@@ -1,6 +1,8 @@
 """The hikvision_axpro integration."""
 import asyncio
 import logging
+from typing import Optional
+
 import hikaxpro
 
 from async_timeout import timeout
@@ -21,8 +23,9 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING
+from .model import ZonesResponse, Zone
 
-PLATFORMS: list[Platform] = [Platform.ALARM_CONTROL_PANEL]
+PLATFORMS: list[Platform] = [Platform.ALARM_CONTROL_PANEL, Platform.SENSOR]
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -70,11 +73,14 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching ax pro data."""
+    axpro: hikaxpro.HikAxPro
+    zone_status: Optional[ZonesResponse]
+    zones: Optional[dict[int, Zone]] = None
 
     def __init__(
         self,
         hass,
-        axpro,
+        axpro: hikaxpro.HikAxPro,
         mac,
         use_code,
         code_format,
@@ -83,6 +89,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     ):
         self.axpro = axpro
         self.state = None
+        self.zone_status = None
         self.host = axpro.host
         self.mac = mac
         self.use_code = use_code
@@ -98,6 +105,13 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         _LOGGER.debug("Axpro status: %s", status)
 
         self.state = status
+
+        zone_status = ZonesResponse.from_dict(self.axpro.zone_status())
+        self.zone_status = zone_status
+        zones = {}
+        for zone in zone_status.zone_list:
+            zones[zone.zone.id] = zone.zone
+        self.zones = zones
 
     async def _async_update_data(self) -> None:
         """Fetch data from Axpro."""
