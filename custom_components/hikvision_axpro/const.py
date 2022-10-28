@@ -3,8 +3,8 @@
 from typing import Final
 
 
-DOMAIN: Final = "hikvision_axpro"
+DOMAIN: Final[str] = "hikvision_axpro"
 
-DATA_COORDINATOR: Final = "hikaxpro"
+DATA_COORDINATOR: Final[str] = "hikaxpro"
 
-USE_CODE_ARMING: Final = "use_code_arming"
+USE_CODE_ARMING: Final[str] = "use_code_arming"
