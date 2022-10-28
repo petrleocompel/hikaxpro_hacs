@@ -4,7 +4,7 @@ import logging
 from typing import cast
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import TEMP_CELSIUS
+from homeassistant.const import TEMP_CELSIUS, DEVICE_CLASS_HUMIDITY, PERCENTAGE
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -47,8 +47,9 @@ async def async_setup_entry(
             if zone.zone.detector_type == DetectorType.WIRELESS_EXTERNAL_MAGNET_DETECTOR:
                 devices.append(HikWirelessExtMagnetDetector(coordinator, zone.zone))
             if zone.zone.temperature is not None:
-                _LOGGER.debug("Temperature exists")
                 devices.append(HikTemperature(coordinator, zone.zone))
+            if zone.zone.detector_type == DetectorType.WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR:
+                devices.append(HikHumidity(coordinator, zone.zone))
     _LOGGER.debug("devices: %s", devices)
     async_add_entities(devices, False)
 
@@ -125,6 +126,34 @@ class HikTemperature(CoordinatorEntity, HikDevice, SensorEntity):
     def native_value(self) -> StateType:
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
             value = self.coordinator.zones[self.zone.id].temperature
+            return cast(float, value)
+        else:
+            return None
+
+
+class HikHumidity(CoordinatorEntity, HikDevice, SensorEntity):
+    """Representation of Hikvision external magnet detector."""
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._attr_unique_id = f"humid-{zone.id}"
+        self._attr_icon = "mdi:cloud-percent"
+        self._attr_name = f"{self.zone.name} Humidity"
+        self._device_class = DEVICE_CLASS_HUMIDITY
+        self._attr_native_unit_of_measurement = PERCENTAGE
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
+    @property
+    def native_value(self) -> StateType:
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].humidity
             return cast(float, value)
         else:
             return None

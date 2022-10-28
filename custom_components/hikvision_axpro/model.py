@@ -67,6 +67,7 @@ class DetectorType(Enum):
     OTHER = "other"
     PASSIVE_INFRARED_DETECTOR = "passiveInfraredDetector"
     WIRELESS_EXTERNAL_MAGNET_DETECTOR = "wirelessExternalMagnetDetector"
+    WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR = "wirelessTemperatureHumidityDetector"
 
 
 @dataclass
@@ -129,6 +130,7 @@ class Zone:
     charge_value: Optional[int] = None
     signal: Optional[int] = None
     temperature: Optional[int] = None
+    humidity: Optional[int] = None
     model: Optional[str] = None
     is_via_repeater: Optional[bool] = None
     version: Optional[str] = None
@@ -162,6 +164,7 @@ class Zone:
         charge_value = from_union([from_int, from_none], obj.get("chargeValue"))
         signal = from_union([from_int, from_none], obj.get("signal"))
         temperature = from_union([from_int, from_none], obj.get("temperature"))
+        humidity = from_union([from_int, from_none], obj.get("humidity"))
         model = from_union([from_str, from_none], obj.get("model"))
         is_via_repeater = from_union([from_bool, from_none], obj.get("isViaRepeater"))
         version = from_union([from_str, from_none], obj.get("version"))
@@ -170,7 +173,7 @@ class Zone:
         is_support_add_type = from_union([from_bool, from_none], obj.get("isSupportAddType"))
         access_module_type = from_union([AccessModuleType, from_none], obj.get("accessModuleType"))
         module_channel = from_union([from_int, from_none], obj.get("moduleChannel"))
-        return Zone(id, name, status, tamper_evident, shielded, bypassed, armed, is_arming, alarm, sub_system_no, linkage_sub_system, detector_type, stay_away, zone_type, zone_attrib, device_no, abnormal_or_not, charge, charge_value, signal, temperature, model, is_via_repeater, version, magnet_open_status, input_list, is_support_add_type, access_module_type, module_channel)
+        return Zone(id, name, status, tamper_evident, shielded, bypassed, armed, is_arming, alarm, sub_system_no, linkage_sub_system, detector_type, stay_away, zone_type, zone_attrib, device_no, abnormal_or_not, charge, charge_value, signal, temperature, humidity, model, is_via_repeater, version, magnet_open_status, input_list, is_support_add_type, access_module_type, module_channel)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -195,6 +198,7 @@ class Zone:
         result["chargeValue"] = from_union([from_int, from_none], self.charge_value)
         result["signal"] = from_union([from_int, from_none], self.signal)
         result["temperature"] = from_union([from_int, from_none], self.temperature)
+        result["humidity"] = from_union([from_int, from_none], self.humidity)
         result["model"] = from_union([from_str, from_none], self.model)
         result["isViaRepeater"] = from_union([from_bool, from_none], self.is_via_repeater)
         result["version"] = from_union([from_str, from_none], self.version)
