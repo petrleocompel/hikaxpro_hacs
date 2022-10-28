@@ -37,31 +37,34 @@ async def async_setup_entry(
             device_registry.async_get_or_create(
                 config_entry_id=entry.entry_id,
                 # connections={},
-                identifiers={(DOMAIN, str(zone.zone.id))},
+                identifiers={(DOMAIN, str(entry.entry_id) + "-" + str(zone.zone.id))},
                 manufacturer="HikVision" if zone.zone.model is not None else "Unknown",
                 # suggested_area=zone.zone.,
                 name=zone.zone.name,
+                via_device=(DOMAIN, str(coordinator.mac)),
                 model=detector_model_to_name(zone.zone.model),
                 sw_version=zone.zone.version,
             )
             if zone.zone.detector_type == DetectorType.WIRELESS_EXTERNAL_MAGNET_DETECTOR:
-                devices.append(HikWirelessExtMagnetDetector(coordinator, zone.zone))
+                devices.append(HikWirelessExtMagnetDetector(coordinator, zone.zone, entry.entry_id))
             if zone.zone.temperature is not None:
-                devices.append(HikTemperature(coordinator, zone.zone))
+                devices.append(HikTemperature(coordinator, zone.zone, entry.entry_id))
             if zone.zone.detector_type == DetectorType.WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR:
-                devices.append(HikHumidity(coordinator, zone.zone))
+                devices.append(HikHumidity(coordinator, zone.zone, entry.entry_id))
     _LOGGER.debug("devices: %s", devices)
     async_add_entities(devices, False)
 
 
 class HikDevice:
+
     zone: Zone
+    _ref_id: str
 
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
         return DeviceInfo(
-            identifiers={(DOMAIN, str(self.zone.id))},
+            identifiers={(DOMAIN, str(self._ref_id) + "-" + str(self.zone.id))},
             manufacturer="HikVision" if self.zone.model is not None else "Unknown",
             # suggested_area=zone.zone.,
             name=self.zone.name,
@@ -74,10 +77,12 @@ class HikWirelessExtMagnetDetector(CoordinatorEntity, HikDevice, BinarySensorEnt
     """Representation of Hikvision external magnet detector."""
     coordinator: HikAxProDataUpdateCoordinator
 
-    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone) -> None:
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
         """Create the entity with a DataUpdateCoordinator."""
         super().__init__(coordinator)
         self.zone = zone
+        self._ref_id = entry_id
+        self.entity_id
         self._attr_unique_id = f"magnet-{zone.id}"
         self._attr_icon = "mdi:magnet"
         self._attr_name = f"{self.zone.name} Magnet presence"
@@ -107,10 +112,11 @@ class HikTemperature(CoordinatorEntity, HikDevice, SensorEntity):
     """Representation of Hikvision external magnet detector."""
     coordinator: HikAxProDataUpdateCoordinator
 
-    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone) -> None:
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
         """Create the entity with a DataUpdateCoordinator."""
         super().__init__(coordinator)
         self.zone = zone
+        self._ref_id = entry_id
         self._attr_unique_id = f"temp-{zone.id}"
         self._attr_icon = "mdi:thermometer"
         self._attr_name = f"{self.zone.name} Temperature"
@@ -135,10 +141,11 @@ class HikHumidity(CoordinatorEntity, HikDevice, SensorEntity):
     """Representation of Hikvision external magnet detector."""
     coordinator: HikAxProDataUpdateCoordinator
 
-    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone) -> None:
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
         """Create the entity with a DataUpdateCoordinator."""
         super().__init__(coordinator)
         self.zone = zone
+        self._ref_id = entry_id
         self._attr_unique_id = f"humid-{zone.id}"
         self._attr_icon = "mdi:cloud-percent"
         self._attr_name = f"{self.zone.name} Humidity"
