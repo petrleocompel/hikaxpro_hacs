@@ -70,6 +70,18 @@ class DetectorType(Enum):
     WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR = "wirelessTemperatureHumidityDetector"
 
 
+def detector_model_to_name(model_id: Optional[str]) -> str:
+    if model_id == "0x00001":
+        return "Passive infrared detector"
+    if model_id == "0x00026":
+        return "Wireless temperature humidity detector"
+    if model_id == "0x00028":
+        return "Wireless external magnet detector"
+    if model_id is not None:
+        return str(model_id)
+    return "Unknown"
+
+
 @dataclass
 class InputList:
     id: int

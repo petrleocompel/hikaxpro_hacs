@@ -18,7 +18,7 @@ from homeassistant.helpers.typing import StateType
 
 from . import HikAxProDataUpdateCoordinator
 from .const import DATA_COORDINATOR, DOMAIN
-from .model import DetectorType, Zone, Status
+from .model import DetectorType, Zone, Status, detector_model_to_name
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ async def async_setup_entry(
                 manufacturer="HikVision" if zone.zone.model is not None else "Unknown",
                 # suggested_area=zone.zone.,
                 name=zone.zone.name,
-                model="Unknown" if zone.zone.model is None else zone.zone.model,
+                model=detector_model_to_name(zone.zone.model),
                 sw_version=zone.zone.version,
             )
             if zone.zone.detector_type == DetectorType.WIRELESS_EXTERNAL_MAGNET_DETECTOR:
