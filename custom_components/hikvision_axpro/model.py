@@ -5,11 +5,12 @@
 # and then, to convert JSON from a string, do
 #
 #     result = welcome_from_dict(json.loads(json_string))
-
+import logging
 from enum import Enum
 from dataclasses import dataclass
 from typing import Any, List, Optional, TypeVar, Callable, Type, cast
 
+_LOGGER = logging.getLogger(__name__)
 
 T = TypeVar("T")
 EnumT = TypeVar("EnumT", bound=Enum)
@@ -68,11 +69,14 @@ class DetectorType(Enum):
     PASSIVE_INFRARED_DETECTOR = "passiveInfraredDetector"
     WIRELESS_EXTERNAL_MAGNET_DETECTOR = "wirelessExternalMagnetDetector"
     WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR = "wirelessTemperatureHumidityDetector"
+    WIRELESS_GLASS_BREAK_DETECTOR = "wirelessGlassBreakDetector"
 
 
 def detector_model_to_name(model_id: Optional[str]) -> str:
     if model_id == "0x00001":
         return "Passive infrared detector"
+    if model_id == "0x00018":
+        return "Glass break detector"
     if model_id == "0x00026":
         return "Wireless temperature humidity detector"
     if model_id == "0x00028":
@@ -132,7 +136,7 @@ class Zone:
     alarm: bool
     sub_system_no: int
     linkage_sub_system: List[int]
-    detector_type: DetectorType
+    detector_type: Optional[DetectorType]
     stay_away: bool
     zone_type: ZoneType
     zone_attrib: ZoneAttrib
@@ -166,7 +170,11 @@ class Zone:
         alarm = from_bool(obj.get("alarm"))
         sub_system_no = from_int(obj.get("subSystemNo"))
         linkage_sub_system = from_list(from_int, obj.get("linkageSubSystem"))
-        detector_type = DetectorType(obj.get("detectorType"))
+        try:
+            detector_type = DetectorType(obj.get("detectorType"))
+        except:
+            _LOGGER.warning("Invalid detector type %s", obj.get("detectorType"))
+            detector_type = None
         stay_away = from_bool(obj.get("stayAway"))
         zone_type = ZoneType(obj.get("zoneType"))
         zone_attrib = ZoneAttrib(obj.get("zoneAttrib"))
