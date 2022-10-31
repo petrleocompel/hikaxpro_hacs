@@ -10,7 +10,7 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.components.binary_sensor import BinarySensorEntity, BinarySensorDeviceClass, STATE_ON, STATE_OFF
-from homeassistant.components.sensor import SensorEntity, DEVICE_CLASS_TEMPERATURE
+from homeassistant.components.sensor import SensorEntity, DEVICE_CLASS_TEMPERATURE, DOMAIN as SENSOR_DOMAIN
 from homeassistant.helpers import device_registry as dr
 
 from homeassistant.helpers.typing import StateType
@@ -82,11 +82,16 @@ class HikWirelessExtMagnetDetector(CoordinatorEntity, HikDevice, BinarySensorEnt
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self.entity_id
-        self._attr_unique_id = f"magnet-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.device_name}-magnet-{zone.id}"
         self._attr_icon = "mdi:magnet"
-        self._attr_name = f"{self.zone.name} Magnet presence"
+        #self._attr_name = f"Magnet presence"
         self._device_class = BinarySensorDeviceClass.PRESENCE
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-magnet-{zone.id}"
+
+    @property
+    def name(self) -> str | None:
+        return "Magnet presence"
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -117,11 +122,17 @@ class HikTemperature(CoordinatorEntity, HikDevice, SensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"temp-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.device_name}-temp-{zone.id}"
         self._attr_icon = "mdi:thermometer"
-        self._attr_name = f"{self.zone.name} Temperature"
+        #self._attr_name = f"{self.zone.name} Temperature"
         self._device_class = DEVICE_CLASS_TEMPERATURE
         self._attr_native_unit_of_measurement = TEMP_CELSIUS
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-temperature-{zone.id}"
+
+    @property
+    def name(self) -> str | None:
+        return "Temperature"
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -146,11 +157,17 @@ class HikHumidity(CoordinatorEntity, HikDevice, SensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"humid-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.device_name}-humid-{zone.id}"
         self._attr_icon = "mdi:cloud-percent"
-        self._attr_name = f"{self.zone.name} Humidity"
+        #self._attr_name = f"{self.zone.name} Humidity"
         self._device_class = DEVICE_CLASS_HUMIDITY
         self._attr_native_unit_of_measurement = PERCENTAGE
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-humidity-{zone.id}"
+
+    @property
+    def name(self) -> str | None:
+        return "Humidity"
 
     @callback
     def _handle_coordinator_update(self) -> None:
