@@ -42,7 +42,8 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
         return DeviceInfo(
             identifiers={(DOMAIN, self.unique_id)},
             manufacturer="Hikvision - Ax Pro",
-            name=self.name,
+            model=self.coordinator.device_model,
+            name=self.coordinator.device_name,
         )
 
     @property
@@ -53,7 +54,8 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
     @property
     def name(self):
         """Return the name."""
-        return "HikvisionAxPro"
+        return self.coordinator.device_name
+        # "HikvisionAxPro"
 
     @property
     def state(self):

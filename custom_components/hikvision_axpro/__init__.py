@@ -4,6 +4,7 @@ import logging
 from typing import Optional
 
 import hikaxpro
+import xmltodict
 
 from async_timeout import timeout
 
@@ -55,6 +56,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         use_code_arming,
         code,
     )
+    try:
+        async with timeout(10):
+            await hass.async_add_executor_job(coordinator.init_device)
+    except (asyncio.TimeoutError, ConnectionError) as ex:
+        raise ConfigEntryNotReady from ex
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {DATA_COORDINATOR: coordinator}
 
@@ -76,6 +82,9 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     axpro: hikaxpro.HikAxPro
     zone_status: Optional[ZonesResponse]
     zones: Optional[dict[int, Zone]] = None
+    device_info: Optional[dict] = None
+    device_model: Optional[str] = None
+    device_name: Optional[str] = None
 
     def __init__(
         self,
@@ -96,22 +105,43 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.code_format = code_format
         self.use_code_arming = use_code_arming
         self.code = code
-
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL)
+
+    def _get_device_info(self):
+        endpoint = self.axpro.buildUrl(f"http://{self.host}/ISAPI/System/deviceInfo", False)
+        response = self.axpro.makeRequest(endpoint, "GET", False)
+
+        if response.status_code != 200:
+            raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
+        _LOGGER.debug(response.text)
+        return xmltodict.parse(response.text)
+
+    def init_device(self):
+        self.device_info = self._get_device_info()
+        self.device_name = self.device_info['DeviceInfo']['deviceName']
+        self.device_model = self.device_info['DeviceInfo']['model']
+        _LOGGER.debug(self.device_info)
 
     def _update_data(self) -> None:
         """Fetch data from axpro via sync functions."""
         status = self.axpro.get_area_arm_status(1)
         _LOGGER.debug("Axpro status: %s", status)
+        # if self.device_info is None:
+        #    self.device_info = self._get_device_info()
+        #    self.device_name = self.device_info['DeviceInfo']['deviceName']
+        #    self.device_model = self.device_info['DeviceInfo']['model']
+        #    _LOGGER.debug(self.device_info)
 
         self.state = status
 
-        zone_status = ZonesResponse.from_dict(self.axpro.zone_status())
+        zone_response = self.axpro.zone_status()
+        zone_status = ZonesResponse.from_dict(zone_response)
         self.zone_status = zone_status
         zones = {}
         for zone in zone_status.zone_list:
             zones[zone.zone.id] = zone.zone
         self.zones = zones
+        _LOGGER.debug("Zones: %s", zone_response)
 
     async def _async_update_data(self) -> None:
         """Fetch data from Axpro."""
