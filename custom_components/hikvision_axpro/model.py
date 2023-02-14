@@ -111,6 +111,7 @@ class InputList:
 class Status(Enum):
     ONLINE = "online"
     TRIGGER = "trigger"
+    OFFLINE = "offline"
 
 
 class ZoneAttrib(Enum):
