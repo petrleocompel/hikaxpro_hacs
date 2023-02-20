@@ -1,10 +1,3 @@
-# To use this code, make sure you
-#
-#     import json
-#
-# and then, to convert JSON from a string, do
-#
-#     result = welcome_from_dict(json.loads(json_string))
 import logging
 from enum import Enum
 from dataclasses import dataclass
@@ -264,9 +257,72 @@ class ZonesResponse:
         return result
 
 
-def welcome_from_dict(s: Any) -> ZonesResponse:
-    return ZonesResponse.from_dict(s)
+class Arming(Enum):
+    AWAY = "away"
+    HOME = "home"
+    VACATION = "vacation"
+    DISARM = "disarm"
 
 
-def welcome_to_dict(x: ZonesResponse) -> Any:
-    return to_class(ZonesResponse, x)
+@dataclass
+class SubSys:
+    id: int
+    arming: Arming
+    alarm: bool
+    enabled: bool
+    name: str
+    delay_time: int
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'SubSys':
+        assert isinstance(obj, dict)
+        id = from_int(obj.get("id"))
+        arming = Arming(obj.get("arming"))
+        alarm = from_bool(obj.get("alarm"))
+        enabled = from_bool(obj.get("enabled"))
+        name = from_str(obj.get("name"))
+        delay_time = from_int(obj.get("delayTime"))
+        return SubSys(id, arming, alarm, enabled, name, delay_time)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        result["id"] = from_int(self.id)
+        result["arming"] = to_enum(Arming, self.arming)
+        result["alarm"] = from_bool(self.alarm)
+        result["enabled"] = from_bool(self.enabled)
+        result["name"] = from_str(self.name)
+        result["delayTime"] = from_int(self.delay_time)
+        return result
+
+
+@dataclass
+class SubSysList:
+    sub_sys: SubSys
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'SubSysList':
+        assert isinstance(obj, dict)
+        sub_sys = SubSys.from_dict(obj.get("SubSys"))
+        return SubSysList(sub_sys)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        result["SubSys"] = to_class(SubSys, self.sub_sys)
+        return result
+
+
+@dataclass
+class SubSystemResponse:
+    sub_sys_list: List[SubSysList]
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'SubSystemResponse':
+        assert isinstance(obj, dict)
+        sub_sys_list = from_list(SubSysList.from_dict, obj.get("SubSysList"))
+        return SubSystemResponse(sub_sys_list)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        result["SubSysList"] = from_list(lambda x: to_class(SubSysList, x), self.sub_sys_list)
+        return result
+

@@ -1,7 +1,7 @@
 """The hikvision_axpro integration."""
 import asyncio
 import logging
-from typing import Optional
+from typing import Optional, Callable
 
 import hikaxpro
 import xmltodict
@@ -18,13 +18,18 @@ from homeassistant.const import (
     CONF_PASSWORD,
     CONF_CODE,
     Platform,
+    STATE_ALARM_ARMED_HOME,
+    STATE_ALARM_ARMED_VACATION,
+    STATE_ALARM_ARMED_AWAY,
+    STATE_ALARM_DISARMED,
+    STATE_ALARM_TRIGGERED
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING
-from .model import ZonesResponse, Zone
+from .model import ZonesResponse, Zone, SubSystemResponse, SubSys, Arming
 
 PLATFORMS: list[Platform] = [Platform.ALARM_CONTROL_PANEL, Platform.SENSOR]
 _LOGGER = logging.getLogger(__name__)
@@ -124,14 +129,33 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
 
     def _update_data(self) -> None:
         """Fetch data from axpro via sync functions."""
-        status = self.axpro.get_area_arm_status(1)
+        status = STATE_ALARM_DISARMED
+        status_json = self.axpro.subsystem_status()
+        try:
+            subsys_resp = SubSystemResponse.from_dict(status_json)
+            subsys_arr: list[SubSys] = []
+            if subsys_resp is not None and subsys_resp.sub_sys_list is not None:
+                subsys_arr = []
+                for sublist in subsys_resp.sub_sys_list:
+                    subsys_arr.append(sublist.sub_sys)
+            func: Callable[[SubSys], bool] = lambda n: n.enabled
+            subsys_resp: [SubSys] = filter(func, subsys_arr)
+            for subsys in subsys_resp:
+                if subsys.alarm:
+                    status = STATE_ALARM_TRIGGERED
+                    break
+                if subsys.arming == Arming.AWAY:
+                    status = STATE_ALARM_ARMED_AWAY
+                    break
+                if subsys.arming == Arming.HOME:
+                    status = STATE_ALARM_ARMED_HOME
+                    break
+                if subsys.arming == Arming.VACATION:
+                    status = STATE_ALARM_ARMED_VACATION
+                    break
+        except:
+            _LOGGER.warning("Error getting status: %s", status_json)
         _LOGGER.debug("Axpro status: %s", status)
-        # if self.device_info is None:
-        #    self.device_info = self._get_device_info()
-        #    self.device_name = self.device_info['DeviceInfo']['deviceName']
-        #    self.device_model = self.device_info['DeviceInfo']['model']
-        #    _LOGGER.debug(self.device_info)
-
         self.state = status
 
         zone_response = self.axpro.zone_status()
