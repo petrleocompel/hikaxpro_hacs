@@ -68,7 +68,7 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
         return self.__get_code_format(self.coordinator.code_format)
 
     def __get_code_format(self, code_format_str) -> CodeFormat:
-        """Returns CodeFormat according to the given code fomrat string."""
+        """Returns CodeFormat according to the given code format string."""
         code_format: CodeFormat = None
 
         if not self.coordinator.use_code:
