@@ -175,6 +175,7 @@ class Zone:
             detector_type = DetectorType(obj.get("detectorType"))
         except:
             _LOGGER.warning("Invalid detector type %s", obj.get("detectorType"))
+            _LOGGER.warning("Detector info: %s", obj)
             detector_type = None
         stay_away = from_bool(obj.get("stayAway"))
         zone_type = ZoneType(obj.get("zoneType"))
