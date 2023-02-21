@@ -47,6 +47,8 @@ async def async_setup_entry(
             )
             if zone.zone.detector_type == DetectorType.WIRELESS_EXTERNAL_MAGNET_DETECTOR:
                 devices.append(HikWirelessExtMagnetDetector(coordinator, zone.zone, entry.entry_id))
+            if zone.zone.detector_type == DetectorType.WIRED_MAGNETIC_CONTACT:
+                devices.append(HikMagneticContactDetector(coordinator, zone.zone, entry.entry_id))
             if zone.zone.temperature is not None:
                 devices.append(HikTemperature(coordinator, zone.zone, entry.entry_id))
             if zone.zone.detector_type == DetectorType.WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR:
@@ -74,6 +76,46 @@ class HikDevice:
 
 
 class HikWirelessExtMagnetDetector(CoordinatorEntity, HikDevice, BinarySensorEntity):
+    """Representation of Hikvision external magnet detector."""
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-magnet-{zone.id}"
+        self._attr_icon = "mdi:magnet"
+        #self._attr_name = f"Magnet presence"
+        self._device_class = BinarySensorDeviceClass.PRESENCE
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-magnet-{zone.id}"
+
+    @property
+    def name(self) -> str | None:
+        return "Magnet presence"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].magnet_open_status
+            self._attr_state = STATE_ON if value is True else STATE_OFF
+        else:
+            self._attr_state = None
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].status
+            return value == Status.ONLINE
+        else:
+            return False
+
+
+class HikMagneticContactDetector(CoordinatorEntity, HikDevice, BinarySensorEntity):
     """Representation of Hikvision external magnet detector."""
     coordinator: HikAxProDataUpdateCoordinator
 

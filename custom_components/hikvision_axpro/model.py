@@ -64,6 +64,7 @@ class DetectorType(Enum):
     WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR = "wirelessTemperatureHumidityDetector"
     WIRELESS_GLASS_BREAK_DETECTOR = "wirelessGlassBreakDetector"
     WIRELESS_PIR_AM_CURTAIN_DETECTOR = "wirelessDTAMCurtainDetector"
+    WIRED_MAGNETIC_CONTACT = "magneticContact"
 
 
 def detector_model_to_name(model_id: Optional[str]) -> str:
