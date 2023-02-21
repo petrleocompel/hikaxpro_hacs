@@ -5,11 +5,13 @@ HACS repository of Hikvision Ax Pro integration for home assistant
 
 ## Support
 
-### Sensors
+### Sensors / detectors
 - wireless external magnetic sensors
 - wireless temperature humidity sensors
 - wireless PIR sensors
 - wireless glass break sensors
+- wireless PIR AM curtain sensor
+- wired magnetic contact sensor
 
 ### Attributes
 - temperature
