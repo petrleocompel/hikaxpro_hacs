@@ -34,6 +34,7 @@ async def async_setup_entry(
     device_registry = dr.async_get(hass)
     if coordinator.zone_status is not None:
         for zone in coordinator.zone_status.zone_list:
+            _LOGGER.debug("Adding device: %s", zone)
             device_registry.async_get_or_create(
                 config_entry_id=entry.entry_id,
                 # connections={},
