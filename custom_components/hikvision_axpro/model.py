@@ -262,7 +262,7 @@ class ZonesResponse:
 
 class Arming(Enum):
     AWAY = "away"
-    HOME = "home"
+    STAY = "stay"
     VACATION = "vacation"
     DISARM = "disarm"
 

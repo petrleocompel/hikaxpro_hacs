@@ -147,7 +147,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
                 if subsys.arming == Arming.AWAY:
                     status = STATE_ALARM_ARMED_AWAY
                     break
-                if subsys.arming == Arming.HOME:
+                if subsys.arming == Arming.STAY:
                     status = STATE_ALARM_ARMED_HOME
                     break
                 if subsys.arming == Arming.VACATION:
