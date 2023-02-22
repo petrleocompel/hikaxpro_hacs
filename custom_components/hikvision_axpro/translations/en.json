@@ -27,16 +27,18 @@
         }
     },
     "options": {
-        "init": {
-            "title": "Update configuration",
-            "data": {
-                "password": "Password",
-                "username": "Username",
-                "enabled": "Use code to disarm",
-                "code_format": "Code format (TEXT or NUMBER)",
-                "use_code_arming": "Use code for arming",
-                "code": "Code",
-                "scan_interval": "Pull interval from system"
+        "step": {
+            "init": {
+                "title": "Update configuration",
+                "data": {
+                    "password": "Password",
+                    "username": "Username",
+                    "enabled": "Use code to disarm",
+                    "code_format": "Code format (TEXT or NUMBER)",
+                    "use_code_arming": "Use code for arming",
+                    "code": "Code",
+                    "scan_interval": "Pull interval from system"
+                }
             }
         }
     }
