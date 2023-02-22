@@ -23,5 +23,16 @@
                 }
             }
         }
+    },
+    "options": {
+        "init": {
+            "scan_interval": "Pull interval from system",
+            "password": "Password",
+            "username": "Username",
+            "enabled": "Use code to disarm",
+            "code_format": "Code format (TEXT or NUMBER)",
+            "use_code_arming": "Use code for arming",
+            "code": "Code"
+        }
     }
 }

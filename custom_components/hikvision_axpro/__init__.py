@@ -1,6 +1,7 @@
 """The hikvision_axpro integration."""
 import asyncio
 import logging
+from datetime import timedelta
 from typing import Optional, Callable
 
 import hikaxpro
@@ -17,6 +18,7 @@ from homeassistant.const import (
     CONF_USERNAME,
     CONF_PASSWORD,
     CONF_CODE,
+    CONF_SCAN_INTERVAL,
     Platform,
     STATE_ALARM_ARMED_HOME,
     STATE_ALARM_ARMED_VACATION,
@@ -45,6 +47,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     code = entry.data[CONF_CODE]
     use_code_arming = entry.data[USE_CODE_ARMING]
     axpro = hikaxpro.HikAxPro(host, username, password)
+    update_interval = entry.data.get(CONF_SCAN_INTERVAL, SCAN_INTERVAL.total_seconds())
 
     try:
         async with timeout(10):
@@ -60,6 +63,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         code_format,
         use_code_arming,
         code,
+        update_interval
     )
     try:
         async with timeout(10):
@@ -100,6 +104,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         code_format,
         use_code_arming,
         code,
+        update_interval
     ):
         self.axpro = axpro
         self.state = None
@@ -110,7 +115,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.code_format = code_format
         self.use_code_arming = use_code_arming
         self.code = code
-        super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL)
+        super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=update_interval))
 
     def _get_device_info(self):
         endpoint = self.axpro.buildUrl(f"http://{self.host}/ISAPI/System/deviceInfo", False)
