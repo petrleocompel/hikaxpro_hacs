@@ -23,6 +23,31 @@
       "abort": {
         "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
       }
+    },
+    "options": {
+      "step": {
+        "init": {
+          "data": {
+            "host": "[%key:common::config_flow::data::host%]",
+            "username": "[%key:common::config_flow::data::username%]",
+            "password": "[%key:common::config_flow::data::password%]",
+            "enabled": "[%key:common::config_flow::data::enabled%]",
+            "code_format": "[%key:common::config_flow::data::code_format%]",
+            "use_code_arming": "[%key:common::config_flow::data::use_code_arming%]",
+            "code": "[%key:common::config_flow::data::code%]"
+          }
+        }
+      },
+      "error": {
+        "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+        "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+        "invalid_code": "[%key:common::config_flow::error::invalid_code%]",
+        "invalid_code_format": "[%key:common::config_flow::error::invalid_code_format%]",
+        "unknown": "[%key:common::config_flow::error::unknown%]"
+      },
+      "abort": {
+        "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      }
     }
   }
   

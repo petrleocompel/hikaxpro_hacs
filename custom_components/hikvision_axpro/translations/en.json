@@ -6,12 +6,13 @@
         "error": {
             "cannot_connect": "Failed to connect",
             "invalid_auth": "Invalid authentication",
-            "invalid_code": "Inavlid code",
+            "invalid_code": "Invalid code",
             "invalid_code_format": "Invalid code format. Code format can take only NUMBER or TEXT as value.",
             "unknown": "Unexpected error"
         },
         "step": {
             "user": {
+                "title": "Add AX Pro system",
                 "data": {
                     "host": "Host",
                     "password": "Password",
@@ -19,20 +20,24 @@
                     "enabled": "Use code to disarm",
                     "code_format": "Code format (TEXT or NUMBER)",
                     "use_code_arming": "Use code for arming",
-                    "code": "Code"
+                    "code": "Code",
+                    "scan_interval": "Pull interval from system"
                 }
             }
         }
     },
     "options": {
         "init": {
-            "scan_interval": "Pull interval from system",
-            "password": "Password",
-            "username": "Username",
-            "enabled": "Use code to disarm",
-            "code_format": "Code format (TEXT or NUMBER)",
-            "use_code_arming": "Use code for arming",
-            "code": "Code"
+            "title": "Update configuration",
+            "data": {
+                "password": "Password",
+                "username": "Username",
+                "enabled": "Use code to disarm",
+                "code_format": "Code format (TEXT or NUMBER)",
+                "use_code_arming": "Use code for arming",
+                "code": "Code",
+                "scan_interval": "Pull interval from system"
+            }
         }
     }
 }
