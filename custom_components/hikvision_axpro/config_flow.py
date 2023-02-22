@@ -192,11 +192,16 @@ class AxProOptionsFlowHandler(config_entries.OptionsFlow):
             _LOGGER.exception("Unexpected exception")
             errors["base"] = "unknown"
         else:
+            _LOGGER.debug("Saving options %s %s",info["title"], user_input)
+
+            self.hass.config_entries.async_update_entry(
+                self.config_entry,
+                data=user_input,
+            )
             return self.async_create_entry(title=info["title"], data=user_input)
 
         return self.async_show_form(
             step_id="init",
-            #data_schema=CONFIGURE_SCHEMA,
             data_schema=schema_defaults(CONFIGURE_SCHEMA, None, **defaults),
             errors=errors
         )

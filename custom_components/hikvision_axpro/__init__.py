@@ -24,7 +24,7 @@ from homeassistant.const import (
     STATE_ALARM_ARMED_VACATION,
     STATE_ALARM_ARMED_AWAY,
     STATE_ALARM_DISARMED,
-    STATE_ALARM_TRIGGERED
+    STATE_ALARM_TRIGGERED, SERVICE_RELOAD
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
@@ -36,6 +36,29 @@ from .model import ZonesResponse, Zone, SubSystemResponse, SubSys, Arming
 PLATFORMS: list[Platform] = [Platform.ALARM_CONTROL_PANEL, Platform.SENSOR]
 _LOGGER = logging.getLogger(__name__)
 
+
+async def async_setup(hass: HomeAssistant, config: ConfigEntry):
+    """Set up the hikvision_axpro integration component."""
+    hass.data.setdefault(DOMAIN, {})
+    async def _handle_reload(service):
+        """Handle reload service call."""
+        _LOGGER.info("Service %s.reload called: reloading integration", DOMAIN)
+
+        current_entries = hass.config_entries.async_entries(DOMAIN)
+
+        reload_tasks = [
+            hass.config_entries.async_reload(entry.entry_id)
+            for entry in current_entries
+        ]
+
+        await asyncio.gather(*reload_tasks)
+
+    hass.helpers.service.async_register_admin_service(
+        DOMAIN,
+        SERVICE_RELOAD,
+        _handle_reload,
+    )
+    return True
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up hikvision_axpro from a config entry."""
@@ -85,6 +108,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     return unload_ok
 
+async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry):
+    """Update listener."""
+    await hass.config_entries.async_reload(config_entry.entry_id)
 
 class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching ax pro data."""
