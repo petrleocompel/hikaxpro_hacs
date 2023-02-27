@@ -1,6 +1,8 @@
 # Changelog
 
 ## v0.5.0
+- **feat**: add lang `sl` @DejanBukovec
+- **feat**: add lang `cs`
 - **feat**: add detail info `Battery`, `Signal`, `Tamper`, `Bypass`
 - **feat**: add `Slim Magnetic Contact`, `Wireless PIR CAM Detector` support
 - **fix**: init of platform
