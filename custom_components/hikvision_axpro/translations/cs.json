@@ -1,0 +1,45 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Zařízení je již nakonfigurováno"
+        },
+        "error": {
+            "cannot_connect": "Nelze se spojit",
+            "invalid_auth": "Neplatná autorizace",
+            "invalid_code": "Neplatný kód",
+            "invalid_code_format": "Neplatný formád kódu. Kód může být pouze číslo nebo text.",
+            "unknown": "Neočekávaná chyba"
+        },
+        "step": {
+            "user": {
+                "title": "Přidání AX Pro system",
+                "data": {
+                    "host": "Host",
+                    "password": "Heslo",
+                    "username": "Uživatelské jméno",
+                    "enabled": "Kód pro odjištění",
+                    "code_format": "Formát kódu (TEXT nebo NUMBER)",
+                    "use_code_arming": "Kód pro zajištění",
+                    "code": "Kód",
+                    "scan_interval": "Aktualizační interval"
+                }
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Akutalizace konfigurace",
+                "data": {
+                    "password": "Heslo",
+                    "username": "Uživatelské jméno",
+                    "enabled": "Kód pro odjištění",
+                    "code_format": "Formát kódu (TEXT nebo NUMBER)",
+                    "use_code_arming": "Kód pro zajištění",
+                    "code": "Kód",
+                    "scan_interval": "Aktualizační interval"
+                }
+            }
+        }
+    }
+}
