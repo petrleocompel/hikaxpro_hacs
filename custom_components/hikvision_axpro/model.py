@@ -65,21 +65,27 @@ class DetectorType(Enum):
     WIRELESS_GLASS_BREAK_DETECTOR = "wirelessGlassBreakDetector"
     WIRELESS_PIR_AM_CURTAIN_DETECTOR = "wirelessDTAMCurtainDetector"
     MAGNETIC_CONTACT = "magneticContact"
+    SLIM_MAGNETIC_CONTACT = "slimMagneticContact"
+    WIRELESS_PIR_CAM_DETECTOR = "pircam"
 
 
 def detector_model_to_name(model_id: Optional[str]) -> str:
     if model_id == "0x00001":
-        return "Passive infrared detector"
+        return "Passive Infrared Detector"
+    if model_id == "0x00005":
+        return "Slim Magnetic Contact"
     if model_id == "0x00006":
-        return "Magnetic contact"
+        return "Magnetic Contact"
+    if model_id == "0x00012":
+        return "Wireless PIR CAM Detector"
     if model_id == "0x00018":
-        return "Glass break detector"
+        return "Glass Break Detector"
     if model_id == "0x00026":
-        return "Wireless temperature humidity detector"
+        return "Wireless Temperature Humidity Detector"
     if model_id == "0x00028":
-        return "Wireless external magnet detector"
+        return "Wireless External Magnet Detector"
     if model_id == "0x00032":
-        return "Wireless PIR AM curtain detector"
+        return "Wireless PIR AM Curtain Detector"
     if model_id is not None:
         return str(model_id)
     return "Unknown"
@@ -121,6 +127,7 @@ class ZoneAttrib(Enum):
 class ZoneType(Enum):
     FOLLOW = "Follow"
     INSTANT = "Instant"
+    DELAY = "Delay"
 
 
 @dataclass
