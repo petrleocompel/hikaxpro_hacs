@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.1
+- **fix**: manifest version
+- **fix**: invalid status attribute
+
 ## v0.5.0
 - **feat**: add lang `sl` @DejanBukovec
 - **feat**: add lang `cs`
