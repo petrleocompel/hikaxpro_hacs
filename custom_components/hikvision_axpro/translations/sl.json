@@ -1,14 +1,14 @@
 {
     "config": {
         "abort": {
-            "already_configured": "Naprava je ûe konfigurirana"
+            "already_configured": "Naprava je ≈æe konfigurirana"
         },
         "error": {
             "cannot_connect": "Povezava ni uspela",
             "invalid_auth": "Neveljavna avtentikacija",
-            "invalid_code": "NapaËna koda",
+            "invalid_code": "Napaƒçna koda",
             "invalid_code_format": "Neveljavna oblika kode. Format kode lahko kot vrednost sprejme samo TEXT ali NUMBER.",
-            "unknown": "NepriËakovana napaka"
+            "unknown": "Nepriƒçakovana napaka"
         },
         "step": {
             "user": {
@@ -16,7 +16,7 @@
                 "data": {
                     "host": "Naslov",
                     "password": "Geslo",
-                    "username": "Uporabniöko ime",
+                    "username": "Uporabni≈°ko ime",
                     "enabled": "Uporabi kodo za izklop",
                     "code_format": "Oblika kode (TEXT ali NUMBER)",
                     "use_code_arming": "Uporabi kodo za vklop",
@@ -32,7 +32,7 @@
                 "title": "Posodobi konfiguracijo",
                 "data": {
                     "password": "Geslo",
-                    "username": "Uporabniöko ime",
+                    "username": "Uporabni≈°ko ime",
                     "enabled": "Uporabi kodo za izklop",
                     "code_format": "Oblika kode (TEXT ali NUMBER)",
                     "use_code_arming": "Uporabi kodo za vklop",
