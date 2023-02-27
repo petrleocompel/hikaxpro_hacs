@@ -169,7 +169,7 @@ class Zone:
         id = from_int(obj.get("id"))
         name = from_str(obj.get("name"))
         try:
-            status = Status(obj.get("detectorType"))
+            status = Status(obj.get("status"))
         except:
             _LOGGER.warning("Invalid status %s", obj.get("status"))
             _LOGGER.warning("Detector info: %s", obj)
