@@ -121,6 +121,7 @@ class ZoneAttrib(Enum):
 class ZoneType(Enum):
     FOLLOW = "Follow"
     INSTANT = "Instant"
+    DELAY = "Delay"
 
 
 @dataclass
@@ -161,7 +162,12 @@ class Zone:
         assert isinstance(obj, dict)
         id = from_int(obj.get("id"))
         name = from_str(obj.get("name"))
-        status = Status(obj.get("status"))
+        try:
+            status = Status(obj.get("detectorType"))
+        except:
+            _LOGGER.warning("Invalid status %s", obj.get("status"))
+            _LOGGER.warning("Detector info: %s", obj)
+            status = None
         tamper_evident = from_bool(obj.get("tamperEvident"))
         shielded = from_bool(obj.get("shielded"))
         bypassed = from_bool(obj.get("bypassed"))
@@ -177,8 +183,18 @@ class Zone:
             _LOGGER.warning("Detector info: %s", obj)
             detector_type = None
         stay_away = from_bool(obj.get("stayAway"))
-        zone_type = ZoneType(obj.get("zoneType"))
-        zone_attrib = ZoneAttrib(obj.get("zoneAttrib"))
+        try:
+            zone_type = ZoneType(obj.get("zoneType"))
+        except:
+            _LOGGER.warning("Invalid zone type %s", obj.get("zoneType"))
+            _LOGGER.warning("Detector info: %s", obj)
+            zone_type = None
+        try:
+            zone_attrib = ZoneAttrib(obj.get("zoneAttrib"))
+        except:
+            _LOGGER.warning("Invalid zone attrib %s", obj.get("zoneAttrib"))
+            _LOGGER.warning("Detector info: %s", obj)
+            zone_attrib = None
         device_no = from_int(obj.get("deviceNo"))
         abnormal_or_not = from_bool(obj.get("abnormalOrNot"))
         charge = from_union([from_str, from_none], obj.get("charge"))
