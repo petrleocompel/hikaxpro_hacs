@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
 
 ## What is hikaxpro_hacs ?
@@ -13,6 +14,27 @@ hikaxpro_hacs is Hikvision Ax Pro integration for [Home Assistant][home-assistan
 -    Wireless PIR AM curtain sensor
 -    Wireless PIR CAM sensor
 -    Wired magnetic contact sensor
+=======
+[![hacs][hacs-badge]][hacs-url]
+[![release][release-badge]][release-url]
+![downloads][downloads-badge]
+![build][build-badge]
+
+
+## What is hikaxpro_hacs ?
+
+hikaxpro_hacs is Hikvision Ax Pro integration for [Home Assistant][home-assistant].
+
+### Supported Sensors / Detectors
+-   ?? Wireless external magnetic sensors
+-   ?? Wireless slim magnetic sensor
+-   ?? Wireless temperature humidity sensors
+-   ?? Wireless PIR sensors
+-   ?? Wireless glass break sensors
+-   ?? Wireless PIR AM curtain sensor
+-   ?? Wireless PIR CAM sensor
+-   ?? Wired magnetic contact sensor
+>>>>>>> 9c1187ab0b38f28a8941daca7a397040f5599618
 
 ### Attributes
 - Temperature
