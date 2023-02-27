@@ -4,9 +4,9 @@ import logging
 from typing import cast
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import TEMP_CELSIUS, DEVICE_CLASS_HUMIDITY, PERCENTAGE
+from homeassistant.const import TEMP_CELSIUS, DEVICE_CLASS_HUMIDITY, DEVICE_CLASS_BATTERY, DEVICE_CLASS_SIGNAL_STRENGTH, PERCENTAGE, SIGNAL_STRENGTH_DECIBELS_MILLIWATT
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.components.binary_sensor import BinarySensorEntity, BinarySensorDeviceClass, STATE_ON, STATE_OFF
@@ -52,6 +52,14 @@ async def async_setup_entry(
                 devices.append(HikMagneticContactDetector(coordinator, zone.zone, entry.entry_id))
             if zone.zone.temperature is not None:
                 devices.append(HikTemperature(coordinator, zone.zone, entry.entry_id))
+            if zone.zone.charge_value is not None:
+                devices.append(HikBatteryInfo(coordinator, zone.zone, entry.entry_id))
+            if zone.zone.signal is not None:
+                devices.append(HikSignalInfo(coordinator, zone.zone, entry.entry_id))
+            if zone.zone.tamper_evident is not None:
+                devices.append(HikTamperDetection(coordinator, zone.zone, entry.entry_id))
+            if zone.zone.bypassed is not None:
+                devices.append(HikBypassDetection(coordinator, zone.zone, entry.entry_id))
             if zone.zone.detector_type == DetectorType.WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR:
                 devices.append(HikHumidity(coordinator, zone.zone, entry.entry_id))
     _LOGGER.debug("devices: %s", devices)
@@ -225,3 +233,155 @@ class HikHumidity(CoordinatorEntity, HikDevice, SensorEntity):
         else:
             return None
 
+
+class HikBatteryInfo(CoordinatorEntity, HikDevice, SensorEntity):
+    """Representation of Hikvision battery status."""
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-battery-{zone.id}"
+        self._attr_icon = "mdi:battery"
+        #self._attr_name = f"{self.zone.name} Battery"
+        self._device_class = DEVICE_CLASS_BATTERY
+        self._attr_native_unit_of_measurement = PERCENTAGE
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-battery-{zone.id}"
+
+    @property
+    def name(self) -> str | None:
+        return "Battery"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
+    @property
+    def native_value(self) -> StateType:
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].charge_value
+            return cast(float, value)
+        else:
+            return None
+
+
+class HikSignalInfo(CoordinatorEntity, HikDevice, SensorEntity):
+    """Representation of Hikvision signal status."""
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-signal-{zone.id}"
+        self._attr_icon = "mdi:signal"
+        #self._attr_name = f"{self.zone.name} Signal"
+        self._device_class = DEVICE_CLASS_SIGNAL_STRENGTH
+        self._attr_native_unit_of_measurement = SIGNAL_STRENGTH_DECIBELS_MILLIWATT
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-signal-{zone.id}"
+
+    @property
+    def name(self) -> str | None:
+        return "Signal"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
+    @property
+    def native_value(self) -> StateType:
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].signal
+            return cast(float, value)
+        else:
+            return None
+
+
+class HikTamperDetection(CoordinatorEntity, HikDevice, BinarySensorEntity):
+    """Representation of Hikvision tamper detection."""
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-tamper-{zone.id}"
+        self._attr_icon = "mdi:electric-switch"
+        #self._attr_name = f"Tamper"
+        self._device_class = BinarySensorDeviceClass.TAMPER
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-tamper-{zone.id}"
+
+    @property
+    def name(self) -> str | None:
+        return "Tamper"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].tamper_evident
+            self._attr_state = STATE_ON if value is True else STATE_OFF
+        else:
+            self._attr_state = None
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].tamper_evident
+            return value == Status.ONLINE
+        else:
+            return False
+
+class HikBypassDetection(CoordinatorEntity, HikDevice, BinarySensorEntity):
+    """Representation of Hikvision bypass detection."""
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-bypass-{zone.id}"
+        self._attr_icon = "mdi:alarm-light-off"
+        #self._attr_name = f"Bypass"
+        self._device_class = BinarySensorDeviceClass.SAFETY
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-bypass-{zone.id}"
+
+    @property
+    def name(self) -> str | None:
+        return "Bypass"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].bypassed
+            self._attr_state = STATE_ON if value is True else STATE_OFF
+        else:
+            self._attr_state = None
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].bypassed
+            return value == Status.ONLINE
+        else:
+            return False

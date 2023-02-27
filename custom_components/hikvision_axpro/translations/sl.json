@@ -1,0 +1,45 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Naprava je že konfigurirana"
+        },
+        "error": {
+            "cannot_connect": "Povezava ni uspela",
+            "invalid_auth": "Neveljavna avtentikacija",
+            "invalid_code": "Napaèna koda",
+            "invalid_code_format": "Neveljavna oblika kode. Format kode lahko kot vrednost sprejme samo TEXT ali NUMBER.",
+            "unknown": "Neprièakovana napaka"
+        },
+        "step": {
+            "user": {
+                "title": "Dodaj AX Pro sistem",
+                "data": {
+                    "host": "Naslov",
+                    "password": "Geslo",
+                    "username": "Uporabniško ime",
+                    "enabled": "Uporabi kodo za izklop",
+                    "code_format": "Oblika kode (TEXT ali NUMBER)",
+                    "use_code_arming": "Uporabi kodo za vklop",
+                    "code": "Koda",
+                    "scan_interval": "Interval preverjanja sistema"
+                }
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Posodobi konfiguracijo",
+                "data": {
+                    "password": "Geslo",
+                    "username": "Uporabniško ime",
+                    "enabled": "Uporabi kodo za izklop",
+                    "code_format": "Oblika kode (TEXT ali NUMBER)",
+                    "use_code_arming": "Uporabi kodo za vklop",
+                    "code": "Koda",
+                    "scan_interval": "Interval preverjanja sistema"
+                }
+            }
+        }
+    }
+}
