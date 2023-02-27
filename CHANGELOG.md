@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.5.0
+- **feat**: add detail info `Battery`, `Signal`, `Tamper`, `Bypass`
+- **feat**: add `Slim Magnetic Contact`, `Wireless PIR CAM Detector` support
+- **fix**: init of platform
+
 ## v0.4.1
 - **fix**: missing await in init
 - **fix**: type conversion safety
