@@ -127,7 +127,7 @@ class HikWirelessExtMagnetDetector(CoordinatorEntity, HikDevice, BinarySensorEnt
         """Return true if the binary sensor is on."""
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
             value = self.coordinator.zones[self.zone.id].status
-            return value ==
+            return value == Status.ONLINE
         else:
             return False
 
