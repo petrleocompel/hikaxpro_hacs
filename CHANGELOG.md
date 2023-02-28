@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.5.2
+- **fix**: missing slim magnetic contact sensor init
+
 ## v0.5.1
 - **fix**: manifest version
 - **fix**: invalid status attribute
