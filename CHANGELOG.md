@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.5.3
+- **feat**: add detail info `Armed`, `Alarm`, `Stay away`, `Is via repeater`
+
 ## v0.5.2
 - **fix**: missing slim magnetic contact sensor init
 
