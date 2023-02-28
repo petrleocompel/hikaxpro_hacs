@@ -125,6 +125,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     device_info: Optional[dict] = None
     device_model: Optional[str] = None
     device_name: Optional[str] = None
+    sub_systems: list[SubSys] = []
 
     def __init__(
         self,
@@ -162,6 +163,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.device_name = self.device_info['DeviceInfo']['deviceName']
         self.device_model = self.device_info['DeviceInfo']['model']
         _LOGGER.debug(self.device_info)
+        self._update_data()
 
     def _update_data(self) -> None:
         """Fetch data from axpro via sync functions."""
@@ -175,8 +177,9 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
                 for sublist in subsys_resp.sub_sys_list:
                     subsys_arr.append(sublist.sub_sys)
             func: Callable[[SubSys], bool] = lambda n: n.enabled
-            subsys_resp: list[SubSys] = filter(func, subsys_arr)
-            for subsys in subsys_resp:
+            subsys_arr = list(filter(func, subsys_arr))
+            self.sub_systems = subsys_arr
+            for subsys in subsys_arr:
                 if subsys.alarm:
                     status = STATE_ALARM_TRIGGERED
                     break
@@ -211,24 +214,27 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         except ConnectionError as error:
             raise UpdateFailed(error) from error
 
-    async def async_arm_home(self):
+    async def async_arm_home(self, id: Optional[int] = None):
         """Arm alarm panel in home state."""
+        # TODO modify AXPRO
         is_success = await self.hass.async_add_executor_job(self.axpro.arm_home)
 
         if is_success:
             await self._async_update_data()
             await self.async_request_refresh()
 
-    async def async_arm_away(self):
+    async def async_arm_away(self, id: Optional[int] = None):
         """Arm alarm panel in away state"""
+        # TODO modify AXPRO
         is_success = await self.hass.async_add_executor_job(self.axpro.arm_away)
 
         if is_success:
             await self._async_update_data()
             await self.async_request_refresh()
 
-    async def async_disarm(self):
+    async def async_disarm(self, id: Optional[int] = None):
         """Disarm alarm control panel."""
+        # TODO modify AXPRO
         is_success = await self.hass.async_add_executor_job(self.axpro.disarm)
 
         if is_success:
