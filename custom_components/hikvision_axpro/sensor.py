@@ -427,7 +427,7 @@ class HikArmedInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
         """Return true if the binary sensor is on."""
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
             value = self.coordinator.zones[self.zone.id].armed
-            return value == Status.ONLINE
+            return value == True
         else:
             return False
 
