@@ -73,7 +73,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     code = entry.data[CONF_CODE]
     use_code_arming = entry.data[USE_CODE_ARMING]
     axpro = hikaxpro.HikAxPro(host, username, password)
-    update_interval = entry.data.get(CONF_SCAN_INTERVAL, SCAN_INTERVAL.total_seconds())
+    update_interval: float = entry.data.get(CONF_SCAN_INTERVAL, SCAN_INTERVAL.total_seconds())
 
     try:
         async with timeout(10):
@@ -136,7 +136,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         code_format,
         use_code_arming,
         code,
-        update_interval
+        update_interval: float
     ):
         self.axpro = axpro
         self.state = None
@@ -214,29 +214,65 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         except ConnectionError as error:
             raise UpdateFailed(error) from error
 
-    async def async_arm_home(self, id: Optional[int] = None):
+    async def async_arm_home(self, sub_id: Optional[int] = None):
         """Arm alarm panel in home state."""
         # TODO modify AXPRO
-        is_success = await self.hass.async_add_executor_job(self.axpro.arm_home)
+        if sub_id is not None:
+            is_success = await self.hass.async_add_executor_job(self._arm_home(sub_id=sub_id))
+        else:
+            is_success = await self.hass.async_add_executor_job(self.axpro.arm_home)
 
         if is_success:
             await self._async_update_data()
             await self.async_request_refresh()
 
-    async def async_arm_away(self, id: Optional[int] = None):
+    async def async_arm_away(self, sub_id: Optional[int] = None):
         """Arm alarm panel in away state"""
         # TODO modify AXPRO
-        is_success = await self.hass.async_add_executor_job(self.axpro.arm_away)
+        if sub_id is not None:
+            is_success = await self.hass.async_add_executor_job(self._arm_away(sub_id=sub_id))
+        else:
+            is_success = await self.hass.async_add_executor_job(self.axpro.arm_away)
 
         if is_success:
             await self._async_update_data()
             await self.async_request_refresh()
 
-    async def async_disarm(self, id: Optional[int] = None):
+    async def async_disarm(self, sub_id: Optional[int] = None):
         """Disarm alarm control panel."""
         # TODO modify AXPRO
-        is_success = await self.hass.async_add_executor_job(self.axpro.disarm)
+        if sub_id is not None:
+            is_success = await self.hass.async_add_executor_job(self._disarm(sub_id=sub_id))
+        else:
+            is_success = await self.hass.async_add_executor_job(self.axpro.disarm)
 
         if is_success:
             await self._async_update_data()
             await self.async_request_refresh()
+
+    def _arm_home(self, sub_id: int):
+        endpoint = self.axpro.buildUrl(f"http://{self.host}{hikaxpro.consts.Endpoints.Alarm_ArmHome.replace('0xffffffff', str(sub_id))}", True)
+        response = self.axpro.makeRequest(endpoint, hikaxpro.consts.Method.PUT)
+
+        if response.status_code != 200:
+            raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
+
+        return response.status_code == 200
+
+    def _arm_away(self, sub_id: int):
+        endpoint = self.axpro.buildUrl(f"http://{self.host}{hikaxpro.consts.Endpoints.Alarm_ArmAway.replace('0xffffffff', str(sub_id))}", True)
+        response = self.axpro.makeRequest(endpoint, hikaxpro.consts.Method.PUT)
+
+        if response.status_code != 200:
+            raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
+
+        return response.status_code == 200
+
+    def _disarm(self, sub_id: int):
+        endpoint = self.axpro.buildUrl(f"http://{self.host}{hikaxpro.consts.Endpoints.Alarm_Disarm.replace('0xffffffff', str(sub_id))}", True)
+        response = self.axpro.makeRequest(endpoint, hikaxpro.consts.Method.PUT)
+
+        if response.status_code != 200:
+            raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
+
+        return response.status_code == 200
