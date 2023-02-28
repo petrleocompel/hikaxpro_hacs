@@ -60,6 +60,14 @@ async def async_setup_entry(
                 devices.append(HikTamperDetection(coordinator, zone.zone, entry.entry_id))
             if zone.zone.bypassed is not None:
                 devices.append(HikBypassDetection(coordinator, zone.zone, entry.entry_id))
+            if zone.zone.armed is not None:
+                devices.append(HikArmedInfo(coordinator, zone.zone, entry.entry_id))
+            if zone.zone.alarm is not None:
+                devices.append(HikAlarmInfo(coordinator, zone.zone, entry.entry_id))
+            if zone.zone.stay_away is not None:
+                devices.append(HikStayAwayInfo(coordinator, zone.zone, entry.entry_id))
+            if zone.zone.is_via_repeater is not None:
+                devices.append(HikIsViaRepeaterInfo(coordinator, zone.zone, entry.entry_id))
             if zone.zone.detector_type == DetectorType.WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR:
                 devices.append(HikHumidity(coordinator, zone.zone, entry.entry_id))
     _LOGGER.debug("devices: %s", devices)
@@ -383,3 +391,162 @@ class HikBypassDetection(CoordinatorEntity, HikDevice, BinarySensorEntity):
         else:
             return False
 
+
+class HikArmedInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
+    """Representation of Hikvision armed status."""
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-armed-{zone.id}"
+        self._attr_icon = "mdi:lock"
+        self._device_class = BinarySensorDeviceClass.LOCK
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-armed-{zone.id}"
+
+    @property
+    def name(self) -> str | None:
+        return "Armed"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].armed
+            self._attr_state = STATE_ON if value is True else STATE_OFF
+        else:
+            self._attr_state = None
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].armed
+            return value == Status.ONLINE
+        else:
+            return False
+
+
+class HikAlarmInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
+    """Representation of Hikvision alarm status."""
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-alarm-{zone.id}"
+        self._attr_icon = "mdi:alarm-light"
+        self._device_class = BinarySensorDeviceClass.LOCK
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-alarm-{zone.id}"
+
+    @property
+    def name(self) -> str | None:
+        return "Alarm"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].alarm
+            self._attr_state = STATE_ON if value is True else STATE_OFF
+        else:
+            self._attr_state = None
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].alarm
+            return value == Status.ONLINE
+        else:
+            return False
+
+
+class HikStayAwayInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
+    """Representation of Hikvision Stay away status."""
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-stayaway-{zone.id}"
+        self._attr_icon = "mdi:shield-lock-outline"
+        self._device_class = BinarySensorDeviceClass.LOCK
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-stayaway-{zone.id}"
+
+    @property
+    def name(self) -> str | None:
+        return "Stay away"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].stay_away
+            self._attr_state = STATE_ON if value is True else STATE_OFF
+        else:
+            self._attr_state = None
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].stay_away
+            return value == Status.ONLINE
+        else:
+            return False
+
+
+class HikIsViaRepeaterInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
+    """Representation of Hikvision is via repeater status."""
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-isviarepeater-{zone.id}"
+        self._attr_icon = "mdi:google-circles-extended"
+        self._device_class = BinarySensorDeviceClass.CONNECTIVITY
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-isviarepeater-{zone.id}"
+
+    @property
+    def name(self) -> str | None:
+        return "Is via repeater"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].is_via_repeater
+            self._attr_state = STATE_ON if value is True else STATE_OFF
+        else:
+            self._attr_state = None
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+            value = self.coordinator.zones[self.zone.id].is_via_repeater
+            return value == Status.ONLINE
+        else:
+            return False
