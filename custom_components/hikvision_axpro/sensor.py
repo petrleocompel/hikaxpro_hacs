@@ -48,7 +48,7 @@ async def async_setup_entry(
             )
             if zone.zone.detector_type == DetectorType.WIRELESS_EXTERNAL_MAGNET_DETECTOR:
                 devices.append(HikWirelessExtMagnetDetector(coordinator, zone.zone, entry.entry_id))
-            if zone.zone.detector_type == DetectorType.MAGNETIC_CONTACT:
+            if zone.zone.detector_type == DetectorType.MAGNETIC_CONTACT or zone.zone.detector_type == DetectorType.SLIM_MAGNETIC_CONTACT:
                 devices.append(HikMagneticContactDetector(coordinator, zone.zone, entry.entry_id))
             if zone.zone.temperature is not None:
                 devices.append(HikTemperature(coordinator, zone.zone, entry.entry_id))
