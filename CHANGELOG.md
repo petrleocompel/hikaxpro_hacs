@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.6.2
+- **fix**: sensor.py typo
+
 ## v0.6.1
 - **fix**: invalid info provided by sensors
 
