@@ -127,7 +127,7 @@ class HikWirelessExtMagnetDetector(CoordinatorEntity, HikDevice, BinarySensorEnt
         """Return true if the binary sensor is on."""
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
             value = self.coordinator.zones[self.zone.id].status
-            return value == Status.ONLINE
+            return value ==
         else:
             return False
 
@@ -346,8 +346,7 @@ class HikTamperDetection(CoordinatorEntity, HikDevice, BinarySensorEntity):
     def is_on(self) -> bool | None:
         """Return true if the binary sensor is on."""
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
-            value = self.coordinator.zones[self.zone.id].tamper_evident
-            return value == Status.ONLINE
+            return self.coordinator.zones[self.zone.id].tamper_evident
         else:
             return False
 
@@ -386,8 +385,7 @@ class HikBypassDetection(CoordinatorEntity, HikDevice, BinarySensorEntity):
     def is_on(self) -> bool | None:
         """Return true if the binary sensor is on."""
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
-            value = self.coordinator.zones[self.zone.id].bypassed
-            return value == Status.ONLINE
+            return self.coordinator.zones[self.zone.id].bypassed
         else:
             return False
 
@@ -426,8 +424,7 @@ class HikArmedInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
     def is_on(self) -> bool | None:
         """Return true if the binary sensor is on."""
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
-            value = self.coordinator.zones[self.zone.id].armed
-            return value == True
+            return self.coordinator.zones[self.zone.id].armed
         else:
             return False
 
@@ -466,8 +463,7 @@ class HikAlarmInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
     def is_on(self) -> bool | None:
         """Return true if the binary sensor is on."""
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
-            value = self.coordinator.zones[self.zone.id].alarm
-            return value == Status.ONLINE
+            return self.coordinator.zones[self.zone.id].alarm
         else:
             return False
 
@@ -506,8 +502,7 @@ class HikStayAwayInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
     def is_on(self) -> bool | None:
         """Return true if the binary sensor is on."""
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
-            value = self.coordinator.zones[self.zone.id].stay_away
-            return value == Status.ONLINE
+            return self.coordinator.zones[self.zone.id].stay_away
         else:
             return False
 
@@ -546,7 +541,6 @@ class HikIsViaRepeaterInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
     def is_on(self) -> bool | None:
         """Return true if the binary sensor is on."""
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
-            value = self.coordinator.zones[self.zone.id].is_via_repeater
-            return value == Status.ONLINE
+            return self.coordinator.zones[self.zone.id].is_via_repeater
         else:
             return False
