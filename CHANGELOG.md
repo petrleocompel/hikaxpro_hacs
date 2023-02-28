@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.6.1
+- **fix**: invalid info provided by sensors
+
 ## v0.6.0
 - **feat**: add detail info `Armed`, `Alarm`, `Stay away`, `Is via repeater`
 
