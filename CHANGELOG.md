@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.3
+- **fix**: add missing services.yaml
+- **fix**: manifest.json order, dependencies, issue tracker
+
 ## v0.6.2
 - **fix**: sensor.py typo
 
