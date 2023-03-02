@@ -40,6 +40,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup(hass: HomeAssistant, config: ConfigEntry):
     """Set up the hikvision_axpro integration component."""
     hass.data.setdefault(DOMAIN, {})
+
     async def _handle_reload(service):
         """Handle reload service call."""
         _LOGGER.info("Service %s.reload called: reloading integration", DOMAIN)
@@ -59,6 +60,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigEntry):
         _handle_reload,
     )
     return True
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up hikvision_axpro from a config entry."""
@@ -108,9 +110,11 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     return unload_ok
 
+
 async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry):
     """Update listener."""
     await hass.config_entries.async_reload(config_entry.entry_id)
+
 
 class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching ax pro data."""
