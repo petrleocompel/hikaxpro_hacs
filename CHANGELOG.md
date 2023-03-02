@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.8.0
+- **feat**: add sensors `entity description`
+
 ## v0.7.0
 - **feat**: add more sensor types
 - **feat**: add `Wireless Magnet Shock Detector`
