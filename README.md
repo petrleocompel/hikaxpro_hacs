@@ -8,6 +8,7 @@ HACS repository of Hikvision Ax Pro integration for home assistant
 ### Supported Sensors / Detectors
 - Wireless external magnetic sensors
 - Wireless slim magnetic sensor
+- Wireless magnet Shock Detector
 - Wireless temperature humidity sensors
 - Wireless PIR sensors
 - Wireless glass break sensors
