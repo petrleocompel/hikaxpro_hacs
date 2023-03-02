@@ -214,7 +214,12 @@ class Zone:
         magnet_open_status = from_union([from_bool, from_none], obj.get("magnetOpenStatus"))
         input_list = from_union([lambda x: from_list(InputList.from_dict, x), from_none], obj.get("InputList"))
         is_support_add_type = from_union([from_bool, from_none], obj.get("isSupportAddType"))
-        access_module_type = from_union([AccessModuleType, from_none], obj.get("accessModuleType"))
+        try:
+            access_module_type = from_union([AccessModuleType, from_none], obj.get("accessModuleType"))
+        except:
+            _LOGGER.warning("Invalid accessModuleType %s", obj.get("accessModuleType"))
+            _LOGGER.warning("Detector info: %s", obj)
+            access_module_type = None
         module_channel = from_union([from_int, from_none], obj.get("moduleChannel"))
         return Zone(id, name, status, tamper_evident, shielded, bypassed, armed, is_arming, alarm, sub_system_no, linkage_sub_system, detector_type, stay_away, zone_type, zone_attrib, device_no, abnormal_or_not, charge, charge_value, signal, temperature, humidity, model, is_via_repeater, version, magnet_open_status, input_list, is_support_add_type, access_module_type, module_channel)
 
@@ -305,7 +310,12 @@ class SubSys:
     def from_dict(obj: Any) -> 'SubSys':
         assert isinstance(obj, dict)
         id = from_int(obj.get("id"))
-        arming = Arming(obj.get("arming"))
+        try:
+            arming = Arming(obj.get("arming"))
+        except:
+            _LOGGER.warning("Invalid subsys attr arming %s", obj.get("arming"))
+            _LOGGER.warning("Subsys: %s", obj)
+            arming = None
         alarm = from_bool(obj.get("alarm"))
         enabled = from_bool(obj.get("enabled"))
         name = from_str(obj.get("name"))
