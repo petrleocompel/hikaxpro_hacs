@@ -55,6 +55,11 @@ def to_class(c: Type[T], x: Any) -> dict:
 
 class AccessModuleType(Enum):
     LOCAL_TRANSMITTER = "localTransmitter"
+    MULTI_TRANSMITTER = "multiTransmitter"
+    LOCAL_ZONE = "localZone"
+    LOCAL_RELAY = "localRelay"
+    LOCAL_SIREN = "localSiren"
+    KEYPAD = "keypad"
 
 
 class DetectorType(Enum):
