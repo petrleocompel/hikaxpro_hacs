@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.7.0
+- **feat**: add more sensor types
+- **feat**: add `Wireless Magnet Shock Detector`
+
 ## v0.6.4
 - **fix**: add missing `AccessModuleType`
 - **fix**: crash on parsing enums
