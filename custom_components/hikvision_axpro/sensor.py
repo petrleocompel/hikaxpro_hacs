@@ -46,10 +46,15 @@ async def async_setup_entry(
                 model=detector_model_to_name(zone.zone.model),
                 sw_version=zone.zone.version,
             )
+            # Specific entity
             if zone.zone.detector_type == DetectorType.WIRELESS_EXTERNAL_MAGNET_DETECTOR:
                 devices.append(HikWirelessExtMagnetDetector(coordinator, zone.zone, entry.entry_id))
-            if zone.zone.detector_type == DetectorType.MAGNETIC_CONTACT or zone.zone.detector_type == DetectorType.SLIM_MAGNETIC_CONTACT:
+            if zone.zone.detector_type == DetectorType.DOOR_MAGNETIC_CONTACT_DETECTOR \
+                    or zone.zone.detector_type == DetectorType.SLIM_MAGNETIC_CONTACT:
                 devices.append(HikMagneticContactDetector(coordinator, zone.zone, entry.entry_id))
+            if zone.zone.detector_type == DetectorType.WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR:
+                devices.append(HikHumidity(coordinator, zone.zone, entry.entry_id))
+            # Generic Attrs
             if zone.zone.temperature is not None:
                 devices.append(HikTemperature(coordinator, zone.zone, entry.entry_id))
             if zone.zone.charge_value is not None:
@@ -68,8 +73,6 @@ async def async_setup_entry(
                 devices.append(HikStayAwayInfo(coordinator, zone.zone, entry.entry_id))
             if zone.zone.is_via_repeater is not None:
                 devices.append(HikIsViaRepeaterInfo(coordinator, zone.zone, entry.entry_id))
-            if zone.zone.detector_type == DetectorType.WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR:
-                devices.append(HikHumidity(coordinator, zone.zone, entry.entry_id))
     _LOGGER.debug("devices: %s", devices)
     async_add_entities(devices, False)
 

@@ -63,15 +63,41 @@ class AccessModuleType(Enum):
 
 
 class DetectorType(Enum):
-    OTHER = "other"
-    PASSIVE_INFRARED_DETECTOR = "passiveInfraredDetector"
-    WIRELESS_EXTERNAL_MAGNET_DETECTOR = "wirelessExternalMagnetDetector"
-    WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR = "wirelessTemperatureHumidityDetector"
-    WIRELESS_GLASS_BREAK_DETECTOR = "wirelessGlassBreakDetector"
-    WIRELESS_PIR_AM_CURTAIN_DETECTOR = "wirelessDTAMCurtainDetector"
-    MAGNETIC_CONTACT = "magneticContact"
+    ACTIVE_IR_DETECTOR = "activeInfraredDetector"
+    CONTROL_SWITCH = "controlSwitch"
+    DISPLACEMENT_DETECTOR = "displacementDetector"
+    DOOR_CONTACT = "singleInfraredDetector"
+    DOOR_MAGNETIC_CONTACT_DETECTOR = "magneticContact"
+    DUAL_TECHNOLOGY_MOTION_DETECTOR = "dualTechnologyPirDetector"
+    DYNAMIC_SWITCH = "dynamicSwitch"
+    GAS_DETECTOR = "combustibleGasDetector"
+    GLASS_BREAK_DETECTOR = "glassBreakDetector"
+    HUMIDITY_DETECTOR = "humidityDetector"
+    INDOOR_DUAL_TECHNOLOGY_DETECTOR = "indoorDualTechnologyDetector"
+    IR_CURTAIN_DETECTOR = "curtainInfraredDetector"
+    MAGNET_SHOCK_DETECTOR = "magnetShockDetector"
+    PANIC_BUTTON = "panicButton"
+    PIRCAM_DETECTOR = "pircam"
+    PIR_DETECTOR = "passiveInfraredDetector"
+    SHOCK_DETECTOR = "vibrationDetector"
     SLIM_MAGNETIC_CONTACT = "slimMagneticContact"
-    WIRELESS_PIR_CAM_DETECTOR = "pircam"
+    SMART_LOCK = "smartLock"
+    SMOKE_DETECTOR = "smokeDetector"
+    TEMPERATURE_DETECTOR = "temperatureDetector"
+    TRIPLE_TECHNOLOGY_DETECTOR = "tripleTechnologyPirDetector"
+    WATER_DETECTOR = "waterDetector"
+    WATER_LEAK_DETECTOR = "waterLeakDetector"
+    WIRELESS_CODETECTOR = "wirelessCODetector"
+    WIRELESS_DTAMCURTAIN_DETECTOR = "wirelessDTAMCurtainDetector"
+    WIRELESS_EXTERNAL_MAGNET_DETECTOR = "wirelessExternalMagnetDetector"
+    WIRELESS_GLASS_BREAK_DETECTOR = "wirelessGlassBreakDetector"
+    WIRELESS_HEAT_DETECTOR = "wirelessHeatDetector"
+    WIRELESS_PIRCEILING_DETECTOR = "wirelessPIRCeilingDetector"
+    WIRELESS_PIRCURTAIN_DETECTOR = "wirelessPIRCurtainDetector"
+    WIRELESS_SINGLE_INPUT_EXPANDER = "singleZoneModule"
+    WIRELESS_SMOKE_DETECTOR = "wirelessSmokeDetector"
+    WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR = "wirelessTemperatureHumidityDetector"
+    OTHER = "other"
 
 
 def detector_model_to_name(model_id: Optional[str]) -> str:
@@ -173,12 +199,6 @@ class Zone:
         assert isinstance(obj, dict)
         id = from_int(obj.get("id"))
         name = from_str(obj.get("name"))
-        try:
-            status = Status(obj.get("status"))
-        except:
-            _LOGGER.warning("Invalid status %s", obj.get("status"))
-            _LOGGER.warning("Detector info: %s", obj)
-            status = None
         tamper_evident = from_bool(obj.get("tamperEvident"))
         shielded = from_bool(obj.get("shielded"))
         bypassed = from_bool(obj.get("bypassed"))
@@ -187,25 +207,7 @@ class Zone:
         alarm = from_bool(obj.get("alarm"))
         sub_system_no = from_int(obj.get("subSystemNo"))
         linkage_sub_system = from_list(from_int, obj.get("linkageSubSystem"))
-        try:
-            detector_type = DetectorType(obj.get("detectorType"))
-        except:
-            _LOGGER.warning("Invalid detector type %s", obj.get("detectorType"))
-            _LOGGER.warning("Detector info: %s", obj)
-            detector_type = None
         stay_away = from_bool(obj.get("stayAway"))
-        try:
-            zone_type = ZoneType(obj.get("zoneType"))
-        except:
-            _LOGGER.warning("Invalid zone type %s", obj.get("zoneType"))
-            _LOGGER.warning("Detector info: %s", obj)
-            zone_type = None
-        try:
-            zone_attrib = ZoneAttrib(obj.get("zoneAttrib"))
-        except:
-            _LOGGER.warning("Invalid zone attrib %s", obj.get("zoneAttrib"))
-            _LOGGER.warning("Detector info: %s", obj)
-            zone_attrib = None
         device_no = from_int(obj.get("deviceNo"))
         abnormal_or_not = from_bool(obj.get("abnormalOrNot"))
         charge = from_union([from_str, from_none], obj.get("charge"))
@@ -219,13 +221,38 @@ class Zone:
         magnet_open_status = from_union([from_bool, from_none], obj.get("magnetOpenStatus"))
         input_list = from_union([lambda x: from_list(InputList.from_dict, x), from_none], obj.get("InputList"))
         is_support_add_type = from_union([from_bool, from_none], obj.get("isSupportAddType"))
+        module_channel = from_union([from_int, from_none], obj.get("moduleChannel"))
+
+        try:
+            status = Status(obj.get("status"))
+        except:
+            _LOGGER.warning("Invalid status %s", obj.get("status"))
+            _LOGGER.warning("Detector info: %s", obj)
+            status = None
+        try:
+            detector_type = DetectorType(obj.get("detectorType"))
+        except:
+            _LOGGER.warning("Invalid detector type %s", obj.get("detectorType"))
+            _LOGGER.warning("Detector info: %s", obj)
+            detector_type = None
+        try:
+            zone_type = ZoneType(obj.get("zoneType"))
+        except:
+            _LOGGER.warning("Invalid zone type %s", obj.get("zoneType"))
+            _LOGGER.warning("Detector info: %s", obj)
+            zone_type = None
+        try:
+            zone_attrib = ZoneAttrib(obj.get("zoneAttrib"))
+        except:
+            _LOGGER.warning("Invalid zone attrib %s", obj.get("zoneAttrib"))
+            _LOGGER.warning("Detector info: %s", obj)
+            zone_attrib = None
         try:
             access_module_type = from_union([AccessModuleType, from_none], obj.get("accessModuleType"))
         except:
             _LOGGER.warning("Invalid accessModuleType %s", obj.get("accessModuleType"))
             _LOGGER.warning("Detector info: %s", obj)
             access_module_type = None
-        module_channel = from_union([from_int, from_none], obj.get("moduleChannel"))
         return Zone(id, name, status, tamper_evident, shielded, bypassed, armed, is_arming, alarm, sub_system_no, linkage_sub_system, detector_type, stay_away, zone_type, zone_attrib, device_no, abnormal_or_not, charge, charge_value, signal, temperature, humidity, model, is_via_repeater, version, magnet_open_status, input_list, is_support_add_type, access_module_type, module_channel)
 
     def to_dict(self) -> dict:
