@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.4
+- **fix**: add missing `AccessModuleType`
+- **fix**: crash on parsing enums
+
 ## v0.6.3
 - **fix**: add missing services.yaml
 - **fix**: manifest.json order, dependencies, issue tracker
