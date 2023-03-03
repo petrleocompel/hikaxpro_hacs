@@ -2,7 +2,8 @@
 import asyncio
 import logging
 from datetime import timedelta
-from typing import Optional, Callable
+from typing import Optional
+from collections.abc import Callable
 
 import hikaxpro
 import xmltodict
@@ -174,7 +175,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
                 for sublist in subsys_resp.sub_sys_list:
                     subsys_arr.append(sublist.sub_sys)
             func: Callable[[SubSys], bool] = lambda n: n.enabled
-            subsys_resp: [SubSys] = filter(func, subsys_arr)
+            subsys_resp: list[SubSys] = filter(func, subsys_arr)
             for subsys in subsys_resp:
                 if subsys.alarm:
                     status = STATE_ALARM_TRIGGERED
