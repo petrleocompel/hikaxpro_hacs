@@ -166,22 +166,22 @@ class ZoneType(Enum):
 @dataclass
 class Zone:
     id: int
-    status: Status
+    name: str
+    status: Optional[Status]
+    tamper_evident: Optional[bool]
+    shielded: Optional[bool]
+    bypassed: Optional[bool]
     armed: bool
-    sub_system_no: int
-    stay_away: bool
-    zone_type: ZoneType
-    zone_attrib: ZoneAttrib
-    device_no: int
+    is_arming: Optional[bool]
+    alarm: Optional[bool]
+    sub_system_no: Optional[int]
+    linkage_sub_system: Optional[list[int]]
+    detector_type: Optional[DetectorType]
+    stay_away: Optional[bool]
+    zone_type: Optional[ZoneType]
+    zone_attrib: Optional[ZoneAttrib]
+    device_no: Optional[int]
     abnormal_or_not: bool
-    name: Optional[str] = None
-    is_arming: Optional[bool] = None
-    alarm: Optional[bool] = None
-    tamper_evident: Optional[bool] = None
-    shielded: Optional[bool] = None
-    bypassed: Optional[bool] = None
-    linkage_sub_system: Optional[List[int]] = None
-    detector_type: Optional[DetectorType] = None
     charge: Optional[str] = None
     charge_value: Optional[int] = None
     signal: Optional[int] = None
@@ -191,7 +191,7 @@ class Zone:
     is_via_repeater: Optional[bool] = None
     version: Optional[str] = None
     magnet_open_status: Optional[bool] = None
-    input_list: Optional[List[InputList]] = None
+    input_list: Optional[list[InputList]] = None
     is_support_add_type: Optional[bool] = None
     access_module_type: Optional[AccessModuleType] = None
     module_channel: Optional[int] = None
@@ -200,24 +200,27 @@ class Zone:
     def from_dict(obj: Any) -> 'Zone':
         assert isinstance(obj, dict)
         id = from_int(obj.get("id"))
-        name = from_union([from_none, from_str], obj.get("name"))
-        if name is None:
+        if obj.get("name") is None:
             name = f"Zone ID {id}"
-        tamper_evident = from_union([from_none, from_bool], obj.get("tamperEvident"))
-        shielded = from_union([from_none, from_bool], obj.get("shielded"))
-        bypassed = from_union([from_none, from_bool], obj.get("bypassed"))
+        else:
+            name = from_str(obj.get("name"))
+        tamper_evident = from_union([from_bool, from_none], obj.get("tamperEvident"))
+        shielded = from_union([from_bool, from_none], obj.get("shielded"))
+        bypassed = from_union([from_bool, from_none], obj.get("bypassed"))
         armed = from_bool(obj.get("armed"))
-        is_arming = from_union([from_none, from_bool], obj.get("isArming"))
-        alarm = from_union([from_none, from_bool], obj.get("alarm"))
-        sub_system_no = from_union([from_none, from_int], obj.get("subSystemNo"))
+        is_arming = from_union([from_bool, from_none], obj.get("isArming"))
+        alarm = from_union([from_bool, from_none], obj.get("alarm"))
+        sub_system_no = from_union([from_int, from_none], obj.get("subSystemNo"))
+
         try:
             linkage_sub_system = from_list(from_int, obj.get("linkageSubSystem"))
         except:
             _LOGGER.warning("Invalid zone linkage_sub_system %s", obj.get("linkage_sub_system"))
             _LOGGER.warning("Zone info: %s", obj)
             linkage_sub_system = None
-        stay_away = from_union([from_none, from_bool], obj.get("stayAway"))
-        device_no = from_union([from_none, from_int], obj.get("deviceNo"))
+
+        stay_away = from_union([from_bool, from_none], obj.get("stayAway"))
+        device_no = from_union([from_int, from_none], obj.get("deviceNo"))
         abnormal_or_not = from_bool(obj.get("abnormalOrNot"))
         charge = from_union([from_str, from_none], obj.get("charge"))
         charge_value = from_union([from_int, from_none], obj.get("chargeValue"))
