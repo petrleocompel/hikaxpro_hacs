@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.8.2
+- **fix**: Zone model init mixup
+- **fix**: python deprecations
+
 ## v0.8.1
 - **fix**: not requiring optional params of Zone
 
