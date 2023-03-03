@@ -166,22 +166,22 @@ class ZoneType(Enum):
 @dataclass
 class Zone:
     id: int
-    name: str
     status: Status
-    tamper_evident: bool
-    shielded: bool
-    bypassed: bool
     armed: bool
-    is_arming: bool
-    alarm: bool
     sub_system_no: int
-    linkage_sub_system: List[int]
-    detector_type: Optional[DetectorType]
     stay_away: bool
     zone_type: ZoneType
     zone_attrib: ZoneAttrib
     device_no: int
     abnormal_or_not: bool
+    name: Optional[str] = None
+    is_arming: Optional[bool] = None
+    alarm: Optional[bool] = None
+    tamper_evident: Optional[bool] = None
+    shielded: Optional[bool] = None
+    bypassed: Optional[bool] = None
+    linkage_sub_system: Optional[List[int]] = None
+    detector_type: Optional[DetectorType] = None
     charge: Optional[str] = None
     charge_value: Optional[int] = None
     signal: Optional[int] = None
@@ -200,17 +200,24 @@ class Zone:
     def from_dict(obj: Any) -> 'Zone':
         assert isinstance(obj, dict)
         id = from_int(obj.get("id"))
-        name = from_str(obj.get("name"))
-        tamper_evident = from_bool(obj.get("tamperEvident"))
-        shielded = from_bool(obj.get("shielded"))
-        bypassed = from_bool(obj.get("bypassed"))
+        name = from_union([from_none, from_str], obj.get("name"))
+        if name is None:
+            name = f"Zone ID {id}"
+        tamper_evident = from_union([from_none, from_bool], obj.get("tamperEvident"))
+        shielded = from_union([from_none, from_bool], obj.get("shielded"))
+        bypassed = from_union([from_none, from_bool], obj.get("bypassed"))
         armed = from_bool(obj.get("armed"))
-        is_arming = from_bool(obj.get("isArming"))
-        alarm = from_bool(obj.get("alarm"))
-        sub_system_no = from_int(obj.get("subSystemNo"))
-        linkage_sub_system = from_list(from_int, obj.get("linkageSubSystem"))
-        stay_away = from_bool(obj.get("stayAway"))
-        device_no = from_int(obj.get("deviceNo"))
+        is_arming = from_union([from_none, from_bool], obj.get("isArming"))
+        alarm = from_union([from_none, from_bool], obj.get("alarm"))
+        sub_system_no = from_union([from_none, from_int], obj.get("subSystemNo"))
+        try:
+            linkage_sub_system = from_list(from_int, obj.get("linkageSubSystem"))
+        except:
+            _LOGGER.warning("Invalid zone linkage_sub_system %s", obj.get("linkage_sub_system"))
+            _LOGGER.warning("Zone info: %s", obj)
+            linkage_sub_system = None
+        stay_away = from_union([from_none, from_bool], obj.get("stayAway"))
+        device_no = from_union([from_none, from_int], obj.get("deviceNo"))
         abnormal_or_not = from_bool(obj.get("abnormalOrNot"))
         charge = from_union([from_str, from_none], obj.get("charge"))
         charge_value = from_union([from_int, from_none], obj.get("chargeValue"))
