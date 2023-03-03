@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.8.1
+- **fix**: not requiring optional params of Zone
+
 ## v0.8.0
 - **feat**: add sensors `entity description`
 
