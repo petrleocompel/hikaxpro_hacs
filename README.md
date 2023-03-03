@@ -17,13 +17,27 @@ HACS repository of Hikvision Ax Pro integration for home assistant
 - Wired magnetic contact sensor
 
 ### Attributes
-- Temperature
-- Humidity
-- Magnet presence
+- Alarm
+- Armed
 - Battery
-- Signal
-- Tamper
 - Bypass
+- Humidity
+- Is via repeater
+- Magnet presence
+- Signal
+- Stay away
+- Tamper
+- Temperature
+
+### Examples
+Example screens of integration. 
+
+**Magnetic Sensor**
+![Magnetic Sensor](https://user-images.githubusercontent.com/9423543/222737996-4eefb9a5-a09a-4713-a87e-71664580aaf2.png)
+
+**PIR Sensor**
+![PIR Sensor](https://user-images.githubusercontent.com/9423543/222738007-1961348c-9e94-46de-9a29-40aedc726e38.png)
+
 
 ## Installation
 
