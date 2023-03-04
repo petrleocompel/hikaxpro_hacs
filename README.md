@@ -15,6 +15,7 @@ HACS repository of Hikvision Ax Pro integration for home assistant
 - Wireless PIR AM curtain sensor
 - Wireless PIR CAM sensor
 - Wired magnetic contact sensor
+- Wireless Smoke Detector
 
 ### Attributes
 - Alarm

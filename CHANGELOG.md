@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.9.0
+- **feat**: add `Wireless Smoke Detector`
+
 ## v0.8.2
 - **fix**: Zone model init mixup
 - **fix**: python deprecations
