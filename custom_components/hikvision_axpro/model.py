@@ -109,6 +109,8 @@ def detector_model_to_name(model_id: Optional[str]) -> str:
         return "Magnetic Contact"
     if model_id == "0x00012":
         return "Wireless PIR CAM Detector"
+    if model_id == "0x00015":
+        return "Wireless Smoke Detector"
     if model_id == "0x00017":
         return "Wireless Magnet Shock Detector"
     if model_id == "0x00018":
@@ -158,9 +160,30 @@ class ZoneAttrib(Enum):
 
 
 class ZoneType(Enum):
-    FOLLOW = "Follow"
-    INSTANT = "Instant"
+    """ delay zone """
     DELAY = "Delay"
+    """ panic zone """
+    EMERGENCY = "Emergency"
+    """ fire zone """
+    FIRE = "Fire"
+    """ follow zone """
+    FOLLOW = "Follow"
+    """ gas zone """
+    GAS = "Gas"
+    """ key """
+    KEY = "Key"
+    """ medical zone """
+    MEDICAL = "Medical"
+    """ disabled zone """
+    NON_ALARM = "Non-Alarm"
+    """ 24 - hour silent zone """
+    NO_SOUND_24 = "24hNoSound"
+    """ perimeter zone """
+    PERIMETER = "Perimeter"
+    """ timeout zone """
+    TIMEOUT = "Timeout"
+    """ instant zone """
+    INSTANT = "Instant"
 
 
 @dataclass
