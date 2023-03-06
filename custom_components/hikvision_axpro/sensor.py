@@ -124,12 +124,21 @@ class HikWirelessExtMagnetDetector(CoordinatorEntity, HikDevice, BinarySensorEnt
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        self.async_write_ha_state()
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
             value = self.coordinator.zones[self.zone.id].magnet_open_status
-            self._attr_state = STATE_ON if value is True else STATE_OFF
+            if value is True:
+                self._attr_state = STATE_OFF
+                self._attr_icon = "mdi:magnet-on"
+            elif value is False:
+                self._attr_state = STATE_ON
+                self._attr_icon = "mdi:magnet"
+            else:
+                self._attr_state = None
+                self._attr_icon = "mdi:help"
         else:
             self._attr_state = None
+            self._attr_icon = "mdi:help"
+        self.async_write_ha_state()
 
     @property
     def is_on(self) -> bool | None:
@@ -151,8 +160,6 @@ class HikMagneticContactDetector(CoordinatorEntity, HikDevice, BinarySensorEntit
         self.zone = zone
         self._ref_id = entry_id
         self._attr_unique_id = f"{self.coordinator.device_name}-magnet-{zone.id}"
-        self._attr_icon = "mdi:magnet"
-        #self._attr_name = f"Magnet presence"
         self._device_class = BinarySensorDeviceClass.PRESENCE
         self._attr_has_entity_name = True
         self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-magnet-{zone.id}"
@@ -164,12 +171,21 @@ class HikMagneticContactDetector(CoordinatorEntity, HikDevice, BinarySensorEntit
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        self.async_write_ha_state()
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
             value = self.coordinator.zones[self.zone.id].magnet_open_status
-            self._attr_state = STATE_ON if value is True else STATE_OFF
+            if value is True:
+                self._attr_state = STATE_OFF
+                self._attr_icon = "mdi:magnet-on"
+            elif value is False:
+                self._attr_state = STATE_ON
+                self._attr_icon = "mdi:magnet"
+            else:
+                self._attr_state = None
+                self._attr_icon = "mdi:help"
         else:
             self._attr_state = None
+            self._attr_icon = "mdi:help"
+        self.async_write_ha_state()
 
     @property
     def is_on(self) -> bool | None:
