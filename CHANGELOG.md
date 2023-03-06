@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.9.1
+- **fix**: missing state of `Arming`
+
 ## v0.9.0
 - **feat**: add `Wireless Smoke Detector`
 
