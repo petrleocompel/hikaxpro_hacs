@@ -362,6 +362,7 @@ class Arming(Enum):
     STAY = "stay"
     VACATION = "vacation"
     DISARM = "disarm"
+    ARMING = "arming"
 
 
 @dataclass
