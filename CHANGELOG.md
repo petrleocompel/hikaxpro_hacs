@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.9.2
+- **fix**: remove logging debug
+
 ## v0.9.1
 - **fix**: missing state of `Arming`
 
