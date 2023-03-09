@@ -37,7 +37,6 @@ from .model import ZonesResponse, Zone, SubSystemResponse, SubSys, Arming
 PLATFORMS: list[Platform] = [Platform.ALARM_CONTROL_PANEL, Platform.SENSOR]
 _LOGGER = logging.getLogger(__name__)
 
-_LOGGER.setLevel(logging.DEBUG)
 
 async def async_setup(hass: HomeAssistant, config: ConfigEntry):
     """Set up the hikvision_axpro integration component."""
