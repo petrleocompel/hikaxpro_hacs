@@ -20,6 +20,7 @@
                     "enabled": "Uporabi kodo za izklop",
                     "code_format": "Oblika kode (TEXT ali NUMBER)",
                     "use_code_arming": "Uporabi kodo za vklop",
+                    "allow_subsystems": "Vključite območja kot ločena območja za vklop/izklop alarmiranja",
                     "code": "Koda",
                     "scan_interval": "Interval preverjanja sistema"
                 }
@@ -36,6 +37,7 @@
                     "enabled": "Uporabi kodo za izklop",
                     "code_format": "Oblika kode (TEXT ali NUMBER)",
                     "use_code_arming": "Uporabi kodo za vklop",
+                    "allow_subsystems": "Vključite območja kot ločena območja za vklop/izklop alarmiranja",
                     "code": "Koda",
                     "scan_interval": "Interval preverjanja sistema"
                 }

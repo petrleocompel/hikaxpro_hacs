@@ -20,6 +20,7 @@
                     "enabled": "Use code to disarm",
                     "code_format": "Code format (TEXT or NUMBER)",
                     "use_code_arming": "Use code for arming",
+                    "allow_subsystems": "Include areas as separate zones for arm/disarm",
                     "code": "Code",
                     "scan_interval": "Pull interval from system"
                 }
@@ -36,6 +37,7 @@
                     "enabled": "Use code to disarm",
                     "code_format": "Code format (TEXT or NUMBER)",
                     "use_code_arming": "Use code for arming",
+                    "allow_subsystems": "Include areas as separate zones for arm/disarm",
                     "code": "Code",
                     "scan_interval": "Pull interval from system"
                 }
