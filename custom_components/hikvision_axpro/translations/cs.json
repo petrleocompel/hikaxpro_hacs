@@ -20,6 +20,7 @@
                     "enabled": "Kód pro odjištění",
                     "code_format": "Formát kódu (TEXT nebo NUMBER)",
                     "use_code_arming": "Kód pro zajištění",
+                    "allow_subsystems": "Zahrnutí zón jako samostatných oblastí pro zapnutí/vypnutí alarmů",
                     "code": "Kód",
                     "scan_interval": "Aktualizační interval"
                 }
@@ -36,6 +37,7 @@
                     "enabled": "Kód pro odjištění",
                     "code_format": "Formát kódu (TEXT nebo NUMBER)",
                     "use_code_arming": "Kód pro zajištění",
+                    "allow_subsystems": "Zahrnutí zón jako samostatných oblastí pro zapnutí/vypnutí alarmů",
                     "code": "Kód",
                     "scan_interval": "Aktualizační interval"
                 }

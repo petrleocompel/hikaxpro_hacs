@@ -16,7 +16,7 @@ from homeassistant.components.alarm_control_panel import (
 from homeassistant.helpers import device_registry as dr
 
 from . import HikAxProDataUpdateCoordinator, SubSys, Arming
-from .const import DATA_COORDINATOR, DOMAIN
+from .const import DATA_COORDINATOR, DOMAIN, ALLOW_SUBSYSTEMS
 
 
 async def async_setup_entry(
@@ -36,10 +36,10 @@ async def async_setup_entry(
         model=coordinator.device_model,
     )
     panels = [HikAxProPanel(coordinator)]
-    for sub_system in coordinator.sub_systems:
-        panels.append(HikAxProSubPanel(coordinator, sub_system))
+    if bool(entry.data.get(ALLOW_SUBSYSTEMS, False)):
+        for sub_system in coordinator.sub_systems:
+            panels.append(HikAxProSubPanel(coordinator, sub_system))
     async_add_entities(panels, False)
-
 
 
 class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
