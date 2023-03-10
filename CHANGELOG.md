@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.10.0
+- **feat**: implementation of multiple areas
+  - subsystem arm/disarm
+  - opt-in using subsystems
+  - README.md update
+
 ## v0.9.2
 - **fix**: remove logging debug
 
