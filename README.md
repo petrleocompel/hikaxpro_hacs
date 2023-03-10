@@ -4,6 +4,7 @@ HACS repository of Hikvision Ax Pro integration for home assistant
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
 ## Support
+- Sub zones control (Opt-in - after configuration reload integration)
 
 ### Supported Sensors / Detectors
 - Wireless external magnetic sensors
