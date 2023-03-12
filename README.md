@@ -40,6 +40,9 @@ Example screens of integration.
 **PIR Sensor**
 ![PIR Sensor](https://user-images.githubusercontent.com/9423543/222738007-1961348c-9e94-46de-9a29-40aedc726e38.png)
 
+**Main System Device**
+![Main System Device](https://user-images.githubusercontent.com/9423543/224548626-823a6cfa-5c15-4a6a-97d2-32831797253c.png)
+
 
 ## Installation
 
