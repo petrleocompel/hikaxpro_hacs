@@ -60,6 +60,9 @@ class AccessModuleType(Enum):
     LOCAL_RELAY = "localRelay"
     LOCAL_SIREN = "localSiren"
     KEYPAD = "keypad"
+    # Undocumented type
+    INPUT_MAIN_ZONE = "inputMainZone"
+
 
 
 class DetectorType(Enum):
