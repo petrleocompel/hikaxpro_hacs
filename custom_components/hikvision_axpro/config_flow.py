@@ -6,6 +6,8 @@ import voluptuous as vol
 
 import hikaxpro
 
+from .hikax import hikax
+
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
@@ -21,7 +23,7 @@ from homeassistant.const import (
 )
 from homeassistant.components.alarm_control_panel import SCAN_INTERVAL
 
-from .const import DOMAIN, USE_CODE_ARMING, ALLOW_SUBSYSTEMS
+from .const import DOMAIN, USE_CODE_ARMING, ALLOW_SUBSYSTEMS, INTERNAL_API
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,6 +38,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         vol.Optional(USE_CODE_ARMING, default=False): bool,
         vol.Required(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL.total_seconds()): int,
         vol.Optional(ALLOW_SUBSYSTEMS, default=False): bool,
+        vol.Optional(INTERNAL_API, default=False): bool,
     }
 )
 
@@ -51,6 +54,7 @@ CONFIGURE_SCHEMA = vol.Schema(
         vol.Optional(USE_CODE_ARMING, default=False): bool,
         vol.Required(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL.total_seconds()): int,
         vol.Optional(ALLOW_SUBSYSTEMS, default=False): bool,
+        vol.Optional(INTERNAL_API, default=False): bool,
     }
 )
 
@@ -93,6 +97,24 @@ class AxProHub:
         return is_connect_success
 
 
+class AxHub:
+    """Helper class for validation and setup ops."""
+
+    def __init__(
+        self, host: str, username: str, password: str, hass: HomeAssistant
+    ) -> None:
+        self.host = host
+        self.username = username
+        self.password = password
+        self.axpro = hikax.HikAxPro(host, username, password)
+        self.hass = hass
+
+    async def authenticate(self) -> bool:
+        """Check the provided credentials by connecting to ax pro."""
+        is_connect_success = await self.hass.async_add_executor_job(self.axpro.connect)
+        return is_connect_success
+
+
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
     """Validate the user input allows us to connect.
 
@@ -112,7 +134,10 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
         ):
             raise InvalidCode
 
+
     hub = AxProHub(data[CONF_HOST], data[CONF_USERNAME], data[CONF_PASSWORD], hass)
+    if data.get(INTERNAL_API):
+        hub = AxHub(data[CONF_HOST], data[CONF_USERNAME], data[CONF_PASSWORD], hass)
 
     if not await hub.authenticate():
         raise InvalidAuth

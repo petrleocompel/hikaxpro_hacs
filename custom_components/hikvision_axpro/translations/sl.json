@@ -22,7 +22,8 @@
                     "use_code_arming": "Uporabi kodo za vklop",
                     "allow_subsystems": "Vključite območja kot ločena območja za vklop/izklop alarmiranja",
                     "code": "Koda",
-                    "scan_interval": "Interval preverjanja sistema"
+                    "scan_interval": "Interval preverjanja sistema",
+                    "internal_api": "Use internal API lib (AXHub)"
                 }
             }
         }
@@ -39,7 +40,8 @@
                     "use_code_arming": "Uporabi kodo za vklop",
                     "allow_subsystems": "Vključite območja kot ločena območja za vklop/izklop alarmiranja",
                     "code": "Koda",
-                    "scan_interval": "Interval preverjanja sistema"
+                    "scan_interval": "Interval preverjanja sistema",
+                    "internal_api": "Use internal API lib (AXHub)"
                 }
             }
         }
