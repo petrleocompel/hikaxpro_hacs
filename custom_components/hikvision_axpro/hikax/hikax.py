@@ -24,6 +24,11 @@ class HikAxPro:
 
     def get_session_params(self):
         response = requests.get(f"http://{self.host}{consts.Endpoints.Session_Capabilities}{self.username}")
+        _LOGGER.debug("Session_Capabilities response")
+        _LOGGER.debug("Status: %s", response.status_code)
+        _LOGGER.debug("Content: %s", response.content)
+        _LOGGER.debug("Text: %s", response.text)
+        _LOGGER.debug("End Session_Capabilities response")
         if response.status_code == 200:
             try:
                 session_cap = self.parse_session_response(response.text)
