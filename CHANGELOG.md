@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.0.2
+- **fix**: safe get session data for AXHub #31
+
 ## v1.0.1
 - **fix**: more logging for AXHub #31
 
