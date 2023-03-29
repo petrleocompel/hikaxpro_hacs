@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.4
+- **fix**: Session Capabilities AX Hub call with auth #31
+- **chore**: convert CRLF to LF
+- **chore**: gitignore
+- **chore**: test runner and test requirements
+
 ## v1.0.3
 - **fix**: areas arming/disarming and updates #32
 
