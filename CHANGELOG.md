@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.0.3
+- **fix**: areas arming/disarming and updates #32
+
 ## v1.0.2
 - **fix**: safe get session data for AXHub #31
 
