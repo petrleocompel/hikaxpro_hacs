@@ -1,0 +1,7 @@
+# pyproject.toml
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q -p no:pytest-sqlalchemy"
+testpaths = [
+    "tests",
+]
