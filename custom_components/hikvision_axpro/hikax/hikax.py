@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 
 import requests
 from xml.etree import ElementTree
@@ -39,17 +39,30 @@ class HikAxPro:
             return None
 
     @staticmethod
+    def _root_get_value(root, ns, key, default = None) -> Any | None:
+        item = root.find(key, ns)
+        if item is not None:
+            return item.text
+        return default
+
+    @staticmethod
     def parse_session_response(xml_data):
         _LOGGER.warning("Debug data %s", xml_data)
         root = ElementTree.fromstring(xml_data)
         namespaces = {'xmlns': consts.XML_SCHEMA}
+        session_id = HikAxPro._root_get_value(root, namespaces, "xmlns:sessionID")
+        challenge = HikAxPro._root_get_value(root, namespaces, "xmlns:challenge")
+        salt = HikAxPro._root_get_value(root, namespaces, "xmlns:salt")
+        salt2 = HikAxPro._root_get_value(root, namespaces, "xmlns:salt2")
+        is_irreversible = HikAxPro._root_get_value(root, namespaces, "xmlns:isIrreversible", False)
+        iterations = HikAxPro._root_get_value(root,namespaces, "xmlns:iterations")
         session_cap = SessionLoginCap.SessionLoginCap(
-            root.find("xmlns:sessionID", namespaces).text,
-            root.find("xmlns:challenge", namespaces).text,
-            root.find("xmlns:salt", namespaces).text,
-            root.find("xmlns:salt2", namespaces).text,
-            root.find("xmlns:isIrreversible", namespaces).text,
-            int(root.find("xmlns:iterations", namespaces).text)
+            sessionID=session_id,
+            challange=challenge,
+            salt=salt,
+            salt2=salt2,
+            isIrreversible=is_irreversible,
+            iterations=int(iterations) if iterations is not None else None
         )
         return session_cap
 
