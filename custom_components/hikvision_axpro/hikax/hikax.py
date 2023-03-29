@@ -23,7 +23,7 @@ class HikAxPro:
         self.cookie = ''
 
     def get_session_params(self):
-        response = requests.get(f"http://{self.host}{consts.Endpoints.Session_Capabilities}{self.username}")
+        response = requests.get(f"http://{self.username}:{self.password}@{self.host}{consts.Endpoints.Session_Capabilities}{self.username}")
         _LOGGER.debug("Session_Capabilities response")
         _LOGGER.debug("Status: %s", response.status_code)
         _LOGGER.debug("Content: %s", response.content)
