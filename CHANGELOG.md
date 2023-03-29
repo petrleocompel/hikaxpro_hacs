@@ -1,10 +1,13 @@
 # Changelog
 
+## v1.0.1
+- **fix**: more logging for AXHub #31
+
 ## v1.0.0
-- BREAKING CHANGE: icons and correct state of magnets - invert state of magnets to match presence #27
-- feat: add internal API lib - `AXHub` #31
-- fix: missing undocumented `AccessModuleType` `inputMainZone` #14
-- chore: Update `README.md`
+- **BREAKING CHANGE**: icons and correct state of magnets - invert state of magnets to match presence #27
+- **feat**: add internal API lib - `AXHub` #31
+- **fix**: missing undocumented `AccessModuleType` `inputMainZone` #14
+- **chore**: Update `README.md`
 
 ## v0.10.0
 - **feat**: implementation of multiple areas
