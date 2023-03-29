@@ -37,7 +37,7 @@ async def async_setup_entry(
     )
     panels = [HikAxProPanel(coordinator)]
     if bool(entry.data.get(ALLOW_SUBSYSTEMS, False)):
-        for sub_system in coordinator.sub_systems:
+        for sub_system in coordinator.sub_systems.values():
             panels.append(HikAxProSubPanel(coordinator, sub_system))
     async_add_entities(panels, False)
 
@@ -130,6 +130,7 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
 class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
     """Representation of Hikvision Ax Pro alarm panel."""
     sys: SubSys
+    coordinator: HikAxProDataUpdateCoordinator
 
     def __init__(self, coordinator: CoordinatorEntity, sys: SubSys):
         self.sys = sys
@@ -139,12 +140,17 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
+        new_sys = self.coordinator.sub_systems.get(self.sys.id)
+        if new_sys is not None:
+            self.sys = new_sys
         self.async_write_ha_state()
 
     _attr_supported_features = (
         AlarmControlPanelEntityFeature.ARM_HOME
         | AlarmControlPanelEntityFeature.ARM_AWAY
     )
+
+
 
     @property
     def device_info(self) -> DeviceInfo:

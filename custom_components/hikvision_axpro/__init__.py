@@ -125,7 +125,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     device_info: Optional[dict] = None
     device_model: Optional[str] = None
     device_name: Optional[str] = None
-    sub_systems: list[SubSys] = []
+    sub_systems: dict[int, SubSys] = {}
 
     def __init__(
         self,
@@ -178,8 +178,9 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
                     subsys_arr.append(sublist.sub_sys)
             func: Callable[[SubSys], bool] = lambda n: n.enabled
             subsys_arr = list(filter(func, subsys_arr))
-            self.sub_systems = subsys_arr
+            self.sub_systems = {}
             for subsys in subsys_arr:
+                self.sub_systems[subsys.id] = subsys
                 if subsys.alarm:
                     status = STATE_ALARM_TRIGGERED
                     break
@@ -218,7 +219,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         """Arm alarm panel in home state."""
         # TODO modify AXPRO
         if sub_id is not None:
-            is_success = await self.hass.async_add_executor_job(self._arm_home(sub_id=sub_id))
+            is_success = await self.hass.async_add_executor_job(self._arm_home, sub_id)
         else:
             is_success = await self.hass.async_add_executor_job(self.axpro.arm_home)
 
@@ -230,7 +231,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         """Arm alarm panel in away state"""
         # TODO modify AXPRO
         if sub_id is not None:
-            is_success = await self.hass.async_add_executor_job(self._arm_away(sub_id=sub_id))
+            is_success = await self.hass.async_add_executor_job(self._arm_away, sub_id)
         else:
             is_success = await self.hass.async_add_executor_job(self.axpro.arm_away)
 
@@ -242,7 +243,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         """Disarm alarm control panel."""
         # TODO modify AXPRO
         if sub_id is not None:
-            is_success = await self.hass.async_add_executor_job(self._disarm(sub_id=sub_id))
+            is_success = await self.hass.async_add_executor_job(self._disarm, sub_id)
         else:
             is_success = await self.hass.async_add_executor_job(self.axpro.disarm)
 
