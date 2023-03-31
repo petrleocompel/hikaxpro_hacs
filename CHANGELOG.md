@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.5
+- **fix**: AX Hub connect logging #31
+- **fix**: AX Hub connect URL encoding #31
+
 ## v1.0.4
 - **fix**: Session Capabilities AX Hub call with auth #31
 - **chore**: convert CRLF to LF
