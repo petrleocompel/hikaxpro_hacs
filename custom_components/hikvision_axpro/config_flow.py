@@ -106,7 +106,7 @@ class AxHub:
         self.host = host
         self.username = username
         self.password = password
-        self.axpro = hikax.HikAxPro(host, username, password)
+        self.axpro = hikax.HikAx(host, username, password)
         self.hass = hass
 
     async def authenticate(self) -> bool:

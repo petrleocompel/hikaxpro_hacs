@@ -15,7 +15,7 @@ import urllib.parse
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)
 
-class HikAxPro:
+class HikAx:
     """HikVisison Ax Pro Alarm panel coordinator."""
 
     def __init__(self, host, username, password):
@@ -55,12 +55,12 @@ class HikAxPro:
         _LOGGER.warning("Debug data %s", xml_data)
         root = ElementTree.fromstring(xml_data)
         namespaces = {'xmlns': consts.XML_SCHEMA}
-        session_id = HikAxPro._root_get_value(root, namespaces, "xmlns:sessionID")
-        challenge = HikAxPro._root_get_value(root, namespaces, "xmlns:challenge")
-        salt = HikAxPro._root_get_value(root, namespaces, "xmlns:salt")
-        salt2 = HikAxPro._root_get_value(root, namespaces, "xmlns:salt2")
-        is_irreversible = HikAxPro._root_get_value(root, namespaces, "xmlns:isIrreversible", False)
-        iterations = HikAxPro._root_get_value(root,namespaces, "xmlns:iterations")
+        session_id = HikAx._root_get_value(root, namespaces, "xmlns:sessionID")
+        challenge = HikAx._root_get_value(root, namespaces, "xmlns:challenge")
+        salt = HikAx._root_get_value(root, namespaces, "xmlns:salt")
+        salt2 = HikAx._root_get_value(root, namespaces, "xmlns:salt2")
+        is_irreversible = HikAx._root_get_value(root, namespaces, "xmlns:isIrreversible", False)
+        iterations = HikAx._root_get_value(root,namespaces, "xmlns:iterations")
         session_cap = SessionLoginCap.SessionLoginCap(
             sessionID=session_id,
             challange=challenge,
@@ -117,7 +117,7 @@ class HikAxPro:
                 if cookie is None:
                     root = ElementTree.fromstring(login_response.text)
                     namespaces = {'xmlns': consts.XML_SCHEMA}
-                    session_id = HikAxPro._root_get_value(root, namespaces, "xmlns:sessionID")
+                    session_id = HikAx._root_get_value(root, namespaces, "xmlns:sessionID")
                     if session_id is not None:
                         cookie = "WebSession=" + session_id
                 else:
@@ -138,6 +138,10 @@ class HikAxPro:
     def build_url(endpoint, is_json):
         param_prefix = "&" if "?" in endpoint else "?"
         return f"{endpoint}{param_prefix}format=json" if is_json else endpoint
+
+    @staticmethod
+    def buildUrl(endpoint, is_json):
+        return HikAx.build_url(endpoint, is_json)
 
     def _base_json_request(self, url: str, method: consts.Method = consts.Method.GET):
         endpoint = self.build_url(url, True)
@@ -257,3 +261,5 @@ class HikAxPro:
             response = self.make_request(endpoint, method, data, is_json)
 
         return response
+    def makeRequest(self, endpoint, method, data=None, is_json=False):
+        return self.make_request(endpoint,method,data,is_json)

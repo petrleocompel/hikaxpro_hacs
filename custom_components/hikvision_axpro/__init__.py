@@ -7,6 +7,7 @@ from collections.abc import Callable
 
 import hikaxpro
 import xmltodict
+from .hikax import hikax
 
 from async_timeout import timeout
 
@@ -31,7 +32,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING
+from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING, INTERNAL_API
 from .model import ZonesResponse, Zone, SubSystemResponse, SubSys, Arming
 
 PLATFORMS: list[Platform] = [Platform.ALARM_CONTROL_PANEL, Platform.SENSOR]
@@ -73,6 +74,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     code = entry.data[CONF_CODE]
     use_code_arming = entry.data[USE_CODE_ARMING]
     axpro = hikaxpro.HikAxPro(host, username, password)
+    if entry.data.get(INTERNAL_API):
+        axpro = hikax.HikAx(host, username, password)
     update_interval: float = entry.data.get(CONF_SCAN_INTERVAL, SCAN_INTERVAL.total_seconds())
 
     try:
