@@ -8,6 +8,8 @@ from .helpers import sha256, xmlBuilder
 from errors import errors
 from datetime import datetime
 import logging
+import urllib.parse
+
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -23,7 +25,9 @@ class HikAxPro:
         self.cookie = ''
 
     def get_session_params(self):
-        response = requests.get(f"http://{self.username}:{self.password}@{self.host}{consts.Endpoints.Session_Capabilities}{self.username}")
+        q_user = urllib.parse.quote(self.username)
+        q_password = urllib.parse.quote(self.password)
+        response = requests.get(f"http://{q_user}:{q_password}@{self.host}{consts.Endpoints.Session_Capabilities}{q_user}")
         _LOGGER.debug("Session_Capabilities response")
         _LOGGER.debug("Status: %s", response.status_code)
         _LOGGER.debug("Content: %s", response.content)
