@@ -115,7 +115,7 @@ class HikAxPro:
                 self.cookie = login_response.headers["Set-Cookie"].split(";")[0]
                 result = True
         except Exception as e:
-            _LOGGER.error("Error in parsing response", )
+            _LOGGER.error("Error in parsing response", exc_info=e)
             result = False
 
         return result
