@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.1.0
+- **feat**: AX Hub support #31
+
 ## v1.0.6
 - **fix**: AX Hub session cookie #31
 - **fix**: AX Hub connect logging #31
