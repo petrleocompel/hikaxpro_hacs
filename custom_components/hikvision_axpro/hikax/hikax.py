@@ -109,11 +109,13 @@ class HikAxPro:
             _LOGGER.debug("Status: %s", login_response.status_code)
             _LOGGER.debug("Content: %s", login_response.content)
             _LOGGER.debug("Text: %s", login_response.text)
+            _LOGGER.debug("Headers: %s", login_response.headers)
             _LOGGER.debug("End connect response")
             if login_response.status_code == 200:
                 self.cookie = login_response.headers["Set-Cookie"].split(";")[0]
                 result = True
-        except:
+        except Exception as e:
+            _LOGGER.error("Error in parsing response", )
             result = False
 
         return result
