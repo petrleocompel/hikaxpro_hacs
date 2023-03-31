@@ -32,6 +32,7 @@ class HikAxPro:
         _LOGGER.debug("Status: %s", response.status_code)
         _LOGGER.debug("Content: %s", response.content)
         _LOGGER.debug("Text: %s", response.text)
+        _LOGGER.debug("Headers: %s", response.headers)
         _LOGGER.debug("End Session_Capabilities response")
         if response.status_code == 200:
             try:
