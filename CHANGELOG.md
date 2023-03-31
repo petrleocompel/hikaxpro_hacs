@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.6
+- **fix**: AX Hub session cookie #31
+- **fix**: AX Hub connect logging #31
+
 ## v1.0.5
 - **fix**: AX Hub connect logging #31
 - **fix**: AX Hub connect URL encoding #31
