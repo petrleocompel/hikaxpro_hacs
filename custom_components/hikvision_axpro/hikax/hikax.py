@@ -113,7 +113,20 @@ class HikAxPro:
             _LOGGER.debug("Headers: %s", login_response.headers)
             _LOGGER.debug("End connect response")
             if login_response.status_code == 200:
-                self.cookie = login_response.headers["Set-Cookie"].split(";")[0]
+                cookie = login_response.headers.get("Set-Cookie")
+                if cookie is None:
+                    root = ElementTree.fromstring(login_response.text)
+                    namespaces = {'xmlns': consts.XML_SCHEMA}
+                    session_id = HikAxPro._root_get_value(root, namespaces, "xmlns:sessionID")
+                    if session_id is not None:
+                        cookie = "WebSession=" + session_id
+                else:
+                    self.cookie = cookie.split(";")[0]
+
+                if cookie is None:
+                    raise Exception("No cookie provided")
+
+                self.cookie = cookie
                 result = True
         except Exception as e:
             _LOGGER.error("Error in parsing response", exc_info=e)
