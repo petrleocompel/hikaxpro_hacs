@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.1.2
+- **fix**: AX Hub models `Zones` #31
+
 ## v1.1.1
 - **fix**: AX Hub models `Zones` and `SubSys` #31
 
