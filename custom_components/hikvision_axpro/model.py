@@ -206,7 +206,7 @@ class Zone:
     zone_type: Optional[ZoneType]
     zone_attrib: Optional[ZoneAttrib]
     device_no: Optional[int]
-    abnormal_or_not: bool
+    abnormal_or_not: Optional[bool] = None
     charge: Optional[str] = None
     charge_value: Optional[int] = None
     signal: Optional[int] = None
@@ -246,7 +246,7 @@ class Zone:
 
         stay_away = from_union([from_bool, from_none], obj.get("stayAway"))
         device_no = from_union([from_int, from_none], obj.get("deviceNo"))
-        abnormal_or_not = from_union([from_bool, from_none], from_bool(obj.get("abnormalOrNot")))
+        abnormal_or_not = from_union([from_bool, from_none], obj.get("abnormalOrNot"))
         charge = from_union([from_str, from_none], obj.get("charge"))
         charge_value = from_union([from_int, from_none], obj.get("chargeValue"))
         signal = from_union([from_int, from_none], obj.get("signal"))
@@ -313,7 +313,7 @@ class Zone:
         result["zoneType"] = to_enum(ZoneType, self.zone_type)
         result["zoneAttrib"] = to_enum(ZoneAttrib, self.zone_attrib)
         result["deviceNo"] = from_int(self.device_no)
-        result["abnormalOrNot"] = from_bool(self.abnormal_or_not)
+        result["abnormalOrNot"] = from_union([from_bool, from_none], self.abnormal_or_not)
         result["charge"] = from_union([from_str, from_none], self.charge)
         result["chargeValue"] = from_union([from_int, from_none], self.charge_value)
         result["signal"] = from_union([from_int, from_none], self.signal)
