@@ -3,6 +3,10 @@ HACS repository of Hikvision Ax Pro integration for home assistant
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
+## Supported devices
+- AX Pro series
+- AX Hub - introduced in version 1.2.0 
+
 ## Support
 - Sub zones control (Opt-in - after configuration reload integration)
 
