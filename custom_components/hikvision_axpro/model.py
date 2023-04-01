@@ -64,7 +64,6 @@ class AccessModuleType(Enum):
     INPUT_MAIN_ZONE = "inputMainZone"
 
 
-
 class DetectorType(Enum):
     ACTIVE_IR_DETECTOR = "activeInfraredDetector"
     CONTROL_SWITCH = "controlSwitch"
@@ -247,7 +246,7 @@ class Zone:
 
         stay_away = from_union([from_bool, from_none], obj.get("stayAway"))
         device_no = from_union([from_int, from_none], obj.get("deviceNo"))
-        abnormal_or_not = from_bool(obj.get("abnormalOrNot"))
+        abnormal_or_not = from_union([from_bool, from_none], from_bool(obj.get("abnormalOrNot")))
         charge = from_union([from_str, from_none], obj.get("charge"))
         charge_value = from_union([from_int, from_none], obj.get("chargeValue"))
         signal = from_union([from_int, from_none], obj.get("signal"))
@@ -291,7 +290,10 @@ class Zone:
             _LOGGER.warning("Invalid accessModuleType %s", obj.get("accessModuleType"))
             _LOGGER.warning("Detector info: %s", obj)
             access_module_type = None
-        return Zone(id, name, status, tamper_evident, shielded, bypassed, armed, is_arming, alarm, sub_system_no, linkage_sub_system, detector_type, stay_away, zone_type, zone_attrib, device_no, abnormal_or_not, charge, charge_value, signal, temperature, humidity, model, is_via_repeater, version, magnet_open_status, input_list, is_support_add_type, access_module_type, module_channel)
+        return Zone(id, name, status, tamper_evident, shielded, bypassed, armed, is_arming, alarm, sub_system_no,
+                    linkage_sub_system, detector_type, stay_away, zone_type, zone_attrib, device_no, abnormal_or_not,
+                    charge, charge_value, signal, temperature, humidity, model, is_via_repeater, version,
+                    magnet_open_status, input_list, is_support_add_type, access_module_type, module_channel)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -321,9 +323,11 @@ class Zone:
         result["isViaRepeater"] = from_union([from_bool, from_none], self.is_via_repeater)
         result["version"] = from_union([from_str, from_none], self.version)
         result["magnetOpenStatus"] = from_union([from_bool, from_none], self.magnet_open_status)
-        result["InputList"] = from_union([lambda x: from_list(lambda x: to_class(InputList, x), x), from_none], self.input_list)
+        result["InputList"] = from_union([lambda x: from_list(lambda x: to_class(InputList, x), x), from_none],
+                                         self.input_list)
         result["isSupportAddType"] = from_union([from_bool, from_none], self.is_support_add_type)
-        result["accessModuleType"] = from_union([lambda x: to_enum(AccessModuleType, x), from_none], self.access_module_type)
+        result["accessModuleType"] = from_union([lambda x: to_enum(AccessModuleType, x), from_none],
+                                                self.access_module_type)
         result["moduleChannel"] = from_union([from_int, from_none], self.module_channel)
         return result
 
@@ -388,9 +392,11 @@ class SubSys:
             _LOGGER.warning("Subsys: %s", obj)
             arming = None
         alarm = from_bool(obj.get("alarm"))
-        enabled = from_bool(obj.get("enabled"))
-        name = from_str(obj.get("name"))
-        delay_time = from_int(obj.get("delayTime"))
+        enabled = from_union([from_bool, from_none], obj.get("enabled"))
+        if enabled is None:
+            enabled = True
+        name = from_union([from_str, from_none], obj.get("name"))
+        delay_time = from_union([from_int, from_none], obj.get("delayTime"))
         return SubSys(id, arming, alarm, enabled, name, delay_time)
 
     def to_dict(self) -> dict:
@@ -434,4 +440,3 @@ class SubSystemResponse:
         result: dict = {}
         result["SubSysList"] = from_list(lambda x: to_class(SubSysList, x), self.sub_sys_list)
         return result
-
