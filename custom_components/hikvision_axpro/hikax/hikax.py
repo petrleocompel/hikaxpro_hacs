@@ -13,7 +13,6 @@ import urllib.parse
 
 
 _LOGGER = logging.getLogger(__name__)
-_LOGGER.setLevel(logging.DEBUG)
 
 class HikAx:
     """HikVisison Ax Pro Alarm panel coordinator."""
@@ -42,6 +41,9 @@ class HikAx:
                 raise errors.IncorrectResponseContentError()
         else:
             return None
+    @staticmethod
+    def set_logging_level(level):
+        _LOGGER.setLevel(level)
 
     @staticmethod
     def _root_get_value(root, ns, key, default = None) -> Any | None:
@@ -152,17 +154,17 @@ class HikAx:
         if response.status_code == 200:
             return response.json()
 
-    def arm_home(self, sub_id: Optional[int]):
+    def arm_home(self, sub_id: Optional[int] = None):
         sid = "0xffffffff" if sub_id is None else str(sub_id)
         return self._base_json_request(f"http://{self.host}{consts.Endpoints.Alarm_ArmHome.replace('{}', sid)}",
                                        method=consts.Method.PUT)
 
-    def arm_away(self, sub_id: Optional[int]):
+    def arm_away(self, sub_id: Optional[int] = None):
         sid = "0xffffffff" if sub_id is None else str(sub_id)
         return self._base_json_request(f"http://{self.host}{consts.Endpoints.Alarm_ArmAway.replace('{}', sid)}",
                                        method=consts.Method.PUT)
 
-    def disarm(self, sub_id: Optional[int]):
+    def disarm(self, sub_id: Optional[int] = None):
         sid = "0xffffffff" if sub_id is None else str(sub_id)
         return self._base_json_request(f"http://{self.host}{consts.Endpoints.Alarm_Disarm.replace('{}', sid)}",
                                        method=consts.Method.PUT)

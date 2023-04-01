@@ -23,7 +23,8 @@
                     "allow_subsystems": "Vključite območja kot ločena območja za vklop/izklop alarmiranja",
                     "code": "Koda",
                     "scan_interval": "Interval preverjanja sistema",
-                    "internal_api": "Use internal API lib (AXHub)"
+                    "internal_api": "Use internal API lib (AXHub)",
+                    "debug": "Enable debug output"
                 }
             }
         }
@@ -41,7 +42,8 @@
                     "allow_subsystems": "Vključite območja kot ločena območja za vklop/izklop alarmiranja",
                     "code": "Koda",
                     "scan_interval": "Interval preverjanja sistema",
-                    "internal_api": "Use internal API lib (AXHub)"
+                    "internal_api": "Use internal API lib (AXHub)",
+                    "debug": "Enable debug output"
                 }
             }
         }

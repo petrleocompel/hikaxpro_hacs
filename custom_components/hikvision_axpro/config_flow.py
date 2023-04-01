@@ -23,7 +23,7 @@ from homeassistant.const import (
 )
 from homeassistant.components.alarm_control_panel import SCAN_INTERVAL
 
-from .const import DOMAIN, USE_CODE_ARMING, ALLOW_SUBSYSTEMS, INTERNAL_API
+from .const import DOMAIN, USE_CODE_ARMING, ALLOW_SUBSYSTEMS, INTERNAL_API, ENABLE_DEBUG_OUTPUT
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,6 +39,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         vol.Required(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL.total_seconds()): int,
         vol.Optional(ALLOW_SUBSYSTEMS, default=False): bool,
         vol.Optional(INTERNAL_API, default=False): bool,
+        vol.Optional(ENABLE_DEBUG_OUTPUT, default=False): bool,
     }
 )
 
@@ -55,6 +56,7 @@ CONFIGURE_SCHEMA = vol.Schema(
         vol.Required(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL.total_seconds()): int,
         vol.Optional(ALLOW_SUBSYSTEMS, default=False): bool,
         vol.Optional(INTERNAL_API, default=False): bool,
+        vol.Optional(ENABLE_DEBUG_OUTPUT, default=False): bool,
     }
 )
 
@@ -138,6 +140,13 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     hub = AxProHub(data[CONF_HOST], data[CONF_USERNAME], data[CONF_PASSWORD], hass)
     if data.get(INTERNAL_API):
         hub = AxHub(data[CONF_HOST], data[CONF_USERNAME], data[CONF_PASSWORD], hass)
+
+    if data.get(ENABLE_DEBUG_OUTPUT):
+        try:
+            hub.axpro.set_logging_level(logging.DEBUG)
+        except:
+            pass
+
 
     if not await hub.authenticate():
         raise InvalidAuth

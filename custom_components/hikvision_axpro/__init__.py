@@ -32,7 +32,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING, INTERNAL_API
+from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING, INTERNAL_API, ENABLE_DEBUG_OUTPUT
 from .model import ZonesResponse, Zone, SubSystemResponse, SubSys, Arming
 
 PLATFORMS: list[Platform] = [Platform.ALARM_CONTROL_PANEL, Platform.SENSOR]
@@ -78,6 +78,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         axpro = hikax.HikAx(host, username, password)
     update_interval: float = entry.data.get(CONF_SCAN_INTERVAL, SCAN_INTERVAL.total_seconds())
 
+    if entry.data.get(ENABLE_DEBUG_OUTPUT):
+        try:
+            axpro.set_logging_level(logging.DEBUG)
+        except:
+            pass
+
     try:
         async with timeout(10):
             mac = await hass.async_add_executor_job(axpro.get_interface_mac_address, 1)
@@ -122,7 +128,7 @@ async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry):
 
 class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching ax pro data."""
-    axpro: hikaxpro.HikAxPro
+    axpro: hikaxpro.HikAxPro | hikax.HikAx
     zone_status: Optional[ZonesResponse]
     zones: Optional[dict[int, Zone]] = None
     device_info: Optional[dict] = None
@@ -133,7 +139,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(
         self,
         hass,
-        axpro: hikaxpro.HikAxPro,
+        axpro: hikaxpro.HikAxPro | hikax.HikAx,
         mac,
         use_code,
         code_format,
