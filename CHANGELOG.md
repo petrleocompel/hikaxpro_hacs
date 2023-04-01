@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.2.0
+- **feat**: AX Hub - final support, debug, arm/disarm #31
+
 ## v1.1.2
 - **fix**: AX Hub models `Zones` #31
 
