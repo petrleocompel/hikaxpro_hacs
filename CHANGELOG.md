@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.3.0
+- **feat**: add Status sensor entity #35
+
 ## v1.2.0
 - **feat**: AX Hub - final support, debug, arm/disarm #31
 
