@@ -150,10 +150,14 @@ class InputList:
         return result
 
 
+
 class Status(Enum):
     ONLINE = "online"
     TRIGGER = "trigger"
     OFFLINE = "offline"
+    BREAK_DOWN = "breakDown"
+    HEART_BEAT_ABNORMAL = "heartbeatAbnormal"
+    NOT_RELATED = "notRelated"
 
 
 class ZoneAttrib(Enum):

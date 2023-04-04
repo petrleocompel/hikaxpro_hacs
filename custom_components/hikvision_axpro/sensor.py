@@ -79,6 +79,8 @@ async def async_setup_entry(
                 devices.append(HikStayAwayInfo(coordinator, zone.zone, entry.entry_id))
             if zone.zone.is_via_repeater is not None:
                 devices.append(HikIsViaRepeaterInfo(coordinator, zone.zone, entry.entry_id))
+            if zone.zone.status is not None:
+                devices.append(HikStatusInfo(coordinator, zone.zone, entry.entry_id))
     _LOGGER.debug("devices: %s", devices)
     async_add_entities(devices, False)
 
@@ -361,6 +363,56 @@ class HikSignalInfo(CoordinatorEntity, HikDevice, SensorEntity):
             return cast(float, value)
         else:
             return None
+
+
+class HikStatusInfo(CoordinatorEntity, HikDevice, SensorEntity):
+    """Representation of Hikvision signal status."""
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-status-{zone.id}"
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-status-{zone.id}"
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]\
+            and self.coordinator.zones[self.zone.id].status is not None:
+            self._attr_native_value = self.coordinator.zones[self.zone.id].status.value
+
+    @property
+    def name(self) -> str | None:
+        return "Status"
+
+    @property
+    def icon(self) -> str | None:
+        """Return the icon to use in the frontend, if any."""
+        if self._attr_native_value is not None:
+            if self._attr_native_value is Status.OFFLINE.value:
+                return "mdi:signal-off"
+            if self._attr_native_value is Status.NOT_RELATED:
+                return "mdi:help"
+            if self._attr_native_value is Status.ONLINE.value:
+                return "mdi:access-point-check"
+            if self._attr_native_value is Status.TRIGGER.value:
+                return "mdi:alarm-light"
+            if self._attr_native_value is Status.BREAK_DOWN.value:
+                return "mdi:image-broken-variant"
+            if self._attr_native_value is Status.HEART_BEAT_ABNORMAL.value:
+                return "mdi:heart-broken"
+        return None
+
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id]\
+            and self.coordinator.zones[self.zone.id].status is not None:
+            self._attr_native_value = self.coordinator.zones[self.zone.id].status.value
+        else:
+            self._attr_native_value = None
+        self.async_write_ha_state()
 
 
 class HikTamperDetection(CoordinatorEntity, HikDevice, BinarySensorEntity):
