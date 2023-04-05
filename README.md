@@ -32,6 +32,7 @@ HACS repository of Hikvision Ax Pro integration for home assistant
 - Magnet presence
 - Signal
 - Stay away
+- Status
 - Tamper
 - Temperature
 
