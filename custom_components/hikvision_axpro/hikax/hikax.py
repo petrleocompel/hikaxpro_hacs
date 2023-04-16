@@ -145,9 +145,9 @@ class HikAx:
     def buildUrl(endpoint, is_json):
         return HikAx.build_url(endpoint, is_json)
 
-    def _base_json_request(self, url: str, method: consts.Method = consts.Method.GET):
+    def _base_json_request(self, url: str, method: consts.Method = consts.Method.GET, data=None):
         endpoint = self.build_url(url, True)
-        response = self.make_request(endpoint, method, is_json=True)
+        response = self.make_request(endpoint, method, is_json=True, data=data)
 
         if response.status_code != 200:
             raise errors.UnexpectedResponseCodeError(response.status_code, response.text)
@@ -252,7 +252,7 @@ class HikAx:
                 response = requests.post(endpoint, data=data, headers=headers)
         elif method == consts.Method.PUT:
             if is_json:
-                response = requests.post(endpoint, json=data, headers=headers)
+                response = requests.put(endpoint, json=data, headers=headers)
             else:
                 response = requests.put(endpoint, data=data, headers=headers)
         else:
