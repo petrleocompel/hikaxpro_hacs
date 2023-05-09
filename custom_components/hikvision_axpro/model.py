@@ -462,6 +462,8 @@ class AMMode(Enum):
 
 class ArmMode(Enum):
     AND = "and"
+    WIRELESS = "wireless"
+    WIRED = "wired"
 
 
 class ChimeWarningType(Enum):
@@ -690,7 +692,7 @@ class ZoneConfig:
             _LOGGER.warning("Zone conf: %s", obj)
             arm_mode = None
         try:
-            zone_attrib = ZoneAttrib(obj.get("armMode"))
+            zone_attrib = ZoneAttrib(obj.get("zoneAttrib"))
         except:
             _LOGGER.warning("Invalid zone arm_mode %s", obj.get("zoneAttrib"))
             _LOGGER.warning("Zone conf: %s", obj)

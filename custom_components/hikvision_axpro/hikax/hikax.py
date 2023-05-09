@@ -263,5 +263,6 @@ class HikAx:
             response = self.make_request(endpoint, method, data, is_json)
 
         return response
+
     def makeRequest(self, endpoint, method, data=None, is_json=False):
         return self.make_request(endpoint,method,data,is_json)

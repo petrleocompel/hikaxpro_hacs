@@ -161,8 +161,8 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=update_interval))
 
     def _get_device_info(self):
-        endpoint = self.axpro.buildUrl(f"http://{self.host}/ISAPI/System/deviceInfo", False)
-        response = self.axpro.makeRequest(endpoint, "GET", False)
+        endpoint = self.axpro.build_url(f"http://{self.host}/ISAPI/System/deviceInfo", False)
+        response = self.axpro.make_request(endpoint, "GET", False)
 
         if response.status_code != 200:
             raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
@@ -185,8 +185,8 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
                 self.devices[item.zone.id] = item.zone
 
     def _load_devices(self) -> ZonesConf:
-        endpoint = self.axpro.buildUrl(f"http://{self.host}" + hikaxpro.consts.Endpoints.ZonesConfig, True)
-        response = self.axpro.makeRequest(endpoint, "GET", False)
+        endpoint = self.axpro.build_url(f"http://{self.host}" + hikaxpro.consts.Endpoints.ZonesConfig, True)
+        response = self.axpro.make_request(endpoint, "GET", False)
 
         if response.status_code != 200:
             raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
@@ -280,8 +280,8 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
             await self.async_request_refresh()
 
     def _arm_home(self, sub_id: int):
-        endpoint = self.axpro.buildUrl(f"http://{self.host}{hikaxpro.consts.Endpoints.Alarm_ArmHome.replace('0xffffffff', str(sub_id))}", True)
-        response = self.axpro.makeRequest(endpoint, hikaxpro.consts.Method.PUT)
+        endpoint = self.axpro.build_url(f"http://{self.host}{hikaxpro.consts.Endpoints.Alarm_ArmHome.replace('0xffffffff', str(sub_id))}", True)
+        response = self.axpro.make_request(endpoint, hikaxpro.consts.Method.PUT)
 
         if response.status_code != 200:
             raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
@@ -289,8 +289,8 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         return response.status_code == 200
 
     def _arm_away(self, sub_id: int):
-        endpoint = self.axpro.buildUrl(f"http://{self.host}{hikaxpro.consts.Endpoints.Alarm_ArmAway.replace('0xffffffff', str(sub_id))}", True)
-        response = self.axpro.makeRequest(endpoint, hikaxpro.consts.Method.PUT)
+        endpoint = self.axpro.build_url(f"http://{self.host}{hikaxpro.consts.Endpoints.Alarm_ArmAway.replace('0xffffffff', str(sub_id))}", True)
+        response = self.axpro.make_request(endpoint, hikaxpro.consts.Method.PUT)
 
         if response.status_code != 200:
             raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
@@ -298,8 +298,8 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         return response.status_code == 200
 
     def _disarm(self, sub_id: int):
-        endpoint = self.axpro.buildUrl(f"http://{self.host}{hikaxpro.consts.Endpoints.Alarm_Disarm.replace('0xffffffff', str(sub_id))}", True)
-        response = self.axpro.makeRequest(endpoint, hikaxpro.consts.Method.PUT)
+        endpoint = self.axpro.build_url(f"http://{self.host}{hikaxpro.consts.Endpoints.Alarm_Disarm.replace('0xffffffff', str(sub_id))}", True)
+        response = self.axpro.make_request(endpoint, hikaxpro.consts.Method.PUT)
 
         if response.status_code != 200:
             raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
