@@ -53,6 +53,15 @@ def to_class(c: Type[T], x: Any) -> dict:
     return cast(Any, x).to_dict()
 
 
+def from_float(x: Any) -> float:
+    assert isinstance(x, (float, int)) and not isinstance(x, bool)
+    return float(x)
+
+
+def to_float(x: Any) -> float:
+    assert isinstance(x, float)
+    return x
+
 class AccessModuleType(Enum):
     LOCAL_TRANSMITTER = "localTransmitter"
     MULTI_TRANSMITTER = "multiTransmitter"
@@ -126,6 +135,7 @@ def detector_model_to_name(model_id: Optional[str]) -> str:
     if model_id is not None:
         return str(model_id)
     return "Unknown"
+
 
 
 @dataclass
@@ -443,4 +453,355 @@ class SubSystemResponse:
     def to_dict(self) -> dict:
         result: dict = {}
         result["SubSysList"] = from_list(lambda x: to_class(SubSysList, x), self.sub_sys_list)
+        return result
+
+
+class AMMode(Enum):
+    ARM = "arm"
+
+
+class ArmMode(Enum):
+    AND = "and"
+
+
+class ChimeWarningType(Enum):
+    SINGLE = "single"
+
+
+@dataclass
+class CrossZoneCFG:
+    is_associated: bool
+    support_associated_zone: List[int]
+    already_associated_zone: List[Any]
+    support_linkage_channel_id: List[Any]
+    already_linkage_channel_id: List[Any]
+    associate_time: int
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'CrossZoneCFG':
+        assert isinstance(obj, dict)
+        is_associated = from_bool(obj.get("isAssociated"))
+        support_associated_zone = from_list(from_int, obj.get("supportAssociatedZone"))
+        already_associated_zone = from_list(lambda x: x, obj.get("alreadyAssociatedZone"))
+        support_linkage_channel_id = from_list(lambda x: x, obj.get("supportLinkageChannelID"))
+        already_linkage_channel_id = from_list(lambda x: x, obj.get("alreadyLinkageChannelID"))
+        associate_time = from_int(obj.get("associateTime"))
+        return CrossZoneCFG(is_associated, support_associated_zone, already_associated_zone, support_linkage_channel_id, already_linkage_channel_id, associate_time)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        result["isAssociated"] = from_bool(self.is_associated)
+        result["supportAssociatedZone"] = from_list(from_int, self.support_associated_zone)
+        result["alreadyAssociatedZone"] = from_list(lambda x: x, self.already_associated_zone)
+        result["supportLinkageChannelID"] = from_list(lambda x: x, self.support_linkage_channel_id)
+        result["alreadyLinkageChannelID"] = from_list(lambda x: x, self.already_linkage_channel_id)
+        result["associateTime"] = from_int(self.associate_time)
+        return result
+
+
+class DetectorAccessMode(Enum):
+    NO = "NO"
+
+
+class DetectorWiringMode(Enum):
+    SEOL = "SEOL"
+
+
+class NewKeyZoneTriggerTypeCFG(Enum):
+    ZONE_STATUS = "zoneStatus"
+
+
+class Relator(Enum):
+    APP = "app"
+
+
+@dataclass
+class RelatedChan:
+    camera_seq: str
+    related_chan: int
+    linkage_camera_name: str
+    relator: Optional[Relator] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'RelatedChan':
+        assert isinstance(obj, dict)
+        camera_seq = from_str(obj.get("cameraSeq"))
+        related_chan = from_int(obj.get("relatedChan"))
+        linkage_camera_name = from_str(obj.get("linkageCameraName"))
+        relator = from_union([Relator, from_none], obj.get("relator"))
+        return RelatedChan(camera_seq, related_chan, linkage_camera_name, relator)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        result["cameraSeq"] = from_str(self.camera_seq)
+        result["relatedChan"] = from_int(self.related_chan)
+        result["linkageCameraName"] = from_str(self.linkage_camera_name)
+        if self.relator is not None:
+            result["relator"] = from_union([lambda x: to_enum(Relator, x), from_none], self.relator)
+        return result
+
+
+@dataclass
+class RelatedChanList:
+    related_chan: RelatedChan
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'RelatedChanList':
+        assert isinstance(obj, dict)
+        related_chan = RelatedChan.from_dict(obj.get("RelatedChan"))
+        return RelatedChanList(related_chan)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        result["RelatedChan"] = to_class(RelatedChan, self.related_chan)
+        return result
+
+
+@dataclass
+class RelatedPIRCAM:
+    support_linkage_zones: List[Any]
+    linkage_zone: List[Any]
+    linkage_pircam_name: str
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'RelatedPIRCAM':
+        assert isinstance(obj, dict)
+        support_linkage_zones = from_list(lambda x: x, obj.get("supportLinkageZones"))
+        linkage_zone = from_list(lambda x: x, obj.get("linkageZone"))
+        linkage_pircam_name = from_str(obj.get("linkagePIRCAMName"))
+        return RelatedPIRCAM(support_linkage_zones, linkage_zone, linkage_pircam_name)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        result["supportLinkageZones"] = from_list(lambda x: x, self.support_linkage_zones)
+        result["linkageZone"] = from_list(lambda x: x, self.linkage_zone)
+        result["linkagePIRCAMName"] = from_str(self.linkage_pircam_name)
+        return result
+
+
+class TimeoutType(Enum):
+    RECOVER = "recover"
+    TIGGER = "tigger"
+
+
+class ZoneStatusCFG(Enum):
+    TRIGGER_ARM = "triggerArm"
+
+
+@dataclass
+class ZoneConfig:
+    id: int
+    zone_name: str
+    detector_type: DetectorType
+    zone_type: ZoneType
+    sub_system_no: int
+    linkage_sub_system: List[int]
+    support_linkage_sub_system_list: List[int]
+    enter_delay: int
+    exit_delay: int
+    stay_arm_delay_time: int
+    siren_delay_time: int
+    stay_away_enabled: bool
+    chime_enabled: bool
+    silent_enabled: bool
+    chime_warning_type: ChimeWarningType
+    timeout_type: TimeoutType
+    timeout: int
+    relate_detector: bool
+    related_chan_list: List[RelatedChanList]
+    double_knock_enabled: bool
+    double_knock_time: int
+    cross_zone_cfg: CrossZoneCFG
+    new_key_zone_trigger_type_cfg: NewKeyZoneTriggerTypeCFG
+    zone_status_cfg: ZoneStatusCFG
+    arm_no_bypass_enabled: bool
+    related_pircam: RelatedPIRCAM
+    arm_mode: ArmMode
+    zone_attrib: ZoneAttrib
+    detector_seq: Optional[str] = None
+    final_door_exit_enabled: Optional[bool] = None
+    time_restart_enabled: Optional[bool] = None
+    swinger_limit_activation: Optional[int] = None
+    detector_wiring_mode: Optional[DetectorWiringMode] = None
+    detector_access_mode: Optional[DetectorAccessMode] = None
+    anti_masking_enabled: Optional[bool] = None
+    am_mode: Optional[AMMode] = None
+    am_delay_time: Optional[int] = None
+    pulse_sensitivity: Optional[int] = None
+    alarm_resistence: Optional[float] = None
+    tamper_resistence: Optional[float] = None
+    module_channel: Optional[int] = None
+    double_zone_cfg_enable: Optional[bool] = None
+    access_module_type: Optional[AccessModuleType] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'ZoneConfig':
+        assert isinstance(obj, dict)
+        id = from_int(obj.get("id"))
+        zone_name = from_str(obj.get("zoneName"))
+        try:
+            detector_type = DetectorType(obj.get("detectorType"))
+        except:
+            _LOGGER.warning("Invalid detector type %s", obj.get("detectorType"))
+            _LOGGER.warning("Detector info: %s", obj)
+            detector_type = None
+        try:
+            zone_type = ZoneType(obj.get("zoneType"))
+        except:
+            _LOGGER.warning("Invalid zone type %s", obj.get("zoneType"))
+            _LOGGER.warning("Detector info: %s", obj)
+            zone_type = None
+        sub_system_no = from_int(obj.get("subSystemNo"))
+        linkage_sub_system = from_list(from_int, obj.get("linkageSubSystem"))
+        support_linkage_sub_system_list = from_list(from_int, obj.get("supportLinkageSubSystemList"))
+        enter_delay = from_int(obj.get("enterDelay"))
+        exit_delay = from_int(obj.get("exitDelay"))
+        stay_arm_delay_time = from_int(obj.get("stayArmDelayTime"))
+        siren_delay_time = from_int(obj.get("sirenDelayTime"))
+        stay_away_enabled = from_bool(obj.get("stayAwayEnabled"))
+        chime_enabled = from_bool(obj.get("chimeEnabled"))
+        silent_enabled = from_bool(obj.get("silentEnabled"))
+        try:
+            chime_warning_type = ChimeWarningType(obj.get("chimeWarningType"))
+        except:
+            _LOGGER.warning("Invalid zone chime_warning_type %s", obj.get("chime_warning_type"))
+            _LOGGER.warning("Zone conf: %s", obj)
+            chime_warning_type = None
+        timeout_type = TimeoutType(obj.get("timeoutType"))
+        timeout = from_int(obj.get("timeout"))
+        relate_detector = from_bool(obj.get("relateDetector"))
+        related_chan_list = from_list(RelatedChanList.from_dict, obj.get("RelatedChanList"))
+        double_knock_enabled = from_bool(obj.get("doubleKnockEnabled"))
+        double_knock_time = from_int(obj.get("doubleKnockTime"))
+        cross_zone_cfg = CrossZoneCFG.from_dict(obj.get("CrossZoneCfg"))
+        new_key_zone_trigger_type_cfg = NewKeyZoneTriggerTypeCFG(obj.get("newKeyZoneTriggerTypeCfg"))
+        zone_status_cfg = ZoneStatusCFG(obj.get("zoneStatusCfg"))
+        arm_no_bypass_enabled = from_bool(obj.get("armNoBypassEnabled"))
+        try:
+            related_pircam = RelatedPIRCAM.from_dict(obj.get("RelatedPIRCAM"))
+        except:
+            _LOGGER.warning("Invalid zone related_pircam %s", obj.get("RelatedPIRCAM"))
+            _LOGGER.warning("Zone conf: %s", obj)
+            related_pircam = None
+        try:
+            arm_mode = ArmMode(obj.get("armMode"))
+        except:
+            _LOGGER.warning("Invalid zone arm_mode %s", obj.get("armMode"))
+            _LOGGER.warning("Zone conf: %s", obj)
+            arm_mode = None
+        try:
+            zone_attrib = ZoneAttrib(obj.get("armMode"))
+        except:
+            _LOGGER.warning("Invalid zone arm_mode %s", obj.get("zoneAttrib"))
+            _LOGGER.warning("Zone conf: %s", obj)
+            zone_attrib = None
+        detector_seq = from_union([from_str, from_none], obj.get("detectorSeq"))
+        final_door_exit_enabled = from_union([from_bool, from_none], obj.get("finalDoorExitEnabled"))
+        time_restart_enabled = from_union([from_bool, from_none], obj.get("timeRestartEnabled"))
+        swinger_limit_activation = from_union([from_int, from_none], obj.get("swingerLimitActivation"))
+        detector_wiring_mode = from_union([DetectorWiringMode, from_none], obj.get("detectorWiringMode"))
+        detector_access_mode = from_union([DetectorAccessMode, from_none], obj.get("detectorAccessMode"))
+        anti_masking_enabled = from_union([from_bool, from_none], obj.get("antiMaskingEnabled"))
+        am_mode = from_union([AMMode, from_none], obj.get("AMMode"))
+        am_delay_time = from_union([from_int, from_none], obj.get("AMDelayTime"))
+        pulse_sensitivity = from_union([from_int, from_none], obj.get("pulseSensitivity"))
+        alarm_resistence = from_union([from_float, from_none], obj.get("alarmResistence"))
+        tamper_resistence = from_union([from_float, from_none], obj.get("tamperResistence"))
+        module_channel = from_union([from_int, from_none], obj.get("moduleChannel"))
+        double_zone_cfg_enable = from_union([from_bool, from_none], obj.get("doubleZoneCfgEnable"))
+        access_module_type = from_union([AccessModuleType, from_none], obj.get("accessModuleType"))
+        return ZoneConfig(id, zone_name, detector_type, zone_type, sub_system_no, linkage_sub_system, support_linkage_sub_system_list, enter_delay, exit_delay, stay_arm_delay_time, siren_delay_time, stay_away_enabled, chime_enabled, silent_enabled, chime_warning_type, timeout_type, timeout, relate_detector, related_chan_list, double_knock_enabled, double_knock_time, cross_zone_cfg, new_key_zone_trigger_type_cfg, zone_status_cfg, arm_no_bypass_enabled, related_pircam, arm_mode, zone_attrib, detector_seq, final_door_exit_enabled, time_restart_enabled, swinger_limit_activation, detector_wiring_mode, detector_access_mode, anti_masking_enabled, am_mode, am_delay_time, pulse_sensitivity, alarm_resistence, tamper_resistence, module_channel, double_zone_cfg_enable, access_module_type)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        result["id"] = from_int(self.id)
+        result["zoneName"] = from_str(self.zone_name)
+        result["detectorType"] = to_enum(DetectorType, self.detector_type)
+        result["zoneType"] = to_enum(ZoneType, self.zone_type)
+        result["subSystemNo"] = from_int(self.sub_system_no)
+        result["linkageSubSystem"] = from_list(from_int, self.linkage_sub_system)
+        result["supportLinkageSubSystemList"] = from_list(from_int, self.support_linkage_sub_system_list)
+        result["enterDelay"] = from_int(self.enter_delay)
+        result["exitDelay"] = from_int(self.exit_delay)
+        result["stayArmDelayTime"] = from_int(self.stay_arm_delay_time)
+        result["sirenDelayTime"] = from_int(self.siren_delay_time)
+        result["stayAwayEnabled"] = from_bool(self.stay_away_enabled)
+        result["chimeEnabled"] = from_bool(self.chime_enabled)
+        result["silentEnabled"] = from_bool(self.silent_enabled)
+        result["chimeWarningType"] = to_enum(ChimeWarningType, self.chime_warning_type)
+        result["timeoutType"] = to_enum(TimeoutType, self.timeout_type)
+        result["timeout"] = from_int(self.timeout)
+        result["relateDetector"] = from_bool(self.relate_detector)
+        result["RelatedChanList"] = from_list(lambda x: to_class(RelatedChanList, x), self.related_chan_list)
+        result["doubleKnockEnabled"] = from_bool(self.double_knock_enabled)
+        result["doubleKnockTime"] = from_int(self.double_knock_time)
+        result["CrossZoneCfg"] = to_class(CrossZoneCFG, self.cross_zone_cfg)
+        result["newKeyZoneTriggerTypeCfg"] = to_enum(NewKeyZoneTriggerTypeCFG, self.new_key_zone_trigger_type_cfg)
+        result["zoneStatusCfg"] = to_enum(ZoneStatusCFG, self.zone_status_cfg)
+        result["armNoBypassEnabled"] = from_bool(self.arm_no_bypass_enabled)
+        result["RelatedPIRCAM"] = to_class(RelatedPIRCAM, self.related_pircam)
+        result["armMode"] = to_enum(ArmMode, self.arm_mode)
+        result["zoneAttrib"] = to_enum(ZoneAttrib, self.zone_attrib)
+        if self.detector_seq is not None:
+            result["detectorSeq"] = from_union([from_str, from_none], self.detector_seq)
+        if self.final_door_exit_enabled is not None:
+            result["finalDoorExitEnabled"] = from_union([from_bool, from_none], self.final_door_exit_enabled)
+        if self.time_restart_enabled is not None:
+            result["timeRestartEnabled"] = from_union([from_bool, from_none], self.time_restart_enabled)
+        if self.swinger_limit_activation is not None:
+            result["swingerLimitActivation"] = from_union([from_int, from_none], self.swinger_limit_activation)
+        if self.detector_wiring_mode is not None:
+            result["detectorWiringMode"] = from_union([lambda x: to_enum(DetectorWiringMode, x), from_none], self.detector_wiring_mode)
+        if self.detector_access_mode is not None:
+            result["detectorAccessMode"] = from_union([lambda x: to_enum(DetectorAccessMode, x), from_none], self.detector_access_mode)
+        if self.anti_masking_enabled is not None:
+            result["antiMaskingEnabled"] = from_union([from_bool, from_none], self.anti_masking_enabled)
+        if self.am_mode is not None:
+            result["AMMode"] = from_union([lambda x: to_enum(AMMode, x), from_none], self.am_mode)
+        if self.am_delay_time is not None:
+            result["AMDelayTime"] = from_union([from_int, from_none], self.am_delay_time)
+        if self.pulse_sensitivity is not None:
+            result["pulseSensitivity"] = from_union([from_int, from_none], self.pulse_sensitivity)
+        if self.alarm_resistence is not None:
+            result["alarmResistence"] = from_union([to_float, from_none], self.alarm_resistence)
+        if self.tamper_resistence is not None:
+            result["tamperResistence"] = from_union([to_float, from_none], self.tamper_resistence)
+        if self.module_channel is not None:
+            result["moduleChannel"] = from_union([from_int, from_none], self.module_channel)
+        if self.double_zone_cfg_enable is not None:
+            result["doubleZoneCfgEnable"] = from_union([from_bool, from_none], self.double_zone_cfg_enable)
+        if self.access_module_type is not None:
+            result["accessModuleType"] = from_union([lambda x: to_enum(AccessModuleType, x), from_none], self.access_module_type)
+        return result
+
+
+@dataclass
+class ListElement:
+    zone: ZoneConfig
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'ListElement':
+        assert isinstance(obj, dict)
+        zone = ZoneConfig.from_dict(obj.get("Zone"))
+        return ListElement(zone)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        result["Zone"] = to_class(ZoneConfig, self.zone)
+        return result
+
+
+@dataclass
+class ZonesConf:
+    list: List[ListElement]
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'ZonesConf':
+        assert isinstance(obj, dict)
+        list = from_list(ListElement.from_dict, obj.get("List"))
+        return ZonesConf(list)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        result["List"] = from_list(lambda x: to_class(ListElement, x), self.list)
         return result

@@ -1,4 +1,4 @@
-hikaxpro==1.3.0
+hikaxpro==2.1.3
 homeassistant
 xmltodict
 pytest

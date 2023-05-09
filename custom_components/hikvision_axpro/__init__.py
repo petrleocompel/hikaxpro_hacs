@@ -33,7 +33,7 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING, INTERNAL_API, ENABLE_DEBUG_OUTPUT
-from .model import ZonesResponse, Zone, SubSystemResponse, SubSys, Arming
+from .model import ZonesResponse, Zone, SubSystemResponse, SubSys, Arming, ZonesConf, ZoneConfig
 
 PLATFORMS: list[Platform] = [Platform.ALARM_CONTROL_PANEL, Platform.SENSOR]
 _LOGGER = logging.getLogger(__name__)
@@ -135,6 +135,8 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     device_model: Optional[str] = None
     device_name: Optional[str] = None
     sub_systems: dict[int, SubSys] = {}
+    """ Zones aka devices """
+    devices: dict[int, ZoneConfig] = {}
 
     def __init__(
         self,
@@ -172,7 +174,24 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.device_name = self.device_info['DeviceInfo']['deviceName']
         self.device_model = self.device_info['DeviceInfo']['model']
         _LOGGER.debug(self.device_info)
+        self.load_devices()
         self._update_data()
+
+    def load_devices(self):
+        devices = self._load_devices()
+        if devices is not None:
+            self.devices = {}
+            for item in devices.list:
+                self.devices[item.zone.id] = item.zone
+
+    def _load_devices(self) -> ZonesConf:
+        endpoint = self.axpro.buildUrl(f"http://{self.host}" + hikaxpro.consts.Endpoints.ZonesConfig, True)
+        response = self.axpro.makeRequest(endpoint, "GET", False)
+
+        if response.status_code != 200:
+            raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
+        _LOGGER.debug(response.text)
+        return ZonesConf.from_dict(response.json())
 
     def _update_data(self) -> None:
         """Fetch data from axpro via sync functions."""

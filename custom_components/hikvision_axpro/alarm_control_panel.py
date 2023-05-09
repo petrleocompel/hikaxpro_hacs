@@ -88,7 +88,7 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
 
     def __get_code_format(self, code_format_str) -> CodeFormat:
         """Returns CodeFormat according to the given code format string."""
-        code_format: CodeFormat = None
+        code_format: CodeFormat | None = None
 
         if not self.coordinator.use_code:
             code_format = None
@@ -132,7 +132,7 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
     sys: SubSys
     coordinator: HikAxProDataUpdateCoordinator
 
-    def __init__(self, coordinator: CoordinatorEntity, sys: SubSys):
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, sys: SubSys):
         self.sys = sys
         super().__init__(coordinator=coordinator)
 
