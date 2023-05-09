@@ -62,13 +62,13 @@ class HikAx:
         salt = HikAx._root_get_value(root, namespaces, "xmlns:salt")
         salt2 = HikAx._root_get_value(root, namespaces, "xmlns:salt2")
         is_irreversible = HikAx._root_get_value(root, namespaces, "xmlns:isIrreversible", False)
-        iterations = HikAx._root_get_value(root,namespaces, "xmlns:iterations")
+        iterations = HikAx._root_get_value(root, namespaces, "xmlns:iterations")
         session_cap = SessionLoginCap.SessionLoginCap(
-            sessionID=session_id,
-            challange=challenge,
+            session_id=session_id,
+            challenge=challenge,
             salt=salt,
             salt2=salt2,
-            isIrreversible=is_irreversible,
+            is_irreversible=is_irreversible,
             iterations=int(iterations) if iterations is not None else None
         )
         return session_cap
@@ -96,7 +96,7 @@ class HikAx:
 
         xml = xmlBuilder.serialize_object(
             SessionLogin.SessionLogin(
-                params.sessionID,
+                params.session_id,
                 self.username,
                 encoded_password
             )

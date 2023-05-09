@@ -22,7 +22,7 @@ def get_mac_address_of_interface(xml_data, interface_id):
             if ni_element.find('xmlns:id', namespaces).text == str(interface_id):
                 link_elm = ni_element.find('xmlns:Link', namespaces)
                 return link_elm.find('xmlns:MACAddress', namespaces).text
-    except(Exception) as ex:
+    except Exception as ex:
         return ''
     
     return ''
