@@ -530,7 +530,12 @@ class RelatedChan:
         camera_seq = from_str(obj.get("cameraSeq"))
         related_chan = from_int(obj.get("relatedChan"))
         linkage_camera_name = from_str(obj.get("linkageCameraName"))
-        relator = from_union([Relator, from_none], obj.get("relator"))
+        try:
+            relator = from_union([Relator, from_none], obj.get("relator"))
+        except:
+            _LOGGER.warning("Invalid relator type %s", obj.get("relator"))
+            _LOGGER.warning("relator info: %s", obj)
+            relator = None
         return RelatedChan(camera_seq, related_chan, linkage_camera_name, relator)
 
     def to_dict(self) -> dict:
@@ -701,17 +706,41 @@ class ZoneConfig:
         final_door_exit_enabled = from_union([from_bool, from_none], obj.get("finalDoorExitEnabled"))
         time_restart_enabled = from_union([from_bool, from_none], obj.get("timeRestartEnabled"))
         swinger_limit_activation = from_union([from_int, from_none], obj.get("swingerLimitActivation"))
-        detector_wiring_mode = from_union([DetectorWiringMode, from_none], obj.get("detectorWiringMode"))
-        detector_access_mode = from_union([DetectorAccessMode, from_none], obj.get("detectorAccessMode"))
+
+        try:
+            detector_wiring_mode = from_union([DetectorWiringMode, from_none], obj.get("detectorWiringMode"))
+        except:
+            _LOGGER.warning("Invalid zone detector_wiring_mode %s", obj.get("detectorWiringMode"))
+            _LOGGER.warning("Zone conf: %s", obj)
+            detector_wiring_mode = None
+        try:
+            detector_access_mode = from_union([DetectorAccessMode, from_none], obj.get("detectorAccessMode"))
+        except:
+            _LOGGER.warning("Invalid zone detector_access_mode %s", obj.get("detectorAccessMode"))
+            _LOGGER.warning("Zone conf: %s", obj)
+            detector_access_mode = None
+
+        try:
+            am_mode = from_union([AMMode, from_none], obj.get("AMMode"))
+        except:
+            _LOGGER.warning("Invalid zone am_mode %s", obj.get("AMMode"))
+            _LOGGER.warning("Zone conf: %s", obj)
+            am_mode = None
+
+        try:
+            access_module_type = from_union([AccessModuleType, from_none], obj.get("accessModuleType"))
+        except:
+            _LOGGER.warning("Invalid zone access_module_type %s", obj.get("accessModuleType"))
+            _LOGGER.warning("Zone conf: %s", obj)
+            access_module_type = None
+
         anti_masking_enabled = from_union([from_bool, from_none], obj.get("antiMaskingEnabled"))
-        am_mode = from_union([AMMode, from_none], obj.get("AMMode"))
         am_delay_time = from_union([from_int, from_none], obj.get("AMDelayTime"))
         pulse_sensitivity = from_union([from_int, from_none], obj.get("pulseSensitivity"))
         alarm_resistence = from_union([from_float, from_none], obj.get("alarmResistence"))
         tamper_resistence = from_union([from_float, from_none], obj.get("tamperResistence"))
         module_channel = from_union([from_int, from_none], obj.get("moduleChannel"))
         double_zone_cfg_enable = from_union([from_bool, from_none], obj.get("doubleZoneCfgEnable"))
-        access_module_type = from_union([AccessModuleType, from_none], obj.get("accessModuleType"))
         return ZoneConfig(id, zone_name, detector_type, zone_type, sub_system_no, linkage_sub_system, support_linkage_sub_system_list, enter_delay, exit_delay, stay_arm_delay_time, siren_delay_time, stay_away_enabled, chime_enabled, silent_enabled, chime_warning_type, timeout_type, timeout, relate_detector, related_chan_list, double_knock_enabled, double_knock_time, cross_zone_cfg, new_key_zone_trigger_type_cfg, zone_status_cfg, arm_no_bypass_enabled, related_pircam, arm_mode, zone_attrib, detector_seq, final_door_exit_enabled, time_restart_enabled, swinger_limit_activation, detector_wiring_mode, detector_access_mode, anti_masking_enabled, am_mode, am_delay_time, pulse_sensitivity, alarm_resistence, tamper_resistence, module_channel, double_zone_cfg_enable, access_module_type)
 
     def to_dict(self) -> dict:
