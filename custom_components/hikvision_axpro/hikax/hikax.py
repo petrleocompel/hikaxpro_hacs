@@ -73,18 +73,18 @@ class HikAx:
         )
         return session_cap
 
-    def encode_password(self, session_cap):
-        if session_cap.isIrreversible:
+    def encode_password(self, session_cap: SessionLoginCap.SessionLoginCap):
+        if session_cap.is_irreversible:
             result = sha256.sha256(f"{self.username}{session_cap.salt}{self.password}")
             result = sha256.sha256(f"{self.username}{session_cap.salt2}{result}")
-            result = sha256.sha256(f"{result}{session_cap.challange}")
+            result = sha256.sha256(f"{result}{session_cap.challenge}")
 
-            for i in range(2, session_cap.iteration):
+            for i in range(2, session_cap.iterations):
                 result = sha256.sha256(result)
         else:
-            result = f"{sha256.sha256(self.password)}{session_cap.challange}"
+            result = f"{sha256.sha256(self.password)}{session_cap.challenge}"
 
-            for i in range(1, session_cap.iteration):
+            for i in range(1, session_cap.iterations):
                 result = sha256.sha256(result)
 
         return result
