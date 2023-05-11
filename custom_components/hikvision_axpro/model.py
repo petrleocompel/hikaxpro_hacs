@@ -611,10 +611,8 @@ class ZoneConfig:
     stay_away_enabled: bool
     chime_enabled: bool
     silent_enabled: bool
-    chime_warning_type: ChimeWarningType
     timeout_type: TimeoutType
     timeout: int
-    relate_detector: bool
     related_chan_list: List[RelatedChanList]
     double_knock_enabled: bool
     double_knock_time: int
@@ -625,6 +623,8 @@ class ZoneConfig:
     related_pircam: RelatedPIRCAM
     arm_mode: ArmMode
     zone_attrib: ZoneAttrib
+    relate_detector: Optional[bool]
+    chime_warning_type: Optional[ChimeWarningType] = None
     detector_seq: Optional[str] = None
     final_door_exit_enabled: Optional[bool] = None
     time_restart_enabled: Optional[bool] = None
@@ -669,14 +669,14 @@ class ZoneConfig:
         chime_enabled = from_bool(obj.get("chimeEnabled"))
         silent_enabled = from_bool(obj.get("silentEnabled"))
         try:
-            chime_warning_type = ChimeWarningType(obj.get("chimeWarningType"))
+            chime_warning_type = from_union([ChimeWarningType, from_none], obj.get("chimeWarningType"))
         except:
             _LOGGER.warning("Invalid zone chime_warning_type %s", obj.get("chime_warning_type"))
             _LOGGER.warning("Zone conf: %s", obj)
             chime_warning_type = None
         timeout_type = TimeoutType(obj.get("timeoutType"))
         timeout = from_int(obj.get("timeout"))
-        relate_detector = from_bool(obj.get("relateDetector"))
+        relate_detector = from_union([from_bool, from_none], obj.get("relateDetector"))
         related_chan_list = from_list(RelatedChanList.from_dict, obj.get("RelatedChanList"))
         double_knock_enabled = from_bool(obj.get("doubleKnockEnabled"))
         double_knock_time = from_int(obj.get("doubleKnockTime"))
@@ -741,7 +741,7 @@ class ZoneConfig:
         tamper_resistence = from_union([from_float, from_none], obj.get("tamperResistence"))
         module_channel = from_union([from_int, from_none], obj.get("moduleChannel"))
         double_zone_cfg_enable = from_union([from_bool, from_none], obj.get("doubleZoneCfgEnable"))
-        return ZoneConfig(id, zone_name, detector_type, zone_type, sub_system_no, linkage_sub_system, support_linkage_sub_system_list, enter_delay, exit_delay, stay_arm_delay_time, siren_delay_time, stay_away_enabled, chime_enabled, silent_enabled, chime_warning_type, timeout_type, timeout, relate_detector, related_chan_list, double_knock_enabled, double_knock_time, cross_zone_cfg, new_key_zone_trigger_type_cfg, zone_status_cfg, arm_no_bypass_enabled, related_pircam, arm_mode, zone_attrib, detector_seq, final_door_exit_enabled, time_restart_enabled, swinger_limit_activation, detector_wiring_mode, detector_access_mode, anti_masking_enabled, am_mode, am_delay_time, pulse_sensitivity, alarm_resistence, tamper_resistence, module_channel, double_zone_cfg_enable, access_module_type)
+        return ZoneConfig(id, zone_name, detector_type, zone_type, sub_system_no, linkage_sub_system, support_linkage_sub_system_list, enter_delay, exit_delay, stay_arm_delay_time, siren_delay_time, stay_away_enabled, chime_enabled, silent_enabled, timeout_type, timeout, related_chan_list, double_knock_enabled, double_knock_time, cross_zone_cfg, new_key_zone_trigger_type_cfg, zone_status_cfg, arm_no_bypass_enabled, related_pircam, arm_mode, zone_attrib, relate_detector, chime_warning_type, detector_seq, final_door_exit_enabled, time_restart_enabled, swinger_limit_activation, detector_wiring_mode, detector_access_mode, anti_masking_enabled, am_mode, am_delay_time, pulse_sensitivity, alarm_resistence, tamper_resistence, module_channel, double_zone_cfg_enable, access_module_type)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -759,10 +759,12 @@ class ZoneConfig:
         result["stayAwayEnabled"] = from_bool(self.stay_away_enabled)
         result["chimeEnabled"] = from_bool(self.chime_enabled)
         result["silentEnabled"] = from_bool(self.silent_enabled)
-        result["chimeWarningType"] = to_enum(ChimeWarningType, self.chime_warning_type)
+        if self.chime_warning_type is not None:
+            result["chimeWarningType"] = from_union([lambda x: to_enum(ChimeWarningType, x), from_none], self.chime_warning_type)
         result["timeoutType"] = to_enum(TimeoutType, self.timeout_type)
         result["timeout"] = from_int(self.timeout)
-        result["relateDetector"] = from_bool(self.relate_detector)
+        if self.relate_detector is not None:
+            result["relateDetector"] = from_union([from_bool, from_none], self.relate_detector)
         result["RelatedChanList"] = from_list(lambda x: to_class(RelatedChanList, x), self.related_chan_list)
         result["doubleKnockEnabled"] = from_bool(self.double_knock_enabled)
         result["doubleKnockTime"] = from_int(self.double_knock_time)
