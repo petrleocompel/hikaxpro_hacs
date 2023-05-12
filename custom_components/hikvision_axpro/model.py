@@ -612,12 +612,12 @@ class ZoneConfig:
     chime_warning_type: ChimeWarningType
     timeout_type: TimeoutType
     timeout: int
-    relate_detector: bool
     related_chan_list: List[RelatedChanList]
     double_knock_enabled: bool
     double_knock_time: int
     new_key_zone_trigger_type_cfg: NewKeyZoneTriggerTypeCFG
     zone_status_cfg: ZoneStatusCFG
+    relate_detector: Optional[bool] = None
     sub_system_no: Optional[int] = None
     linkage_sub_system: Optional[List[int]] = None
     support_linkage_sub_system_list: Optional[List[int]] = None
@@ -662,7 +662,7 @@ class ZoneConfig:
         chime_warning_type = ChimeWarningType(obj.get("chimeWarningType"))
         timeout_type = TimeoutType(obj.get("timeoutType"))
         timeout = from_int(obj.get("timeout"))
-        relate_detector = from_bool(obj.get("relateDetector"))
+        relate_detector = from_union([from_bool, from_none], obj.get("relateDetector"))
         related_chan_list = from_list(RelatedChanList.from_dict, obj.get("RelatedChanList"))
         double_knock_enabled = from_bool(obj.get("doubleKnockEnabled"))
         double_knock_time = from_int(obj.get("doubleKnockTime"))
@@ -700,8 +700,8 @@ class ZoneConfig:
         timeout_limit = from_union([from_bool, from_none], obj.get("timeoutLimit"))
         check_time = from_union([from_int, from_none], obj.get("checkTime"))
         return ZoneConfig(id, zone_name, detector_type, zone_type, stay_away_enabled, chime_enabled, silent_enabled,
-                    chime_warning_type, timeout_type, timeout, relate_detector, related_chan_list, double_knock_enabled,
-                    double_knock_time, new_key_zone_trigger_type_cfg, zone_status_cfg, sub_system_no,
+                    chime_warning_type, timeout_type, timeout, related_chan_list, double_knock_enabled,
+                    double_knock_time, new_key_zone_trigger_type_cfg, zone_status_cfg, relate_detector, sub_system_no,
                     linkage_sub_system, support_linkage_sub_system_list, enter_delay, exit_delay, stay_arm_delay_time,
                     siren_delay_time, detector_seq, cross_zone_cfg, arm_no_bypass_enabled, related_pircam, arm_mode,
                     zone_attrib, final_door_exit_enabled, time_restart_enabled, swinger_limit_activation,
@@ -721,7 +721,8 @@ class ZoneConfig:
         result["chimeWarningType"] = to_enum(ChimeWarningType, self.chime_warning_type)
         result["timeoutType"] = to_enum(TimeoutType, self.timeout_type)
         result["timeout"] = from_int(self.timeout)
-        result["relateDetector"] = from_bool(self.relate_detector)
+        if self.relate_detector is not None:
+            result["relateDetector"] = from_bool(self.relate_detector)
         result["RelatedChanList"] = from_list(lambda x: to_class(RelatedChanList, x), self.related_chan_list)
         result["doubleKnockEnabled"] = from_bool(self.double_knock_enabled)
         result["doubleKnockTime"] = from_int(self.double_knock_time)
