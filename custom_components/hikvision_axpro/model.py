@@ -252,7 +252,7 @@ class Zone:
         sub_system_no = from_union([from_int, from_none], obj.get("subSystemNo"))
 
         try:
-            linkage_sub_system = from_list(from_int, obj.get("linkageSubSystem"))
+            linkage_sub_system = from_union([lambda x: from_list(from_int, x), from_none], obj.get("linkageSubSystem"))
         except:
             _LOGGER.warning("Invalid zone linkage_sub_system %s", obj.get("linkage_sub_system"))
             _LOGGER.warning("Zone info: %s", obj)
@@ -281,19 +281,19 @@ class Zone:
             _LOGGER.warning("Detector info: %s", obj)
             status = None
         try:
-            detector_type = DetectorType(obj.get("detectorType"))
+            detector_type = from_union([DetectorType, from_none], obj.get("detectorType"))
         except:
             _LOGGER.warning("Invalid detector type %s", obj.get("detectorType"))
             _LOGGER.warning("Detector info: %s", obj)
             detector_type = None
         try:
-            zone_type = ZoneType(obj.get("zoneType"))
+            zone_type = from_union([ZoneType, from_none], obj.get("zoneType"))
         except:
             _LOGGER.warning("Invalid zone type %s", obj.get("zoneType"))
             _LOGGER.warning("Detector info: %s", obj)
             zone_type = None
         try:
-            zone_attrib = ZoneAttrib(obj.get("zoneAttrib"))
+            zone_attrib = from_union([ZoneAttrib, from_none], obj.get("zoneAttrib"))
         except:
             _LOGGER.warning("Invalid zone attrib %s", obj.get("zoneAttrib"))
             _LOGGER.warning("Detector info: %s", obj)
@@ -460,8 +460,11 @@ class AMMode(Enum):
     ARM = "arm"
 
 
-class ArmMode(Enum):
+class ArmModeConf(Enum):
     AND = "and"
+    OR = "or"
+
+class ArmMode(Enum):
     WIRELESS = "wireless"
     WIRED = "wired"
 
@@ -515,6 +518,7 @@ class NewKeyZoneTriggerTypeCFG(Enum):
 
 class Relator(Enum):
     APP = "app"
+    HOST= "host"
 
 
 @dataclass
@@ -625,7 +629,7 @@ class ZoneConfig:
     cross_zone_cfg: Optional[CrossZoneCFG] = None
     arm_no_bypass_enabled: Optional[bool] = None
     related_pircam: Optional[RelatedPIRCAM] = None
-    arm_mode: Optional[ArmMode] = None
+    arm_mode: Optional[ArmModeConf] = None
     zone_attrib: Optional[ZoneAttrib] = None
     final_door_exit_enabled: Optional[bool] = None
     time_restart_enabled: Optional[bool] = None
@@ -676,7 +680,7 @@ class ZoneConfig:
         cross_zone_cfg = from_union([CrossZoneCFG.from_dict, from_none], obj.get("CrossZoneCfg"))
         arm_no_bypass_enabled = from_union([from_bool, from_none], obj.get("armNoBypassEnabled"))
         related_pircam = from_union([RelatedPIRCAM.from_dict, from_none], obj.get("RelatedPIRCAM"))
-        arm_mode = from_union([ArmMode, from_none], obj.get("armMode"))
+        arm_mode = from_union([ArmModeConf, from_none], obj.get("armMode"))
         zone_attrib = from_union([ZoneAttrib, from_none], obj.get("zoneAttrib"))
         final_door_exit_enabled = from_union([from_bool, from_none], obj.get("finalDoorExitEnabled"))
         time_restart_enabled = from_union([from_bool, from_none], obj.get("timeRestartEnabled"))
@@ -748,7 +752,7 @@ class ZoneConfig:
         if self.related_pircam is not None:
             result["RelatedPIRCAM"] = from_union([lambda x: to_class(RelatedPIRCAM, x), from_none], self.related_pircam)
         if self.arm_mode is not None:
-            result["armMode"] = from_union([lambda x: to_enum(ArmMode, x), from_none], self.arm_mode)
+            result["armMode"] = from_union([lambda x: to_enum(ArmModeConf, x), from_none], self.arm_mode)
         if self.zone_attrib is not None:
             result["zoneAttrib"] = from_union([lambda x: to_enum(ZoneAttrib, x), from_none], self.zone_attrib)
         if self.final_door_exit_enabled is not None:
