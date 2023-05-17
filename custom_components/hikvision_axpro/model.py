@@ -471,6 +471,7 @@ class ArmMode(Enum):
 
 class ChimeWarningType(Enum):
     SINGLE = "single"
+    CONTINUOUS = "continuous"
 
 
 @dataclass
@@ -609,7 +610,6 @@ class ZoneConfig:
     stay_away_enabled: bool
     chime_enabled: bool
     silent_enabled: bool
-    chime_warning_type: ChimeWarningType
     timeout_type: TimeoutType
     timeout: int
     related_chan_list: List[RelatedChanList]
@@ -617,6 +617,7 @@ class ZoneConfig:
     double_knock_time: int
     new_key_zone_trigger_type_cfg: NewKeyZoneTriggerTypeCFG
     zone_status_cfg: ZoneStatusCFG
+    chime_warning_type: Optional[ChimeWarningType] = None
     relate_detector: Optional[bool] = None
     sub_system_no: Optional[int] = None
     linkage_sub_system: Optional[List[int]] = None
@@ -659,7 +660,7 @@ class ZoneConfig:
         stay_away_enabled = from_bool(obj.get("stayAwayEnabled"))
         chime_enabled = from_bool(obj.get("chimeEnabled"))
         silent_enabled = from_bool(obj.get("silentEnabled"))
-        chime_warning_type = ChimeWarningType(obj.get("chimeWarningType"))
+        chime_warning_type = from_union([ChimeWarningType, from_none], obj.get("chimeWarningType"))
         timeout_type = TimeoutType(obj.get("timeoutType"))
         timeout = from_int(obj.get("timeout"))
         relate_detector = from_union([from_bool, from_none], obj.get("relateDetector"))
@@ -699,12 +700,11 @@ class ZoneConfig:
         delay_time = from_union([from_int, from_none], obj.get("delayTime"))
         timeout_limit = from_union([from_bool, from_none], obj.get("timeoutLimit"))
         check_time = from_union([from_int, from_none], obj.get("checkTime"))
-        return ZoneConfig(id, zone_name, detector_type, zone_type, stay_away_enabled, chime_enabled, silent_enabled,
-                    chime_warning_type, timeout_type, timeout, related_chan_list, double_knock_enabled,
+        return ZoneConfig(id, zone_name, detector_type, zone_type, stay_away_enabled, chime_enabled, silent_enabled, timeout_type, timeout, related_chan_list, double_knock_enabled,
                     double_knock_time, new_key_zone_trigger_type_cfg, zone_status_cfg, relate_detector, sub_system_no,
                     linkage_sub_system, support_linkage_sub_system_list, enter_delay, exit_delay, stay_arm_delay_time,
                     siren_delay_time, detector_seq, cross_zone_cfg, arm_no_bypass_enabled, related_pircam, arm_mode,
-                    zone_attrib, final_door_exit_enabled, time_restart_enabled, swinger_limit_activation,
+                    zone_attrib, chime_warning_type, final_door_exit_enabled, time_restart_enabled, swinger_limit_activation,
                     detector_wiring_mode, detector_access_mode, anti_masking_enabled, am_mode, am_delay_time,
                     pulse_sensitivity, alarm_resistence, tamper_resistence, module_channel, double_zone_cfg_enable,
                     access_module_type, delay_time, timeout_limit, check_time)
@@ -718,7 +718,8 @@ class ZoneConfig:
         result["stayAwayEnabled"] = from_bool(self.stay_away_enabled)
         result["chimeEnabled"] = from_bool(self.chime_enabled)
         result["silentEnabled"] = from_bool(self.silent_enabled)
-        result["chimeWarningType"] = to_enum(ChimeWarningType, self.chime_warning_type)
+        if self.chime_warning_type is not None:
+            result["chimeWarningType"] = to_enum(ChimeWarningType, self.chime_warning_type)
         result["timeoutType"] = to_enum(TimeoutType, self.timeout_type)
         result["timeout"] = from_int(self.timeout)
         if self.relate_detector is not None:
