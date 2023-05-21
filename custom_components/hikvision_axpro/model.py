@@ -62,6 +62,7 @@ def to_float(x: Any) -> float:
     assert isinstance(x, float)
     return x
 
+
 class AccessModuleType(Enum):
     LOCAL_TRANSMITTER = "localTransmitter"
     MULTI_TRANSMITTER = "multiTransmitter"
@@ -137,7 +138,6 @@ def detector_model_to_name(model_id: Optional[str]) -> str:
     return "Unknown"
 
 
-
 @dataclass
 class InputList:
     id: int
@@ -158,7 +158,6 @@ class InputList:
         result["enabled"] = from_bool(self.enabled)
         result["mode"] = from_str(self.mode)
         return result
-
 
 
 class Status(Enum):
@@ -324,7 +323,8 @@ class Zone:
         result["linkageSubSystem"] = from_list(from_int, self.linkage_sub_system)
         result["detectorType"] = to_enum(DetectorType, self.detector_type)
         result["stayAway"] = from_bool(self.stay_away)
-        result["zoneType"] = to_enum(ZoneType, self.zone_type)
+        if self.zone_type is not None:
+            result["zoneType"] = to_enum(ZoneType, self.zone_type)
         result["zoneAttrib"] = to_enum(ZoneAttrib, self.zone_attrib)
         result["deviceNo"] = from_int(self.device_no)
         result["abnormalOrNot"] = from_union([from_bool, from_none], self.abnormal_or_not)
@@ -464,6 +464,7 @@ class ArmModeConf(Enum):
     AND = "and"
     OR = "or"
 
+
 class ArmMode(Enum):
     WIRELESS = "wireless"
     WIRED = "wired"
@@ -492,7 +493,8 @@ class CrossZoneCFG:
         support_linkage_channel_id = from_list(lambda x: x, obj.get("supportLinkageChannelID"))
         already_linkage_channel_id = from_list(lambda x: x, obj.get("alreadyLinkageChannelID"))
         associate_time = from_int(obj.get("associateTime"))
-        return CrossZoneCFG(is_associated, support_associated_zone, already_associated_zone, support_linkage_channel_id, already_linkage_channel_id, associate_time)
+        return CrossZoneCFG(is_associated, support_associated_zone, already_associated_zone, support_linkage_channel_id,
+                            already_linkage_channel_id, associate_time)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -519,7 +521,7 @@ class NewKeyZoneTriggerTypeCFG(Enum):
 
 class Relator(Enum):
     APP = "app"
-    HOST= "host"
+    HOST = "host"
 
 
 @dataclass
@@ -606,7 +608,6 @@ class ZoneConfig:
     id: int
     zone_name: str
     detector_type: DetectorType
-    zone_type: ZoneType
     stay_away_enabled: bool
     chime_enabled: bool
     silent_enabled: bool
@@ -617,6 +618,7 @@ class ZoneConfig:
     double_knock_time: int
     new_key_zone_trigger_type_cfg: NewKeyZoneTriggerTypeCFG
     zone_status_cfg: ZoneStatusCFG
+    zone_type: Optional[ZoneType] = None
     chime_warning_type: Optional[ChimeWarningType] = None
     relate_detector: Optional[bool] = None
     sub_system_no: Optional[int] = None
@@ -656,7 +658,12 @@ class ZoneConfig:
         id = from_int(obj.get("id"))
         zone_name = from_str(obj.get("zoneName"))
         detector_type = DetectorType(obj.get("detectorType"))
-        zone_type = ZoneType(obj.get("zoneType"))
+        try:
+            zone_type = from_union([ZoneType, from_none], obj.get("zoneType"))
+        except:
+            _LOGGER.warning("Invalid zone type %s", obj.get("zoneType"))
+            _LOGGER.warning("Detector info: %s", obj)
+            zone_type = None
         stay_away_enabled = from_bool(obj.get("stayAwayEnabled"))
         chime_enabled = from_bool(obj.get("chimeEnabled"))
         silent_enabled = from_bool(obj.get("silentEnabled"))
@@ -700,21 +707,24 @@ class ZoneConfig:
         delay_time = from_union([from_int, from_none], obj.get("delayTime"))
         timeout_limit = from_union([from_bool, from_none], obj.get("timeoutLimit"))
         check_time = from_union([from_int, from_none], obj.get("checkTime"))
-        return ZoneConfig(id, zone_name, detector_type, zone_type, stay_away_enabled, chime_enabled, silent_enabled, timeout_type, timeout, related_chan_list, double_knock_enabled,
-                    double_knock_time, new_key_zone_trigger_type_cfg, zone_status_cfg, relate_detector, sub_system_no,
-                    linkage_sub_system, support_linkage_sub_system_list, enter_delay, exit_delay, stay_arm_delay_time,
-                    siren_delay_time, detector_seq, cross_zone_cfg, arm_no_bypass_enabled, related_pircam, arm_mode,
-                    zone_attrib, chime_warning_type, final_door_exit_enabled, time_restart_enabled, swinger_limit_activation,
-                    detector_wiring_mode, detector_access_mode, anti_masking_enabled, am_mode, am_delay_time,
-                    pulse_sensitivity, alarm_resistence, tamper_resistence, module_channel, double_zone_cfg_enable,
-                    access_module_type, delay_time, timeout_limit, check_time)
+        return ZoneConfig(id, zone_name, detector_type, stay_away_enabled, chime_enabled, silent_enabled, timeout_type,
+                          timeout, related_chan_list, double_knock_enabled, double_knock_time,
+                          new_key_zone_trigger_type_cfg, zone_status_cfg, relate_detector, sub_system_no,
+                          linkage_sub_system, support_linkage_sub_system_list, enter_delay, exit_delay,
+                          stay_arm_delay_time, siren_delay_time, detector_seq, cross_zone_cfg, arm_no_bypass_enabled,
+                          related_pircam, arm_mode, zone_attrib, zone_type, chime_warning_type, final_door_exit_enabled,
+                          time_restart_enabled, swinger_limit_activation, detector_wiring_mode, detector_access_mode,
+                          anti_masking_enabled, am_mode, am_delay_time, pulse_sensitivity, alarm_resistence,
+                          tamper_resistence, module_channel, double_zone_cfg_enable, access_module_type, delay_time,
+                          timeout_limit, check_time)
 
     def to_dict(self) -> dict:
         result: dict = {}
         result["id"] = from_int(self.id)
         result["zoneName"] = from_str(self.zone_name)
         result["detectorType"] = to_enum(DetectorType, self.detector_type)
-        result["zoneType"] = to_enum(ZoneType, self.zone_type)
+        if self.zone_type is not None:
+            result["zoneType"] = to_enum(ZoneType, self.zone_type)
         result["stayAwayEnabled"] = from_bool(self.stay_away_enabled)
         result["chimeEnabled"] = from_bool(self.chime_enabled)
         result["silentEnabled"] = from_bool(self.silent_enabled)
