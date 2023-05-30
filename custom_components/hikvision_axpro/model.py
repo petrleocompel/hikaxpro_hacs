@@ -109,6 +109,7 @@ class DetectorType(Enum):
     WIRELESS_SINGLE_INPUT_EXPANDER = "singleZoneModule"
     WIRELESS_SMOKE_DETECTOR = "wirelessSmokeDetector"
     WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR = "wirelessTemperatureHumidityDetector"
+    WIRELESS_TRI_TECH_DETECTOR = "wirelesTriTechDetector"
     OTHER = "other"
 
 
