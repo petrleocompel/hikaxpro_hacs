@@ -245,11 +245,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_arm_home(self, sub_id: Optional[int] = None):
         """Arm alarm panel in home state."""
-        # TODO modify AXPRO
-        if sub_id is not None:
-            is_success = await self.hass.async_add_executor_job(self._arm_home, sub_id)
-        else:
-            is_success = await self.hass.async_add_executor_job(self.axpro.arm_home)
+        is_success = await self.hass.async_add_executor_job(self.axpro.arm_home, sub_id)
 
         if is_success:
             await self._async_update_data()
@@ -257,11 +253,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_arm_away(self, sub_id: Optional[int] = None):
         """Arm alarm panel in away state"""
-        # TODO modify AXPRO
-        if sub_id is not None:
-            is_success = await self.hass.async_add_executor_job(self._arm_away, sub_id)
-        else:
-            is_success = await self.hass.async_add_executor_job(self.axpro.arm_away)
+        is_success = await self.hass.async_add_executor_job(self.axpro.arm_away, sub_id)
 
         if is_success:
             await self._async_update_data()
@@ -269,39 +261,9 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_disarm(self, sub_id: Optional[int] = None):
         """Disarm alarm control panel."""
-        # TODO modify AXPRO
-        if sub_id is not None:
-            is_success = await self.hass.async_add_executor_job(self._disarm, sub_id)
-        else:
-            is_success = await self.hass.async_add_executor_job(self.axpro.disarm)
+        is_success = await self.hass.async_add_executor_job(self.axpro.disarm, sub_id)
 
         if is_success:
             await self._async_update_data()
             await self.async_request_refresh()
 
-    def _arm_home(self, sub_id: int):
-        endpoint = self.axpro.build_url(f"http://{self.host}{hikaxpro.consts.Endpoints.Alarm_ArmHome.replace('0xffffffff', str(sub_id))}", True)
-        response = self.axpro.make_request(endpoint, hikaxpro.consts.Method.PUT)
-
-        if response.status_code != 200:
-            raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
-
-        return response.status_code == 200
-
-    def _arm_away(self, sub_id: int):
-        endpoint = self.axpro.build_url(f"http://{self.host}{hikaxpro.consts.Endpoints.Alarm_ArmAway.replace('0xffffffff', str(sub_id))}", True)
-        response = self.axpro.make_request(endpoint, hikaxpro.consts.Method.PUT)
-
-        if response.status_code != 200:
-            raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
-
-        return response.status_code == 200
-
-    def _disarm(self, sub_id: int):
-        endpoint = self.axpro.build_url(f"http://{self.host}{hikaxpro.consts.Endpoints.Alarm_Disarm.replace('0xffffffff', str(sub_id))}", True)
-        response = self.axpro.make_request(endpoint, hikaxpro.consts.Method.PUT)
-
-        if response.status_code != 200:
-            raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
-
-        return response.status_code == 200
