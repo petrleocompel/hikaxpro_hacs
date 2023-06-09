@@ -247,15 +247,11 @@ class HikTemperature(CoordinatorEntity, HikDevice, SensorEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        self.async_write_ha_state()
-
-    @property
-    def native_value(self) -> StateType:
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
-            value = self.coordinator.zones[self.zone.id].temperature
-            return cast(float, value)
+            self._attr_native_value = cast(float, self.coordinator.zones[self.zone.id].temperature)
         else:
-            return None
+            self._attr_native_value = None
+        self.async_write_ha_state()
 
 
 class HikHumidity(CoordinatorEntity, HikDevice, SensorEntity):
@@ -288,15 +284,11 @@ class HikHumidity(CoordinatorEntity, HikDevice, SensorEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        self.async_write_ha_state()
-
-    @property
-    def native_value(self) -> StateType:
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
-            value = self.coordinator.zones[self.zone.id].humidity
-            return cast(float, value)
+            self._attr_native_value = cast(float, self.coordinator.zones[self.zone.id].humidity)
         else:
-            return None
+            self._attr_native_value = None
+        self.async_write_ha_state()
 
 
 class HikBatteryInfo(CoordinatorEntity, HikDevice, SensorEntity):
@@ -330,15 +322,11 @@ class HikBatteryInfo(CoordinatorEntity, HikDevice, SensorEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        self.async_write_ha_state()
-
-    @property
-    def native_value(self) -> StateType:
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
-            value = self.coordinator.zones[self.zone.id].charge_value
-            return cast(float, value)
+            self._attr_native_value = cast(float, self.coordinator.zones[self.zone.id].charge_value)
         else:
-            return None
+            self._attr_native_value = None
+        self.async_write_ha_state()
 
 
 class HikSignalInfo(CoordinatorEntity, HikDevice, SensorEntity):
@@ -372,15 +360,11 @@ class HikSignalInfo(CoordinatorEntity, HikDevice, SensorEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        self.async_write_ha_state()
-
-    @property
-    def native_value(self) -> StateType:
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
-            value = self.coordinator.zones[self.zone.id].signal
-            return cast(float, value)
+            self._attr_native_value = cast(float, self.coordinator.zones[self.zone.id].signal)
         else:
-            return None
+            self._attr_native_value = None
+        self.async_write_ha_state()
 
 
 class HikStatusInfo(CoordinatorEntity, HikDevice, SensorEntity):
