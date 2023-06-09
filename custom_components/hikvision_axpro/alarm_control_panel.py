@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_ALARM_TRIGGERED, STATE_ALARM_ARMED_AWAY, STATE_ALARM_ARMED_HOME, \
     STATE_ALARM_ARMED_VACATION, STATE_ALARM_DISARMED
@@ -18,6 +20,7 @@ from homeassistant.helpers import device_registry as dr
 from . import HikAxProDataUpdateCoordinator, SubSys, Arming
 from .const import DATA_COORDINATOR, DOMAIN, ALLOW_SUBSYSTEMS
 
+_LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
@@ -143,6 +146,8 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
         new_sys = self.coordinator.sub_systems.get(self.sys.id)
         if new_sys is not None:
             self.sys = new_sys
+        else:
+            logging.warning("Area %s was not found", self.sys.id)
         self.async_write_ha_state()
 
     _attr_supported_features = (

@@ -221,6 +221,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
                 if subsys.arming == Arming.VACATION:
                     status = STATE_ALARM_ARMED_VACATION
                     break
+            _LOGGER.debug("SubSystem status: %s", subsys_resp)
         except:
             _LOGGER.warning("Error getting status: %s", status_json)
         _LOGGER.debug("Axpro status: %s", status)
