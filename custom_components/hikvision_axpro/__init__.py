@@ -211,16 +211,12 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
                 self.sub_systems[subsys.id] = subsys
                 if subsys.alarm:
                     status = STATE_ALARM_TRIGGERED
-                    break
-                if subsys.arming == Arming.AWAY:
+                elif subsys.arming == Arming.AWAY:
                     status = STATE_ALARM_ARMED_AWAY
-                    break
-                if subsys.arming == Arming.STAY:
+                elif subsys.arming == Arming.STAY:
                     status = STATE_ALARM_ARMED_HOME
-                    break
-                if subsys.arming == Arming.VACATION:
+                elif subsys.arming == Arming.VACATION:
                     status = STATE_ALARM_ARMED_VACATION
-                    break
             _LOGGER.debug("SubSystem status: %s", subsys_resp)
         except:
             _LOGGER.warning("Error getting status: %s", status_json)
