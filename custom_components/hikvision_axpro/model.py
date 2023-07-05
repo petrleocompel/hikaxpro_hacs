@@ -116,6 +116,8 @@ class DetectorType(Enum):
 def detector_model_to_name(model_id: Optional[str]) -> str:
     if model_id == "0x00001":
         return "Passive Infrared Detector"
+    if model_id == "0x00002":
+        return "Wireless Dual-Tech Detector"
     if model_id == "0x00005":
         return "Slim Magnetic Contact"
     if model_id == "0x00006":
