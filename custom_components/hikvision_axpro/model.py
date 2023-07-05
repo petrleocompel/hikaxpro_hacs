@@ -510,6 +510,7 @@ class CrossZoneCFG:
 
 class DetectorAccessMode(Enum):
     NO = "NO"
+    NC = "NC"
 
 
 class DetectorWiringMode(Enum):
@@ -694,8 +695,18 @@ class ZoneConfig:
         final_door_exit_enabled = from_union([from_bool, from_none], obj.get("finalDoorExitEnabled"))
         time_restart_enabled = from_union([from_bool, from_none], obj.get("timeRestartEnabled"))
         swinger_limit_activation = from_union([from_int, from_none], obj.get("swingerLimitActivation"))
-        detector_wiring_mode = from_union([DetectorWiringMode, from_none], obj.get("detectorWiringMode"))
-        detector_access_mode = from_union([DetectorAccessMode, from_none], obj.get("detectorAccessMode"))
+        try:
+            detector_wiring_mode = from_union([DetectorWiringMode, from_none], obj.get("detectorWiringMode"))
+        except:
+            _LOGGER.warning("Invalid detector_wiring_mode %s", obj.get("detectorWiringMode"))
+            _LOGGER.warning("Detector info: %s", obj)
+            detector_wiring_mode = None
+        try:
+            detector_access_mode = from_union([DetectorAccessMode, from_none], obj.get("detectorAccessMode"))
+        except:
+            _LOGGER.warning("Invalid detector_access_mode %s", obj.get("detectorAccessMode"))
+            _LOGGER.warning("Detector info: %s", obj)
+            detector_access_mode = None
         anti_masking_enabled = from_union([from_bool, from_none], obj.get("antiMaskingEnabled"))
         am_mode = from_union([AMMode, from_none], obj.get("AMMode"))
         am_delay_time = from_union([from_int, from_none], obj.get("AMDelayTime"))
