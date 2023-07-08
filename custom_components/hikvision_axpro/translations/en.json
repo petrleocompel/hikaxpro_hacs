@@ -42,7 +42,7 @@
                     "allow_subsystems": "Include areas as separate zones for arm/disarm",
                     "code": "Code",
                     "scan_interval": "Pull interval from system",
-                    "internal_api": "Use internal API lib (AXHub)",
+                    "internal_api": "DEPRECATED - Use internal API lib (AXHub)",
                     "debug": "Enable debug output"
                 }
             }

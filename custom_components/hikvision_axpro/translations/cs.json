@@ -42,7 +42,7 @@
                     "allow_subsystems": "Zahrnutí zón jako samostatných oblastí pro zapnutí/vypnutí alarmů",
                     "code": "Kód",
                     "scan_interval": "Aktualizační interval",
-                    "internal_api": "Použít interní API knihovnu (AXHub)",
+                    "internal_api": "DEPRECATED - Použít interní API knihovnu (AXHub)",
                     "debug": "Zapnout debug výstup"
                 }
             }

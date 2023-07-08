@@ -1,5 +1,21 @@
 # Changelog
 
+## v2.0.0
+
+> From version 2.0.0 configuration option "AXHub" is no more needed, currently being kept for later internal debug purposes.
+> Should not be used until told for debug.
+
+- **refactor**: use native attrs
+- **feat**: loading of devices from configuration
+- **fix**: add missing "Wireless Dual-Tech Detector" 
+- **fix**: area initialization + updates 
+- **fix**: missing detectorType
+- **fix**: Separate Area Arm/Disarm 
+- **fix**: a lot models fixes
+- **fix**: AXHub internal lib
+- **fix**: runtime errors unknown types fixes 
+- **fix**: runtime errors, missing enum values
+
 ## v1.3.1
 - **fix**: (AX Hub) Arm / disarm + code support #31
 
