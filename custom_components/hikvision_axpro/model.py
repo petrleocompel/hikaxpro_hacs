@@ -72,6 +72,7 @@ class AccessModuleType(Enum):
     KEYPAD = "keypad"
     # Undocumented type
     INPUT_MAIN_ZONE = "inputMainZone"
+    TRANSMITTER = "transmitter"
 
 
 class DetectorType(Enum):
@@ -717,7 +718,12 @@ class ZoneConfig:
         tamper_resistence = from_union([from_float, from_none], obj.get("tamperResistence"))
         module_channel = from_union([from_int, from_none], obj.get("moduleChannel"))
         double_zone_cfg_enable = from_union([from_bool, from_none], obj.get("doubleZoneCfgEnable"))
-        access_module_type = from_union([AccessModuleType, from_none], obj.get("accessModuleType"))
+        try:
+            access_module_type = from_union([AccessModuleType, from_none], obj.get("accessModuleType"))
+        except:
+            _LOGGER.warning("Invalid accessModuleType %s", obj.get("accessModuleType"))
+            _LOGGER.warning("Zone config: %s", obj)
+            access_module_type = None
         delay_time = from_union([from_int, from_none], obj.get("delayTime"))
         timeout_limit = from_union([from_bool, from_none], obj.get("timeoutLimit"))
         check_time = from_union([from_int, from_none], obj.get("checkTime"))
