@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.0.1
+- **fix**: undocumented accessModuleType `transmitter` #55
+
 ## v2.0.0
 
 > From version 2.0.0 configuration option "AXHub" is no more needed, currently being kept for later internal debug purposes.
