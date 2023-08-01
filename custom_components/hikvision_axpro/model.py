@@ -125,8 +125,6 @@ def detector_model_to_name(model_id: Optional[str]) -> str:
         return "Magnetic Contact"
     if model_id == "0x00012":
         return "Wireless PIR CAM Detector"
-    if model_id == "0x00013":
-        return "Wireless CO Detector"
     if model_id == "0x00015":
         return "Wireless Smoke Detector"
     if model_id == "0x00017":
@@ -137,6 +135,8 @@ def detector_model_to_name(model_id: Optional[str]) -> str:
         return "Wireless Temperature Humidity Detector"
     if model_id == "0x00028":
         return "Wireless External Magnet Detector"
+    if model_id == "0x00031":
+        return "Wireless CO Detector"
     if model_id == "0x00032":
         return "Wireless PIR AM Curtain Detector"
     if model_id is not None:
