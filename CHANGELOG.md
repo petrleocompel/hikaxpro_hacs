@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.0.3
+- **fix**: invalid missing model number for `Wireless CO Detector` #14
+
 ## v2.0.2
 - **fix**: add missing model name `Wireless CO Detector` #14
 
