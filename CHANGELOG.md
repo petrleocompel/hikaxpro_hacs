@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.1.0
+- **feat**: hikaxpro update to 2.2.0 #56
+
 ## v2.0.3
 - **fix**: invalid missing model number for `Wireless CO Detector` #14
 
