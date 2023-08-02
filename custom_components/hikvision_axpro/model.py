@@ -870,14 +870,14 @@ class ZoneConfig:
 
 
 @dataclass
-class ListElement:
+class ZoneConfListWrap:
     zone: ZoneConfig
 
     @staticmethod
-    def from_dict(obj: Any) -> 'ListElement':
+    def from_dict(obj: Any) -> 'ZoneConfListWrap':
         assert isinstance(obj, dict)
         zone = ZoneConfig.from_dict(obj.get("Zone"))
-        return ListElement(zone)
+        return ZoneConfListWrap(zone)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -887,15 +887,491 @@ class ListElement:
 
 @dataclass
 class ZonesConf:
-    list: List[ListElement]
+    list: List[ZoneConfListWrap]
 
     @staticmethod
     def from_dict(obj: Any) -> 'ZonesConf':
         assert isinstance(obj, dict)
-        list = from_list(ListElement.from_dict, obj.get("List"))
+        list = from_list(ZoneConfListWrap.from_dict, obj.get("List"))
         return ZonesConf(list)
 
     def to_dict(self) -> dict:
         result: dict = {}
-        result["List"] = from_list(lambda x: to_class(ListElement, x), self.list)
+        result["List"] = from_list(lambda x: to_class(ZoneConfListWrap, x), self.list)
         return result
+
+
+@dataclass
+class AlarmCFG:
+    alarm_type: Optional[List[Any]] = None
+    support_associated_zone: Optional[List[int]] = None
+    associate_zone_cfg: Optional[List[Any]] = None
+    support_disarm_linkage_zone: Optional[List[Any]] = None
+    disarm_linkage_zone: Optional[List[Any]] = None
+    support_linkage_channel_id: Optional[List[Any]] = None
+    linkage_channel_id: Optional[List[Any]] = None
+    alarm_logic: Optional[str] = None
+    relay_mode: Optional[str] = None
+    pulse_duration: Optional[int] = None
+    contact_status: Optional[str] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'AlarmCFG':
+        assert isinstance(obj, dict)
+        alarm_type = from_union([lambda x: from_list(lambda x: x, x), from_none], obj.get("alarmType"))
+        support_associated_zone = from_union([lambda x: from_list(from_int, x), from_none], obj.get("supportAssociatedZone"))
+        associate_zone_cfg = from_union([lambda x: from_list(lambda x: x, x), from_none], obj.get("associateZoneCfg"))
+        support_disarm_linkage_zone = from_union([lambda x: from_list(lambda x: x, x), from_none], obj.get("supportDisarmLinkageZone"))
+        disarm_linkage_zone = from_union([lambda x: from_list(lambda x: x, x), from_none], obj.get("disarmLinkageZone"))
+        support_linkage_channel_id = from_union([lambda x: from_list(lambda x: x, x), from_none], obj.get("supportLinkageChannelID"))
+        linkage_channel_id = from_union([lambda x: from_list(lambda x: x, x), from_none], obj.get("linkageChannelID"))
+        alarm_logic = from_union([from_str, from_none], obj.get("alarmLogic"))
+        relay_mode = from_union([from_str, from_none], obj.get("relayMode"))
+        pulse_duration = from_union([from_int, from_none], obj.get("pulseDuration"))
+        contact_status = from_union([from_str, from_none], obj.get("contactStatus"))
+        return AlarmCFG(alarm_type, support_associated_zone, associate_zone_cfg, support_disarm_linkage_zone, disarm_linkage_zone, support_linkage_channel_id, linkage_channel_id, alarm_logic, relay_mode, pulse_duration, contact_status)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.alarm_type is not None:
+            result["alarmType"] = from_union([lambda x: from_list(lambda x: x, x), from_none], self.alarm_type)
+        if self.support_associated_zone is not None:
+            result["supportAssociatedZone"] = from_union([lambda x: from_list(from_int, x), from_none], self.support_associated_zone)
+        if self.associate_zone_cfg is not None:
+            result["associateZoneCfg"] = from_union([lambda x: from_list(lambda x: x, x), from_none], self.associate_zone_cfg)
+        if self.support_disarm_linkage_zone is not None:
+            result["supportDisarmLinkageZone"] = from_union([lambda x: from_list(lambda x: x, x), from_none], self.support_disarm_linkage_zone)
+        if self.disarm_linkage_zone is not None:
+            result["disarmLinkageZone"] = from_union([lambda x: from_list(lambda x: x, x), from_none], self.disarm_linkage_zone)
+        if self.support_linkage_channel_id is not None:
+            result["supportLinkageChannelID"] = from_union([lambda x: from_list(lambda x: x, x), from_none], self.support_linkage_channel_id)
+        if self.linkage_channel_id is not None:
+            result["linkageChannelID"] = from_union([lambda x: from_list(lambda x: x, x), from_none], self.linkage_channel_id)
+        if self.alarm_logic is not None:
+            result["alarmLogic"] = from_union([from_str, from_none], self.alarm_logic)
+        if self.relay_mode is not None:
+            result["relayMode"] = from_union([from_str, from_none], self.relay_mode)
+        if self.pulse_duration is not None:
+            result["pulseDuration"] = from_union([from_int, from_none], self.pulse_duration)
+        if self.contact_status is not None:
+            result["contactStatus"] = from_union([from_str, from_none], self.contact_status)
+        return result
+
+
+@dataclass
+class CFG:
+    arm_type: Optional[List[Any]] = None
+    relay_mode: Optional[str] = None
+    pulse_duration: Optional[int] = None
+    contact_status: Optional[str] = None
+    fault_type: Optional[List[Any]] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'CFG':
+        assert isinstance(obj, dict)
+        arm_type = from_union([lambda x: from_list(lambda x: x, x), from_none], obj.get("armType"))
+        relay_mode = from_union([from_str, from_none], obj.get("relayMode"))
+        pulse_duration = from_union([from_int, from_none], obj.get("pulseDuration"))
+        contact_status = from_union([from_str, from_none], obj.get("contactStatus"))
+        fault_type = from_union([lambda x: from_list(lambda x: x, x), from_none], obj.get("faultType"))
+        return CFG(arm_type, relay_mode, pulse_duration, contact_status, fault_type)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.arm_type is not None:
+            result["armType"] = from_union([lambda x: from_list(lambda x: x, x), from_none], self.arm_type)
+        if self.relay_mode is not None:
+            result["relayMode"] = from_union([from_str, from_none], self.relay_mode)
+        if self.pulse_duration is not None:
+            result["pulseDuration"] = from_union([from_int, from_none], self.pulse_duration)
+        if self.contact_status is not None:
+            result["contactStatus"] = from_union([from_str, from_none], self.contact_status)
+        if self.fault_type is not None:
+            result["faultType"] = from_union([lambda x: from_list(lambda x: x, x), from_none], self.fault_type)
+        return result
+
+
+@dataclass
+class ManualCFG:
+    relay_mode: Optional[str] = None
+    pulse_duration: Optional[int] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'ManualCFG':
+        assert isinstance(obj, dict)
+        relay_mode = from_union([from_str, from_none], obj.get("relayMode"))
+        pulse_duration = from_union([from_int, from_none], obj.get("pulseDuration"))
+        return ManualCFG(relay_mode, pulse_duration)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.relay_mode is not None:
+            result["relayMode"] = from_union([from_str, from_none], self.relay_mode)
+        if self.pulse_duration is not None:
+            result["pulseDuration"] = from_union([from_int, from_none], self.pulse_duration)
+        return result
+
+
+@dataclass
+class TimeSegment:
+    id: Optional[int] = None
+    enabled: Optional[bool] = None
+    contact_status: Optional[str] = None
+    begin_time: Optional[str] = None
+    end_time: Optional[str] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'TimeSegment':
+        assert isinstance(obj, dict)
+        id = from_union([from_int, from_none], obj.get("id"))
+        enabled = from_union([from_bool, from_none], obj.get("enabled"))
+        contact_status = from_union([from_str, from_none], obj.get("contactStatus"))
+        begin_time = from_union([from_str, from_none], obj.get("beginTime"))
+        end_time = from_union([from_str, from_none], obj.get("endTime"))
+        return TimeSegment(id, enabled, contact_status, begin_time, end_time)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.id is not None:
+            result["id"] = from_union([from_int, from_none], self.id)
+        if self.enabled is not None:
+            result["enabled"] = from_union([from_bool, from_none], self.enabled)
+        if self.contact_status is not None:
+            result["contactStatus"] = from_union([from_str, from_none], self.contact_status)
+        if self.begin_time is not None:
+            result["beginTime"] = from_union([from_str, from_none], self.begin_time)
+        if self.end_time is not None:
+            result["endTime"] = from_union([from_str, from_none], self.end_time)
+        return result
+
+
+@dataclass
+class ScheduleCFG:
+    time_segment: Optional[TimeSegment] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'ScheduleCFG':
+        assert isinstance(obj, dict)
+        time_segment = from_union([TimeSegment.from_dict, from_none], obj.get("timeSegment"))
+        return ScheduleCFG(time_segment)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.time_segment is not None:
+            result["timeSegment"] = from_union([lambda x: to_class(TimeSegment, x), from_none], self.time_segment)
+        return result
+
+
+@dataclass
+class RelaySwitchConf:
+    id: Optional[int] = None
+    name: Optional[str] = None
+    related: Optional[bool] = None
+    access_module_type: Optional[str] = None
+    module_channel: Optional[int] = None
+    sub_system: Optional[List[int]] = None
+    scenario_type: Optional[List[str]] = None
+    alarm_cfg: Optional[AlarmCFG] = None
+    schedule_cfg: Optional[List[ScheduleCFG]] = None
+    arm_cfg: Optional[CFG] = None
+    disarm_cfg: Optional[CFG] = None
+    clear_alarm_cfg: Optional[CFG] = None
+    fault_cfg: Optional[CFG] = None
+    manual_cfg: Optional[ManualCFG] = None
+    original_status: Optional[str] = None
+    support_linkage_sub_system_list: Optional[List[int]] = None
+    relay_attrib: Optional[str] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'RelaySwitchConf':
+        assert isinstance(obj, dict)
+        id = from_union([from_int, from_none], obj.get("id"))
+        name = from_union([from_str, from_none], obj.get("name"))
+        related = from_union([from_bool, from_none], obj.get("related"))
+        access_module_type = from_union([from_str, from_none], obj.get("accessModuleType"))
+        module_channel = from_union([from_int, from_none], obj.get("moduleChannel"))
+        sub_system = from_union([lambda x: from_list(from_int, x), from_none], obj.get("subSystem"))
+        scenario_type = from_union([lambda x: from_list(from_str, x), from_none], obj.get("scenarioType"))
+        try:
+            alarm_cfg = from_union([AlarmCFG.from_dict, from_none], obj.get("alarmCfg"))
+        except:
+            alarm_cfg = None
+        try:
+            schedule_cfg = from_union([lambda x: from_list(ScheduleCFG.from_dict, x), from_none], obj.get("scheduleCfg"))
+        except:
+            schedule_cfg = None
+        try:
+            arm_cfg = from_union([CFG.from_dict, from_none], obj.get("armCfg"))
+        except:
+            arm_cfg = None
+        try:
+            disarm_cfg = from_union([CFG.from_dict, from_none], obj.get("disarmCfg"))
+        except:
+            disarm_cfg = None
+        try:
+            clear_alarm_cfg = from_union([CFG.from_dict, from_none], obj.get("clearAlarmCfg"))
+        except:
+            clear_alarm_cfg = None
+        try:
+            fault_cfg = from_union([CFG.from_dict, from_none], obj.get("faultCfg"))
+        except:
+            fault_cfg = None
+        try:
+            manual_cfg = from_union([ManualCFG.from_dict, from_none], obj.get("manualCfg"))
+        except:
+            manual_cfg = None
+        original_status = from_union([from_str, from_none], obj.get("OriginalStatus"))
+        support_linkage_sub_system_list = from_union([lambda x: from_list(from_int, x), from_none], obj.get("supportLinkageSubSystemList"))
+        relay_attrib = from_union([from_str, from_none], obj.get("relayAttrib"))
+        return RelaySwitchConf(id, name, related, access_module_type, module_channel, sub_system, scenario_type, alarm_cfg, schedule_cfg, arm_cfg, disarm_cfg, clear_alarm_cfg, fault_cfg, manual_cfg, original_status, support_linkage_sub_system_list, relay_attrib)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.id is not None:
+            result["id"] = from_union([from_int, from_none], self.id)
+        if self.name is not None:
+            result["name"] = from_union([from_str, from_none], self.name)
+        if self.related is not None:
+            result["related"] = from_union([from_bool, from_none], self.related)
+        if self.access_module_type is not None:
+            result["accessModuleType"] = from_union([from_str, from_none], self.access_module_type)
+        if self.module_channel is not None:
+            result["moduleChannel"] = from_union([from_int, from_none], self.module_channel)
+        if self.sub_system is not None:
+            result["subSystem"] = from_union([lambda x: from_list(from_int, x), from_none], self.sub_system)
+        if self.scenario_type is not None:
+            result["scenarioType"] = from_union([lambda x: from_list(from_str, x), from_none], self.scenario_type)
+        if self.alarm_cfg is not None:
+            result["alarmCfg"] = from_union([lambda x: to_class(AlarmCFG, x), from_none], self.alarm_cfg)
+        if self.schedule_cfg is not None:
+            result["scheduleCfg"] = from_union([lambda x: from_list(lambda x: to_class(ScheduleCFG, x), x), from_none], self.schedule_cfg)
+        if self.arm_cfg is not None:
+            result["armCfg"] = from_union([lambda x: to_class(CFG, x), from_none], self.arm_cfg)
+        if self.disarm_cfg is not None:
+            result["disarmCfg"] = from_union([lambda x: to_class(CFG, x), from_none], self.disarm_cfg)
+        if self.clear_alarm_cfg is not None:
+            result["clearAlarmCfg"] = from_union([lambda x: to_class(CFG, x), from_none], self.clear_alarm_cfg)
+        if self.fault_cfg is not None:
+            result["faultCfg"] = from_union([lambda x: to_class(CFG, x), from_none], self.fault_cfg)
+        if self.manual_cfg is not None:
+            result["manualCfg"] = from_union([lambda x: to_class(ManualCFG, x), from_none], self.manual_cfg)
+        if self.original_status is not None:
+            result["OriginalStatus"] = from_union([from_str, from_none], self.original_status)
+        if self.support_linkage_sub_system_list is not None:
+            result["supportLinkageSubSystemList"] = from_union([lambda x: from_list(from_int, x), from_none], self.support_linkage_sub_system_list)
+        if self.relay_attrib is not None:
+            result["relayAttrib"] = from_union([from_str, from_none], self.relay_attrib)
+        return result
+
+
+@dataclass
+class OutputConfListWrap:
+    output: Optional[RelaySwitchConf] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'OutputConfListWrap':
+        assert isinstance(obj, dict)
+        output = from_union([RelaySwitchConf.from_dict, from_none], obj.get("Output"))
+        return OutputConfListWrap(output)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.output is not None:
+            result["Output"] = from_union([lambda x: to_class(RelaySwitchConf, x), from_none], self.output)
+        return result
+
+
+@dataclass
+class OutputConfList:
+    list: Optional[List[OutputConfListWrap]] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'OutputConfList':
+        assert isinstance(obj, dict)
+        list = from_union([lambda x: from_list(OutputConfListWrap.from_dict, x), from_none], obj.get("List"))
+        return OutputConfList(list)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.list is not None:
+            result["List"] = from_union([lambda x: from_list(lambda x: to_class(OutputConfListWrap, x), x), from_none], self.list)
+        return result
+
+
+
+class RelayAttrib(Enum):
+    WIRED = "wired"
+
+
+class RelayStatusEnum(Enum):
+    NOT_RELATED = "notRelated"
+    OFF = "off"
+    ON = "on"
+
+
+@dataclass
+class RelayStatus:
+    id: Optional[int] = None
+    name: Optional[str] = None
+    status: Optional[RelayStatusEnum] = None
+    access_module_type: Optional[str] = None
+    module_channel: Optional[int] = None
+    sub_system_list: Optional[List[int]] = None
+    scenario_type: Optional[List[str]] = None
+    relay_attrib: Optional[RelayAttrib] = None
+    device_no: Optional[int] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'RelayStatus':
+        assert isinstance(obj, dict)
+        id = from_union([from_int, from_none], obj.get("id"))
+        name = from_union([from_str, from_none], obj.get("name"))
+        try:
+            status = from_union([RelayStatusEnum, from_none], obj.get("status"))
+        except:
+            status = None
+        access_module_type = from_union([from_str, from_none], obj.get("accessModuleType"))
+        module_channel = from_union([from_int, from_none], obj.get("moduleChannel"))
+        sub_system_list = from_union([lambda x: from_list(from_int, x), from_none], obj.get("subSystemList"))
+        scenario_type = from_union([lambda x: from_list(from_str, x), from_none], obj.get("scenarioType"))
+        try:
+            relay_attrib = from_union([RelayAttrib, from_none], obj.get("relayAttrib"))
+        except:
+            relay_attrib = None
+        device_no = from_union([from_int, from_none], obj.get("deviceNo"))
+        return RelayStatus(id, name, status, access_module_type, module_channel, sub_system_list, scenario_type, relay_attrib, device_no)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.id is not None:
+            result["id"] = from_union([from_int, from_none], self.id)
+        if self.name is not None:
+            result["name"] = from_union([from_str, from_none], self.name)
+        if self.status is not None:
+            result["status"] = from_union([lambda x: to_enum(Status, x), from_none], self.status)
+        if self.access_module_type is not None:
+            result["accessModuleType"] = from_union([from_str, from_none], self.access_module_type)
+        if self.module_channel is not None:
+            result["moduleChannel"] = from_union([from_int, from_none], self.module_channel)
+        if self.sub_system_list is not None:
+            result["subSystemList"] = from_union([lambda x: from_list(from_int, x), from_none], self.sub_system_list)
+        if self.scenario_type is not None:
+            result["scenarioType"] = from_union([lambda x: from_list(from_str, x), from_none], self.scenario_type)
+        if self.relay_attrib is not None:
+            result["relayAttrib"] = from_union([lambda x: to_enum(RelayAttrib, x), from_none], self.relay_attrib)
+        if self.device_no is not None:
+            result["deviceNo"] = from_union([from_int, from_none], self.device_no)
+        return result
+
+
+@dataclass
+class RelayStatusList:
+    output: Optional[RelayStatus] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'RelayStatusList':
+        assert isinstance(obj, dict)
+        output = from_union([RelayStatus.from_dict, from_none], obj.get("Output"))
+        return RelayStatusList(output)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.output is not None:
+            result["Output"] = from_union([lambda x: to_class(RelayStatus, x), from_none], self.output)
+        return result
+
+
+@dataclass
+class RelayStatusSearch:
+    search_id: Optional[str] = None
+    response_status_strg: Optional[str] = None
+    num_of_matches: Optional[int] = None
+    total_matches: Optional[int] = None
+    output_list: Optional[List[RelayStatusList]] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'RelayStatusSearch':
+        assert isinstance(obj, dict)
+        search_id = from_union([from_str, from_none], obj.get("searchID"))
+        response_status_strg = from_union([from_str, from_none], obj.get("responseStatusStrg"))
+        num_of_matches = from_union([from_int, from_none], obj.get("numOfMatches"))
+        total_matches = from_union([from_int, from_none], obj.get("totalMatches"))
+        output_list = from_union([lambda x: from_list(RelayStatusList.from_dict, x), from_none], obj.get("OutputList"))
+        return RelayStatusSearch(search_id, response_status_strg, num_of_matches, total_matches, output_list)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.search_id is not None:
+            result["searchID"] = from_union([from_str, from_none], self.search_id)
+        if self.response_status_strg is not None:
+            result["responseStatusStrg"] = from_union([from_str, from_none], self.response_status_strg)
+        if self.num_of_matches is not None:
+            result["numOfMatches"] = from_union([from_int, from_none], self.num_of_matches)
+        if self.total_matches is not None:
+            result["totalMatches"] = from_union([from_int, from_none], self.total_matches)
+        if self.output_list is not None:
+            result["OutputList"] = from_union([lambda x: from_list(lambda x: to_class(RelayStatusList, x), x), from_none], self.output_list)
+        return result
+
+
+@dataclass
+class RelayStatusSearchResponse:
+    output_search: Optional[RelayStatusSearch] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'RelayStatusSearchResponse':
+        assert isinstance(obj, dict)
+        output_search = from_union([RelayStatusSearch.from_dict, from_none], obj.get("OutputSearch"))
+        return RelayStatusSearchResponse(output_search)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.output_search is not None:
+            result["OutputSearch"] = from_union([lambda x: to_class(RelayStatusSearch, x), from_none], self.output_search)
+        return result
+
+
+@dataclass
+class JSONResponseStatus:
+    request_url: Optional[str] = None
+    status_code: Optional[int] = None
+    status_string: Optional[str] = None
+    sub_status_code: Optional[str] = None
+    error_code: Optional[int] = None
+    error_msg: Optional[str] = None
+    m_err_code: Optional[str] = None
+    m_err_dev_self_ex: Optional[str] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'JSONResponseStatus':
+        assert isinstance(obj, dict)
+        request_url = from_union([from_str, from_none], obj.get("requestURL"))
+        status_code = from_union([from_int, from_none], obj.get("statusCode"))
+        status_string = from_union([from_str, from_none], obj.get("statusString"))
+        sub_status_code = from_union([from_str, from_none], obj.get("subStatusCode"))
+        error_code = from_union([from_int, from_none], obj.get("errorCode"))
+        error_msg = from_union([from_str, from_none], obj.get("errorMsg"))
+        m_err_code = from_union([from_str, from_none], obj.get("MErrCode"))
+        m_err_dev_self_ex = from_union([from_str, from_none], obj.get("MErrDevSelfEx"))
+        return JSONResponseStatus(request_url, status_code, status_string, sub_status_code, error_code, error_msg, m_err_code, m_err_dev_self_ex)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.request_url is not None:
+            result["requestURL"] = from_union([from_str, from_none], self.request_url)
+        if self.status_code is not None:
+            result["statusCode"] = from_union([from_int, from_none], self.status_code)
+        if self.status_string is not None:
+            result["statusString"] = from_union([from_str, from_none], self.status_string)
+        if self.sub_status_code is not None:
+            result["subStatusCode"] = from_union([from_str, from_none], self.sub_status_code)
+        if self.error_code is not None:
+            result["errorCode"] = from_union([from_int, from_none], self.error_code)
+        if self.error_msg is not None:
+            result["errorMsg"] = from_union([from_str, from_none], self.error_msg)
+        if self.m_err_code is not None:
+            result["MErrCode"] = from_union([from_str, from_none], self.m_err_code)
+        if self.m_err_dev_self_ex is not None:
+            result["MErrDevSelfEx"] = from_union([from_str, from_none], self.m_err_dev_self_ex)
+        return result
+

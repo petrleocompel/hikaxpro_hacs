@@ -99,7 +99,7 @@ async def async_setup_entry(
                 devices.append(HikIsViaRepeaterInfo(coordinator, zone.zone, entry.entry_id))
             if zone.zone.status is not None:
                 devices.append(HikStatusInfo(coordinator, zone.zone, entry.entry_id))
-    _LOGGER.debug("devices: %s", devices)
+    _LOGGER.debug("setting up - sensors: %s", devices)
     async_add_entities(devices, False)
 
 

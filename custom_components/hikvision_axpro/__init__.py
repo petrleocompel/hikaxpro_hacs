@@ -33,9 +33,9 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING, INTERNAL_API, ENABLE_DEBUG_OUTPUT
-from .model import ZonesResponse, Zone, SubSystemResponse, SubSys, Arming, ZonesConf, ZoneConfig
+from .model import ZonesResponse, Zone, SubSystemResponse, SubSys, Arming, ZonesConf, ZoneConfig, RelaySwitchConf, RelayStatus, RelayStatusSearchResponse, OutputConfList, JSONResponseStatus
 
-PLATFORMS: list[Platform] = [Platform.ALARM_CONTROL_PANEL, Platform.SENSOR]
+PLATFORMS: list[Platform] = [Platform.ALARM_CONTROL_PANEL, Platform.SENSOR, Platform.SWITCH]
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -137,6 +137,9 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     sub_systems: dict[int, SubSys] = {}
     """ Zones aka devices """
     devices: dict[int, ZoneConfig] = {}
+    relays: dict[int, RelaySwitchConf] = {}
+    relays_status: dict[int, RelayStatus] = {}
+
 
     def __init__(
         self,
@@ -161,7 +164,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=update_interval))
 
     def _get_device_info(self):
-        endpoint = self.axpro.build_url(f"http://{self.host}/ISAPI/System/deviceInfo", False)
+        endpoint = self.axpro.build_url(f"http://{self.host}" + hikaxpro.consts.Endpoints.SystemDeviceInfo, False)
         response = self.axpro.make_request(endpoint, "GET", False)
 
         if response.status_code != 200:
@@ -175,7 +178,24 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.device_model = self.device_info['DeviceInfo']['model']
         _LOGGER.debug(self.device_info)
         self.load_devices()
+        self.load_relays()
         self._update_data()
+
+    def load_relays(self):
+        devices = self._load_relays()
+        if devices is not None:
+            self.relays = {}
+            for item in devices.list:
+                self.relays[item.output.id] = item.output
+
+    def _load_relays(self) -> OutputConfList:
+        endpoint = self.axpro.build_url(f"http://{self.host}" + hikaxpro.consts.Endpoints.OutputConfig, True)
+        response = self.axpro.make_request(endpoint, "GET", False)
+
+        if response.status_code != 200:
+            raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
+        _LOGGER.debug(response.text)
+        return OutputConfList.from_dict(response.json())
 
     def load_devices(self):
         devices = self._load_devices()
@@ -192,6 +212,20 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
             raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
         _LOGGER.debug(response.text)
         return ZonesConf.from_dict(response.json())
+
+    def _update_relays_status(self) -> RelayStatusSearchResponse:
+        endpoint = self.axpro.build_url(f"http://{self.host}" + hikaxpro.consts.Endpoints.OutputStatus, True)
+        response = self.axpro.make_request(
+            endpoint,
+            "POST",
+            {"OutputCond":{"searchID":"homeassistant","searchResultPosition": 0,"maxResults": 50,}},
+            True
+        )
+
+        if response.status_code != 200:
+            raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
+        _LOGGER.debug(response.text)
+        return RelayStatusSearchResponse.from_dict(response.json())
 
     def _update_data(self) -> None:
         """Fetch data from axpro via sync functions."""
@@ -231,6 +265,13 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
             zones[zone.zone.id] = zone.zone
         self.zones = zones
         _LOGGER.debug("Zones: %s", zone_response)
+        # relays
+        current_relays_state = self._update_relays_status()
+        relays_status = {}
+        for item in current_relays_state.output_search.output_list:
+            relays_status[item.output.id] = item.output
+        self.relays_status = relays_status
+        _LOGGER.debug("Relay status: %s", relays_status)
 
     async def _async_update_data(self) -> None:
         """Fetch data from Axpro."""
@@ -264,3 +305,18 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
             await self._async_update_data()
             await self.async_request_refresh()
 
+    def _relay_call(self, relay_id: int, is_enabled: bool) -> JSONResponseStatus:
+        endpoint = self.axpro.build_url(f"http://{self.host}" + hikaxpro.consts.Endpoints.OutputControl.replace("{}", str(relay_id)), True)
+        response = self.axpro.make_request(endpoint, "PUT", {"OutputsCtrl": {"switch": "open" if is_enabled else "close"}}, True)
+        if response.status_code != 200:
+            raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
+        _LOGGER.debug(response.text)
+        return JSONResponseStatus.from_dict(response.json())
+
+    async def relay_on(self, relay_id: int):
+        response: JSONResponseStatus = await self.hass.async_add_executor_job(self._relay_call, relay_id, True)
+        return response.status_code == 1
+
+    async def relay_off(self, relay_id: int):
+        response: JSONResponseStatus = await self.hass.async_add_executor_job(self._relay_call, relay_id, False)
+        return response.status_code == 1
