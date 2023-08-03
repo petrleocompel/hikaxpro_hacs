@@ -520,7 +520,9 @@ class DetectorAccessMode(Enum):
 
 class DetectorWiringMode(Enum):
     SEOL = "SEOL"
-
+    DEOL = "DEOL"
+    TEOL = "TEOL"
+    NO_EOL = "No EOL"
 
 class NewKeyZoneTriggerTypeCFG(Enum):
     ZONE_STATUS = "zoneStatus"
