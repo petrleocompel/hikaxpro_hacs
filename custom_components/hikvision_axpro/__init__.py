@@ -218,7 +218,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         response = self.axpro.make_request(
             endpoint,
             "POST",
-            {"OutputCond":{"searchID":"homeassistant","searchResultPosition": 0,"maxResults": 50,}},
+            {"OutputCond":{"searchID":"homeassistant","searchResultPosition": 1, "maxResults": 50, "moduleType": "localWired"}},
             True
         )
 
