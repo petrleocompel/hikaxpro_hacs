@@ -618,11 +618,11 @@ class ZoneConfig:
     stay_away_enabled: bool
     chime_enabled: bool
     silent_enabled: bool
-    timeout_type: TimeoutType
     timeout: int
-    related_chan_list: List[RelatedChanList]
-    new_key_zone_trigger_type_cfg: NewKeyZoneTriggerTypeCFG
-    zone_status_cfg: ZoneStatusCFG
+    timeout_type: Optional[TimeoutType] = None
+    related_chan_list: Optional[List[RelatedChanList]] = None
+    new_key_zone_trigger_type_cfg: Optional[NewKeyZoneTriggerTypeCFG] = None
+    zone_status_cfg: Optional[ZoneStatusCFG] = None
     double_knock_enabled: Optional[bool] = None
     double_knock_time: Optional[int] = None
     zone_type: Optional[ZoneType] = None
@@ -671,18 +671,39 @@ class ZoneConfig:
             _LOGGER.warning("Invalid zone type %s", obj.get("zoneType"))
             _LOGGER.warning("Detector info: %s", obj)
             zone_type = None
-        stay_away_enabled = from_bool(obj.get("stayAwayEnabled"))
-        chime_enabled = from_bool(obj.get("chimeEnabled"))
-        silent_enabled = from_bool(obj.get("silentEnabled"))
+        stay_away_enabled = from_union([from_bool, from_none], obj.get("stayAwayEnabled"))
+        chime_enabled = from_union([from_bool, from_none], obj.get("chimeEnabled"))
+        silent_enabled = from_union([from_bool, from_none], obj.get("silentEnabled"))
         chime_warning_type = from_union([ChimeWarningType, from_none], obj.get("chimeWarningType"))
-        timeout_type = TimeoutType(obj.get("timeoutType"))
-        timeout = from_int(obj.get("timeout"))
+
+        try:
+            timeout_type = from_union([TimeoutType, from_none],
+                                                       obj.get("timeoutType"))
+        except:
+            _LOGGER.warning("Invalid timeout_type %s", obj.get("timeoutType"))
+            _LOGGER.warning("Detector info: %s", obj)
+            timeout_type = None
+
+        timeout = from_union([from_int, from_none], obj.get("timeout"))
         relate_detector = from_union([from_bool, from_none], obj.get("relateDetector"))
-        related_chan_list = from_list(RelatedChanList.from_dict, obj.get("RelatedChanList"))
+        related_chan_list = from_union([lambda x: from_list(RelatedChanList.from_dict, x), from_none], obj.get("RelatedChanList"))
         double_knock_enabled = from_union([from_bool, from_none], obj.get("doubleKnockEnabled"))
         double_knock_time = from_union([from_int, from_none], obj.get("doubleKnockTime"))
-        new_key_zone_trigger_type_cfg = NewKeyZoneTriggerTypeCFG(obj.get("newKeyZoneTriggerTypeCfg"))
-        zone_status_cfg = ZoneStatusCFG(obj.get("zoneStatusCfg"))
+
+        try:
+            new_key_zone_trigger_type_cfg = from_union([NewKeyZoneTriggerTypeCFG, from_none], obj.get("newKeyZoneTriggerTypeCfg"))
+        except:
+            _LOGGER.warning("Invalid new_key_zone_trigger_type_cfg %s", obj.get("newKeyZoneTriggerTypeCfg"))
+            _LOGGER.warning("Detector info: %s", obj)
+            new_key_zone_trigger_type_cfg = None
+
+        try:
+            zone_status_cfg = from_union([ZoneStatusCFG, from_none], obj.get("zoneStatusCfg"))
+        except:
+            _LOGGER.warning("Invalid zone_status_cfg %s", obj.get("zoneStatusCfg"))
+            _LOGGER.warning("Detector info: %s", obj)
+            zone_status_cfg = None
+
         sub_system_no = from_union([from_int, from_none], obj.get("subSystemNo"))
         linkage_sub_system = from_union([lambda x: from_list(from_int, x), from_none], obj.get("linkageSubSystem"))
         support_linkage_sub_system_list = from_union([lambda x: from_list(from_int, x), from_none],
@@ -736,8 +757,8 @@ class ZoneConfig:
             stay_away_enabled,
             chime_enabled,
             silent_enabled,
-            timeout_type,
             timeout,
+            timeout_type,
             related_chan_list,
             new_key_zone_trigger_type_cfg,
             zone_status_cfg,
@@ -790,7 +811,8 @@ class ZoneConfig:
         result["silentEnabled"] = from_bool(self.silent_enabled)
         if self.chime_warning_type is not None:
             result["chimeWarningType"] = to_enum(ChimeWarningType, self.chime_warning_type)
-        result["timeoutType"] = to_enum(TimeoutType, self.timeout_type)
+        if self.timeout_type is not None:
+            result["timeoutType"] = to_enum(TimeoutType, self.timeout_type)
         result["timeout"] = from_int(self.timeout)
         if self.relate_detector is not None:
             result["relateDetector"] = from_bool(self.relate_detector)
@@ -799,8 +821,10 @@ class ZoneConfig:
             result["doubleKnockEnabled"] = from_bool(self.double_knock_enabled)
         if self.double_knock_time is not None:
             result["doubleKnockTime"] = from_int(self.double_knock_time)
-        result["newKeyZoneTriggerTypeCfg"] = to_enum(NewKeyZoneTriggerTypeCFG, self.new_key_zone_trigger_type_cfg)
-        result["zoneStatusCfg"] = to_enum(ZoneStatusCFG, self.zone_status_cfg)
+        if self.new_key_zone_trigger_type_cfg is not None:
+            result["newKeyZoneTriggerTypeCfg"] = to_enum(NewKeyZoneTriggerTypeCFG, self.new_key_zone_trigger_type_cfg)
+        if self.zone_status_cfg is not None:
+            result["zoneStatusCfg"] = to_enum(ZoneStatusCFG, self.zone_status_cfg)
         if self.sub_system_no is not None:
             result["subSystemNo"] = from_union([from_int, from_none], self.sub_system_no)
         if self.linkage_sub_system is not None:
