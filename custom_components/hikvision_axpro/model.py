@@ -133,6 +133,8 @@ def detector_model_to_name(model_id: Optional[str]) -> str:
         return "Glass Break Detector"
     if model_id == "0x00026":
         return "Wireless Temperature Humidity Detector"
+    if model_id == "0x00027":
+        return "Wireless PIR Ceiling Detector"
     if model_id == "0x00028":
         return "Wireless External Magnet Detector"
     if model_id == "0x00031":
