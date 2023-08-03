@@ -353,14 +353,14 @@ class Zone:
 
 
 @dataclass
-class ZoneList:
+class ZoneListWrap:
     zone: Zone
 
     @staticmethod
-    def from_dict(obj: Any) -> 'ZoneList':
+    def from_dict(obj: Any) -> 'ZoneListWrap':
         assert isinstance(obj, dict)
         zone = Zone.from_dict(obj.get("Zone"))
-        return ZoneList(zone)
+        return ZoneListWrap(zone)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -370,17 +370,17 @@ class ZoneList:
 
 @dataclass
 class ZonesResponse:
-    zone_list: List[ZoneList]
+    zone_list: List[ZoneListWrap]
 
     @staticmethod
     def from_dict(obj: Any) -> 'ZonesResponse':
         assert isinstance(obj, dict)
-        zone_list = from_list(ZoneList.from_dict, obj.get("ZoneList"))
+        zone_list = from_list(ZoneListWrap.from_dict, obj.get("ZoneList"))
         return ZonesResponse(zone_list)
 
     def to_dict(self) -> dict:
         result: dict = {}
-        result["ZoneList"] = from_list(lambda x: to_class(ZoneList, x), self.zone_list)
+        result["ZoneList"] = from_list(lambda x: to_class(ZoneListWrap, x), self.zone_list)
         return result
 
 
@@ -1404,5 +1404,1107 @@ class JSONResponseStatus:
             result["MErrCode"] = from_union([from_str, from_none], self.m_err_code)
         if self.m_err_dev_self_ex is not None:
             result["MErrDevSelfEx"] = from_union([from_str, from_none], self.m_err_dev_self_ex)
+        return result
+
+
+
+
+
+@dataclass
+class CardReader:
+    id: Optional[int] = None
+    seq: Optional[str] = None
+    name: Optional[str] = None
+    status: Optional[str] = None
+    tamper_evident: Optional[bool] = None
+    charge: Optional[str] = None
+    signal: Optional[int] = None
+    model: Optional[str] = None
+    temperature: Optional[int] = None
+    sub_system_list: Optional[List[int]] = None
+    is_via_repeater: Optional[bool] = None
+    repeater_name: Optional[str] = None
+    version: Optional[str] = None
+    device_no: Optional[int] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'CardReader':
+        assert isinstance(obj, dict)
+        id = from_union([from_int, from_none], obj.get("id"))
+        seq = from_union([from_str, from_none], obj.get("seq"))
+        name = from_union([from_str, from_none], obj.get("name"))
+        status = from_union([from_str, from_none], obj.get("status"))
+        tamper_evident = from_union([from_bool, from_none], obj.get("tamperEvident"))
+        charge = from_union([from_str, from_none], obj.get("charge"))
+        signal = from_union([from_int, from_none], obj.get("signal"))
+        model = from_union([from_str, from_none], obj.get("model"))
+        temperature = from_union([from_int, from_none], obj.get("temperature"))
+        sub_system_list = from_union([lambda x: from_list(from_int, x), from_none], obj.get("subSystemList"))
+        is_via_repeater = from_union([from_bool, from_none], obj.get("isViaRepeater"))
+        repeater_name = from_union([from_str, from_none], obj.get("repeaterName"))
+        version = from_union([from_str, from_none], obj.get("version"))
+        device_no = from_union([from_int, from_none], obj.get("deviceNo"))
+        return CardReader(id, seq, name, status, tamper_evident, charge, signal, model, temperature, sub_system_list, is_via_repeater, repeater_name, version, device_no)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.id is not None:
+            result["id"] = from_union([from_int, from_none], self.id)
+        if self.seq is not None:
+            result["seq"] = from_union([from_str, from_none], self.seq)
+        if self.name is not None:
+            result["name"] = from_union([from_str, from_none], self.name)
+        if self.status is not None:
+            result["status"] = from_union([from_str, from_none], self.status)
+        if self.tamper_evident is not None:
+            result["tamperEvident"] = from_union([from_bool, from_none], self.tamper_evident)
+        if self.charge is not None:
+            result["charge"] = from_union([from_str, from_none], self.charge)
+        if self.signal is not None:
+            result["signal"] = from_union([from_int, from_none], self.signal)
+        if self.model is not None:
+            result["model"] = from_union([from_str, from_none], self.model)
+        if self.temperature is not None:
+            result["temperature"] = from_union([from_int, from_none], self.temperature)
+        if self.sub_system_list is not None:
+            result["subSystemList"] = from_union([lambda x: from_list(from_int, x), from_none], self.sub_system_list)
+        if self.is_via_repeater is not None:
+            result["isViaRepeater"] = from_union([from_bool, from_none], self.is_via_repeater)
+        if self.repeater_name is not None:
+            result["repeaterName"] = from_union([from_str, from_none], self.repeater_name)
+        if self.version is not None:
+            result["version"] = from_union([from_str, from_none], self.version)
+        if self.device_no is not None:
+            result["deviceNo"] = from_union([from_int, from_none], self.device_no)
+        return result
+
+
+@dataclass
+class CardReaderList:
+    card_reader: Optional[CardReader] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'CardReaderList':
+        assert isinstance(obj, dict)
+        card_reader = from_union([CardReader.from_dict, from_none], obj.get("CardReader"))
+        return CardReaderList(card_reader)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.card_reader is not None:
+            result["CardReader"] = from_union([lambda x: to_class(CardReader, x), from_none], self.card_reader)
+        return result
+
+
+@dataclass
+class ExtensionModule:
+    id: Optional[int] = None
+    name: Optional[str] = None
+    address: Optional[int] = None
+    linkage_address: Optional[int] = None
+    type: Optional[str] = None
+    status: Optional[str] = None
+    tamper_evident: Optional[bool] = None
+    module_attrib: Optional[str] = None
+    charge: Optional[str] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'ExtensionModule':
+        assert isinstance(obj, dict)
+        id = from_union([from_int, from_none], obj.get("id"))
+        name = from_union([from_str, from_none], obj.get("name"))
+        address = from_union([from_int, from_none], obj.get("address"))
+        linkage_address = from_union([from_int, from_none], obj.get("linkageAddress"))
+        type = from_union([from_str, from_none], obj.get("type"))
+        status = from_union([from_str, from_none], obj.get("status"))
+        tamper_evident = from_union([from_bool, from_none], obj.get("tamperEvident"))
+        module_attrib = from_union([from_str, from_none], obj.get("moduleAttrib"))
+        charge = from_union([from_str, from_none], obj.get("charge"))
+        return ExtensionModule(id, name, address, linkage_address, type, status, tamper_evident, module_attrib, charge)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.id is not None:
+            result["id"] = from_union([from_int, from_none], self.id)
+        if self.name is not None:
+            result["name"] = from_union([from_str, from_none], self.name)
+        if self.address is not None:
+            result["address"] = from_union([from_int, from_none], self.address)
+        if self.linkage_address is not None:
+            result["linkageAddress"] = from_union([from_int, from_none], self.linkage_address)
+        if self.type is not None:
+            result["type"] = from_union([from_str, from_none], self.type)
+        if self.status is not None:
+            result["status"] = from_union([from_str, from_none], self.status)
+        if self.tamper_evident is not None:
+            result["tamperEvident"] = from_union([from_bool, from_none], self.tamper_evident)
+        if self.module_attrib is not None:
+            result["moduleAttrib"] = from_union([from_str, from_none], self.module_attrib)
+        if self.charge is not None:
+            result["charge"] = from_union([from_str, from_none], self.charge)
+        return result
+
+
+@dataclass
+class ExtensionList:
+    extension_module: Optional[ExtensionModule] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'ExtensionList':
+        assert isinstance(obj, dict)
+        extension_module = from_union([ExtensionModule.from_dict, from_none], obj.get("ExtensionModule"))
+        return ExtensionList(extension_module)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.extension_module is not None:
+            result["ExtensionModule"] = from_union([lambda x: to_class(ExtensionModule, x), from_none], self.extension_module)
+        return result
+
+
+@dataclass
+class Keypad:
+    id: Optional[int] = None
+    seq: Optional[str] = None
+    name: Optional[str] = None
+    status: Optional[str] = None
+    tamper_evident: Optional[bool] = None
+    keypad_attrib: Optional[str] = None
+    charge: Optional[str] = None
+    signal: Optional[int] = None
+    address: Optional[int] = None
+    model: Optional[str] = None
+    temperature: Optional[int] = None
+    sub_system_list: Optional[List[int]] = None
+    is_via_repeater: Optional[bool] = None
+    repeater_name: Optional[str] = None
+    version: Optional[str] = None
+    smoke_detector_alarm: Optional[str] = None
+    smoke_detector_power_supply: Optional[str] = None
+    power_supply: Optional[str] = None
+    main_power_supply: Optional[bool] = None
+    type: Optional[str] = None
+    device_no: Optional[int] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'Keypad':
+        assert isinstance(obj, dict)
+        id = from_union([from_int, from_none], obj.get("id"))
+        seq = from_union([from_str, from_none], obj.get("seq"))
+        name = from_union([from_str, from_none], obj.get("name"))
+        status = from_union([from_str, from_none], obj.get("status"))
+        tamper_evident = from_union([from_bool, from_none], obj.get("tamperEvident"))
+        keypad_attrib = from_union([from_str, from_none], obj.get("keypadAttrib"))
+        charge = from_union([from_str, from_none], obj.get("charge"))
+        signal = from_union([from_int, from_none], obj.get("signal"))
+        address = from_union([from_int, from_none], obj.get("address"))
+        model = from_union([from_str, from_none], obj.get("model"))
+        temperature = from_union([from_int, from_none], obj.get("temperature"))
+        sub_system_list = from_union([lambda x: from_list(from_int, x), from_none], obj.get("subSystemList"))
+        is_via_repeater = from_union([from_bool, from_none], obj.get("isViaRepeater"))
+        repeater_name = from_union([from_str, from_none], obj.get("repeaterName"))
+        version = from_union([from_str, from_none], obj.get("version"))
+        smoke_detector_alarm = from_union([from_str, from_none], obj.get("smokeDetectorAlarm"))
+        smoke_detector_power_supply = from_union([from_str, from_none], obj.get("smokeDetectorPowerSupply"))
+        power_supply = from_union([from_str, from_none], obj.get("powerSupply"))
+        main_power_supply = from_union([from_bool, from_none], obj.get("mainPowerSupply"))
+        type = from_union([from_str, from_none], obj.get("type"))
+        device_no = from_union([from_int, from_none], obj.get("deviceNo"))
+        return Keypad(id, seq, name, status, tamper_evident, keypad_attrib, charge, signal, address, model, temperature, sub_system_list, is_via_repeater, repeater_name, version, smoke_detector_alarm, smoke_detector_power_supply, power_supply, main_power_supply, type, device_no)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.id is not None:
+            result["id"] = from_union([from_int, from_none], self.id)
+        if self.seq is not None:
+            result["seq"] = from_union([from_str, from_none], self.seq)
+        if self.name is not None:
+            result["name"] = from_union([from_str, from_none], self.name)
+        if self.status is not None:
+            result["status"] = from_union([from_str, from_none], self.status)
+        if self.tamper_evident is not None:
+            result["tamperEvident"] = from_union([from_bool, from_none], self.tamper_evident)
+        if self.keypad_attrib is not None:
+            result["keypadAttrib"] = from_union([from_str, from_none], self.keypad_attrib)
+        if self.charge is not None:
+            result["charge"] = from_union([from_str, from_none], self.charge)
+        if self.signal is not None:
+            result["signal"] = from_union([from_int, from_none], self.signal)
+        if self.address is not None:
+            result["address"] = from_union([from_int, from_none], self.address)
+        if self.model is not None:
+            result["model"] = from_union([from_str, from_none], self.model)
+        if self.temperature is not None:
+            result["temperature"] = from_union([from_int, from_none], self.temperature)
+        if self.sub_system_list is not None:
+            result["subSystemList"] = from_union([lambda x: from_list(from_int, x), from_none], self.sub_system_list)
+        if self.is_via_repeater is not None:
+            result["isViaRepeater"] = from_union([from_bool, from_none], self.is_via_repeater)
+        if self.repeater_name is not None:
+            result["repeaterName"] = from_union([from_str, from_none], self.repeater_name)
+        if self.version is not None:
+            result["version"] = from_union([from_str, from_none], self.version)
+        if self.smoke_detector_alarm is not None:
+            result["smokeDetectorAlarm"] = from_union([from_str, from_none], self.smoke_detector_alarm)
+        if self.smoke_detector_power_supply is not None:
+            result["smokeDetectorPowerSupply"] = from_union([from_str, from_none], self.smoke_detector_power_supply)
+        if self.power_supply is not None:
+            result["powerSupply"] = from_union([from_str, from_none], self.power_supply)
+        if self.main_power_supply is not None:
+            result["mainPowerSupply"] = from_union([from_bool, from_none], self.main_power_supply)
+        if self.type is not None:
+            result["type"] = from_union([from_str, from_none], self.type)
+        if self.device_no is not None:
+            result["deviceNo"] = from_union([from_int, from_none], self.device_no)
+        return result
+
+
+@dataclass
+class KeypadList:
+    keypad: Optional[Keypad] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'KeypadList':
+        assert isinstance(obj, dict)
+        keypad = from_union([Keypad.from_dict, from_none], obj.get("Keypad"))
+        return KeypadList(keypad)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.keypad is not None:
+            result["Keypad"] = from_union([lambda x: to_class(Keypad, x), from_none], self.keypad)
+        return result
+
+
+@dataclass
+class OutputStatusFull:
+    id: Optional[int] = None
+    name: Optional[str] = None
+    status: Optional[str] = None
+    tamper_evident: Optional[bool] = None
+    charge: Optional[str] = None
+    linkage: Optional[str] = None
+    signal: Optional[int] = None
+    temperature: Optional[int] = None
+    version: Optional[str] = None
+    access_module_type: Optional[str] = None
+    related_access_module_id: Optional[int] = None
+    address: Optional[int] = None
+    sub_system_list: Optional[List[int]] = None
+    scenario_type: Optional[List[str]] = None
+    relay_attrib: Optional[str] = None
+    device_no: Optional[int] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'OutputStatusFull':
+        assert isinstance(obj, dict)
+        id = from_union([from_int, from_none], obj.get("id"))
+        name = from_union([from_str, from_none], obj.get("name"))
+        status = from_union([from_str, from_none], obj.get("status"))
+        tamper_evident = from_union([from_bool, from_none], obj.get("tamperEvident"))
+        charge = from_union([from_str, from_none], obj.get("charge"))
+        linkage = from_union([from_str, from_none], obj.get("linkage"))
+        signal = from_union([from_int, from_none], obj.get("signal"))
+        temperature = from_union([from_int, from_none], obj.get("temperature"))
+        version = from_union([from_str, from_none], obj.get("version"))
+        access_module_type = from_union([from_str, from_none], obj.get("accessModuleType"))
+        related_access_module_id = from_union([from_int, from_none], obj.get("relatedAccessModuleID"))
+        address = from_union([from_int, from_none], obj.get("address"))
+        sub_system_list = from_union([lambda x: from_list(from_int, x), from_none], obj.get("subSystemList"))
+        scenario_type = from_union([lambda x: from_list(from_str, x), from_none], obj.get("scenarioType"))
+        relay_attrib = from_union([from_str, from_none], obj.get("relayAttrib"))
+        device_no = from_union([from_int, from_none], obj.get("deviceNo"))
+        return OutputStatusFull(id, name, status, tamper_evident, charge, linkage, signal, temperature, version, access_module_type, related_access_module_id, address, sub_system_list, scenario_type, relay_attrib, device_no)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.id is not None:
+            result["id"] = from_union([from_int, from_none], self.id)
+        if self.name is not None:
+            result["name"] = from_union([from_str, from_none], self.name)
+        if self.status is not None:
+            result["status"] = from_union([from_str, from_none], self.status)
+        if self.tamper_evident is not None:
+            result["tamperEvident"] = from_union([from_bool, from_none], self.tamper_evident)
+        if self.charge is not None:
+            result["charge"] = from_union([from_str, from_none], self.charge)
+        if self.linkage is not None:
+            result["linkage"] = from_union([from_str, from_none], self.linkage)
+        if self.signal is not None:
+            result["signal"] = from_union([from_int, from_none], self.signal)
+        if self.temperature is not None:
+            result["temperature"] = from_union([from_int, from_none], self.temperature)
+        if self.version is not None:
+            result["version"] = from_union([from_str, from_none], self.version)
+        if self.access_module_type is not None:
+            result["accessModuleType"] = from_union([from_str, from_none], self.access_module_type)
+        if self.related_access_module_id is not None:
+            result["relatedAccessModuleID"] = from_union([from_int, from_none], self.related_access_module_id)
+        if self.address is not None:
+            result["address"] = from_union([from_int, from_none], self.address)
+        if self.sub_system_list is not None:
+            result["subSystemList"] = from_union([lambda x: from_list(from_int, x), from_none], self.sub_system_list)
+        if self.scenario_type is not None:
+            result["scenarioType"] = from_union([lambda x: from_list(from_str, x), from_none], self.scenario_type)
+        if self.relay_attrib is not None:
+            result["relayAttrib"] = from_union([from_str, from_none], self.relay_attrib)
+        if self.device_no is not None:
+            result["deviceNo"] = from_union([from_int, from_none], self.device_no)
+        return result
+
+
+@dataclass
+class ExDevStatusOutputList:
+    output: Optional[OutputStatusFull] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'ExDevStatusOutputList':
+        assert isinstance(obj, dict)
+        output = from_union([OutputStatusFull.from_dict, from_none], obj.get("Output"))
+        return ExDevStatusOutputList(output)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.output is not None:
+            result["Output"] = from_union([lambda x: to_class(OutputStatusFull, x), from_none], self.output)
+        return result
+
+
+@dataclass
+class RelayList:
+    id: Optional[int] = None
+    status: Optional[str] = None
+    name: Optional[str] = None
+    sub_system: Optional[List[int]] = None
+    scenario_type: Optional[List[str]] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'RelayList':
+        assert isinstance(obj, dict)
+        id = from_union([from_int, from_none], obj.get("id"))
+        status = from_union([from_str, from_none], obj.get("status"))
+        name = from_union([from_str, from_none], obj.get("name"))
+        sub_system = from_union([lambda x: from_list(from_int, x), from_none], obj.get("subSystem"))
+        scenario_type = from_union([lambda x: from_list(from_str, x), from_none], obj.get("scenarioType"))
+        return RelayList(id, status, name, sub_system, scenario_type)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.id is not None:
+            result["id"] = from_union([from_int, from_none], self.id)
+        if self.status is not None:
+            result["status"] = from_union([from_str, from_none], self.status)
+        if self.name is not None:
+            result["name"] = from_union([from_str, from_none], self.name)
+        if self.sub_system is not None:
+            result["subSystem"] = from_union([lambda x: from_list(from_int, x), from_none], self.sub_system)
+        if self.scenario_type is not None:
+            result["scenarioType"] = from_union([lambda x: from_list(from_str, x), from_none], self.scenario_type)
+        return result
+
+
+@dataclass
+class OutputMod:
+    id: Optional[int] = None
+    seq: Optional[str] = None
+    status: Optional[str] = None
+    tamper_evident: Optional[bool] = None
+    charge: Optional[str] = None
+    signal: Optional[int] = None
+    model: Optional[str] = None
+    temperature: Optional[int] = None
+    is_via_repeater: Optional[bool] = None
+    repeater_name: Optional[str] = None
+    volt_value: Optional[int] = None
+    current_value: Optional[int] = None
+    power_load: Optional[int] = None
+    energy_sum_vaule: Optional[int] = None
+    relay_list: Optional[List[RelayList]] = None
+    volt_value_v20: Optional[int] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'OutputMod':
+        assert isinstance(obj, dict)
+        id = from_union([from_int, from_none], obj.get("id"))
+        seq = from_union([from_str, from_none], obj.get("seq"))
+        status = from_union([from_str, from_none], obj.get("status"))
+        tamper_evident = from_union([from_bool, from_none], obj.get("tamperEvident"))
+        charge = from_union([from_str, from_none], obj.get("charge"))
+        signal = from_union([from_int, from_none], obj.get("signal"))
+        model = from_union([from_str, from_none], obj.get("model"))
+        temperature = from_union([from_int, from_none], obj.get("temperature"))
+        is_via_repeater = from_union([from_bool, from_none], obj.get("isViaRepeater"))
+        repeater_name = from_union([from_str, from_none], obj.get("repeaterName"))
+        volt_value = from_union([from_int, from_none], obj.get("voltValue"))
+        current_value = from_union([from_int, from_none], obj.get("currentValue"))
+        power_load = from_union([from_int, from_none], obj.get("powerLoad"))
+        energy_sum_vaule = from_union([from_int, from_none], obj.get("energySumVaule"))
+        relay_list = from_union([lambda x: from_list(RelayList.from_dict, x), from_none], obj.get("relayList"))
+        volt_value_v20 = from_union([from_int, from_none], obj.get("voltValueV20"))
+        return OutputMod(id, seq, status, tamper_evident, charge, signal, model, temperature, is_via_repeater, repeater_name, volt_value, current_value, power_load, energy_sum_vaule, relay_list, volt_value_v20)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.id is not None:
+            result["id"] = from_union([from_int, from_none], self.id)
+        if self.seq is not None:
+            result["seq"] = from_union([from_str, from_none], self.seq)
+        if self.status is not None:
+            result["status"] = from_union([from_str, from_none], self.status)
+        if self.tamper_evident is not None:
+            result["tamperEvident"] = from_union([from_bool, from_none], self.tamper_evident)
+        if self.charge is not None:
+            result["charge"] = from_union([from_str, from_none], self.charge)
+        if self.signal is not None:
+            result["signal"] = from_union([from_int, from_none], self.signal)
+        if self.model is not None:
+            result["model"] = from_union([from_str, from_none], self.model)
+        if self.temperature is not None:
+            result["temperature"] = from_union([from_int, from_none], self.temperature)
+        if self.is_via_repeater is not None:
+            result["isViaRepeater"] = from_union([from_bool, from_none], self.is_via_repeater)
+        if self.repeater_name is not None:
+            result["repeaterName"] = from_union([from_str, from_none], self.repeater_name)
+        if self.volt_value is not None:
+            result["voltValue"] = from_union([from_int, from_none], self.volt_value)
+        if self.current_value is not None:
+            result["currentValue"] = from_union([from_int, from_none], self.current_value)
+        if self.power_load is not None:
+            result["powerLoad"] = from_union([from_int, from_none], self.power_load)
+        if self.energy_sum_vaule is not None:
+            result["energySumVaule"] = from_union([from_int, from_none], self.energy_sum_vaule)
+        if self.relay_list is not None:
+            result["relayList"] = from_union([lambda x: from_list(lambda x: to_class(RelayList, x), x), from_none], self.relay_list)
+        if self.volt_value_v20 is not None:
+            result["voltValueV20"] = from_union([from_int, from_none], self.volt_value_v20)
+        return result
+
+
+@dataclass
+class OutputModList:
+    output_mod: Optional[OutputMod] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'OutputModList':
+        assert isinstance(obj, dict)
+        output_mod = from_union([OutputMod.from_dict, from_none], obj.get("OutputMod"))
+        return OutputModList(output_mod)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.output_mod is not None:
+            result["OutputMod"] = from_union([lambda x: to_class(OutputMod, x), from_none], self.output_mod)
+        return result
+
+
+@dataclass
+class CombKey:
+    keys: Optional[str] = None
+    func: Optional[str] = None
+    output_no: Optional[int] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'CombKey':
+        assert isinstance(obj, dict)
+        keys = from_union([from_str, from_none], obj.get("keys"))
+        func = from_union([from_str, from_none], obj.get("func"))
+        output_no = from_union([from_int, from_none], obj.get("outputNo"))
+        return CombKey(keys, func, output_no)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.keys is not None:
+            result["keys"] = from_union([from_str, from_none], self.keys)
+        if self.func is not None:
+            result["func"] = from_union([from_str, from_none], self.func)
+        if self.output_no is not None:
+            result["outputNo"] = from_union([from_int, from_none], self.output_no)
+        return result
+
+
+@dataclass
+class CombKeyList:
+    comb_key: Optional[CombKey] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'CombKeyList':
+        assert isinstance(obj, dict)
+        comb_key = from_union([CombKey.from_dict, from_none], obj.get("CombKey"))
+        return CombKeyList(comb_key)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.comb_key is not None:
+            result["CombKey"] = from_union([lambda x: to_class(CombKey, x), from_none], self.comb_key)
+        return result
+
+
+@dataclass
+class SelKey:
+    key: Optional[int] = None
+    func: Optional[str] = None
+    output_no: Optional[int] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'SelKey':
+        assert isinstance(obj, dict)
+        key = from_union([from_int, from_none], obj.get("key"))
+        func = from_union([from_str, from_none], obj.get("func"))
+        output_no = from_union([from_int, from_none], obj.get("outputNo"))
+        return SelKey(key, func, output_no)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.key is not None:
+            result["key"] = from_union([from_int, from_none], self.key)
+        if self.func is not None:
+            result["func"] = from_union([from_str, from_none], self.func)
+        if self.output_no is not None:
+            result["outputNo"] = from_union([from_int, from_none], self.output_no)
+        return result
+
+
+@dataclass
+class SelKeyList:
+    sel_key: Optional[SelKey] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'SelKeyList':
+        assert isinstance(obj, dict)
+        sel_key = from_union([SelKey.from_dict, from_none], obj.get("SelKey"))
+        return SelKeyList(sel_key)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.sel_key is not None:
+            result["SelKey"] = from_union([lambda x: to_class(SelKey, x), from_none], self.sel_key)
+        return result
+
+
+@dataclass
+class Remote:
+    id: Optional[int] = None
+    seq: Optional[str] = None
+    name: Optional[str] = None
+    status: Optional[str] = None
+    charge: Optional[str] = None
+    charge_value: Optional[int] = None
+    model: Optional[str] = None
+    is_via_repeater: Optional[bool] = None
+    repeater_name: Optional[str] = None
+    sel_key_list: Optional[List[SelKeyList]] = None
+    comb_key_list: Optional[List[CombKeyList]] = None
+    related_net_user_name: Optional[str] = None
+    user_nick_name: Optional[str] = None
+    version: Optional[str] = None
+    device_no: Optional[int] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'Remote':
+        assert isinstance(obj, dict)
+        id = from_union([from_int, from_none], obj.get("id"))
+        seq = from_union([from_str, from_none], obj.get("seq"))
+        name = from_union([from_str, from_none], obj.get("name"))
+        status = from_union([from_str, from_none], obj.get("status"))
+        charge = from_union([from_str, from_none], obj.get("charge"))
+        charge_value = from_union([from_int, from_none], obj.get("chargeValue"))
+        model = from_union([from_str, from_none], obj.get("model"))
+        is_via_repeater = from_union([from_bool, from_none], obj.get("isViaRepeater"))
+        repeater_name = from_union([from_str, from_none], obj.get("repeaterName"))
+        sel_key_list = from_union([lambda x: from_list(SelKeyList.from_dict, x), from_none], obj.get("SelKeyList"))
+        comb_key_list = from_union([lambda x: from_list(CombKeyList.from_dict, x), from_none], obj.get("CombKeyList"))
+        related_net_user_name = from_union([from_str, from_none], obj.get("relatedNetUserName"))
+        user_nick_name = from_union([from_str, from_none], obj.get("userNickName"))
+        version = from_union([from_str, from_none], obj.get("version"))
+        device_no = from_union([from_int, from_none], obj.get("deviceNo"))
+        return Remote(id, seq, name, status, charge, charge_value, model, is_via_repeater, repeater_name, sel_key_list, comb_key_list, related_net_user_name, user_nick_name, version, device_no)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.id is not None:
+            result["id"] = from_union([from_int, from_none], self.id)
+        if self.seq is not None:
+            result["seq"] = from_union([from_str, from_none], self.seq)
+        if self.name is not None:
+            result["name"] = from_union([from_str, from_none], self.name)
+        if self.status is not None:
+            result["status"] = from_union([from_str, from_none], self.status)
+        if self.charge is not None:
+            result["charge"] = from_union([from_str, from_none], self.charge)
+        if self.charge_value is not None:
+            result["chargeValue"] = from_union([from_int, from_none], self.charge_value)
+        if self.model is not None:
+            result["model"] = from_union([from_str, from_none], self.model)
+        if self.is_via_repeater is not None:
+            result["isViaRepeater"] = from_union([from_bool, from_none], self.is_via_repeater)
+        if self.repeater_name is not None:
+            result["repeaterName"] = from_union([from_str, from_none], self.repeater_name)
+        if self.sel_key_list is not None:
+            result["SelKeyList"] = from_union([lambda x: from_list(lambda x: to_class(SelKeyList, x), x), from_none], self.sel_key_list)
+        if self.comb_key_list is not None:
+            result["CombKeyList"] = from_union([lambda x: from_list(lambda x: to_class(CombKeyList, x), x), from_none], self.comb_key_list)
+        if self.related_net_user_name is not None:
+            result["relatedNetUserName"] = from_union([from_str, from_none], self.related_net_user_name)
+        if self.user_nick_name is not None:
+            result["userNickName"] = from_union([from_str, from_none], self.user_nick_name)
+        if self.version is not None:
+            result["version"] = from_union([from_str, from_none], self.version)
+        if self.device_no is not None:
+            result["deviceNo"] = from_union([from_int, from_none], self.device_no)
+        return result
+
+
+@dataclass
+class RemoteList:
+    remote: Optional[Remote] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'RemoteList':
+        assert isinstance(obj, dict)
+        remote = from_union([Remote.from_dict, from_none], obj.get("Remote"))
+        return RemoteList(remote)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.remote is not None:
+            result["Remote"] = from_union([lambda x: to_class(Remote, x), from_none], self.remote)
+        return result
+
+
+@dataclass
+class Repeater:
+    id: Optional[int] = None
+    seq: Optional[str] = None
+    name: Optional[str] = None
+    status: Optional[str] = None
+    tamper_evident: Optional[bool] = None
+    charge: Optional[str] = None
+    signal: Optional[int] = None
+    charge_value: Optional[int] = None
+    model: Optional[str] = None
+    temperature: Optional[int] = None
+    conn_dev_num: Optional[int] = None
+    main_power_supply: Optional[bool] = None
+    battery_status: Optional[str] = None
+    version: Optional[str] = None
+    device_no: Optional[int] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'Repeater':
+        assert isinstance(obj, dict)
+        id = from_union([from_int, from_none], obj.get("id"))
+        seq = from_union([from_str, from_none], obj.get("seq"))
+        name = from_union([from_str, from_none], obj.get("name"))
+        status = from_union([from_str, from_none], obj.get("status"))
+        tamper_evident = from_union([from_bool, from_none], obj.get("tamperEvident"))
+        charge = from_union([from_str, from_none], obj.get("charge"))
+        signal = from_union([from_int, from_none], obj.get("signal"))
+        charge_value = from_union([from_int, from_none], obj.get("chargeValue"))
+        model = from_union([from_str, from_none], obj.get("model"))
+        temperature = from_union([from_int, from_none], obj.get("temperature"))
+        conn_dev_num = from_union([from_int, from_none], obj.get("connDevNum"))
+        main_power_supply = from_union([from_bool, from_none], obj.get("mainPowerSupply"))
+        battery_status = from_union([from_str, from_none], obj.get("batteryStatus"))
+        version = from_union([from_str, from_none], obj.get("version"))
+        device_no = from_union([from_int, from_none], obj.get("deviceNo"))
+        return Repeater(id, seq, name, status, tamper_evident, charge, signal, charge_value, model, temperature, conn_dev_num, main_power_supply, battery_status, version, device_no)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.id is not None:
+            result["id"] = from_union([from_int, from_none], self.id)
+        if self.seq is not None:
+            result["seq"] = from_union([from_str, from_none], self.seq)
+        if self.name is not None:
+            result["name"] = from_union([from_str, from_none], self.name)
+        if self.status is not None:
+            result["status"] = from_union([from_str, from_none], self.status)
+        if self.tamper_evident is not None:
+            result["tamperEvident"] = from_union([from_bool, from_none], self.tamper_evident)
+        if self.charge is not None:
+            result["charge"] = from_union([from_str, from_none], self.charge)
+        if self.signal is not None:
+            result["signal"] = from_union([from_int, from_none], self.signal)
+        if self.charge_value is not None:
+            result["chargeValue"] = from_union([from_int, from_none], self.charge_value)
+        if self.model is not None:
+            result["model"] = from_union([from_str, from_none], self.model)
+        if self.temperature is not None:
+            result["temperature"] = from_union([from_int, from_none], self.temperature)
+        if self.conn_dev_num is not None:
+            result["connDevNum"] = from_union([from_int, from_none], self.conn_dev_num)
+        if self.main_power_supply is not None:
+            result["mainPowerSupply"] = from_union([from_bool, from_none], self.main_power_supply)
+        if self.battery_status is not None:
+            result["batteryStatus"] = from_union([from_str, from_none], self.battery_status)
+        if self.version is not None:
+            result["version"] = from_union([from_str, from_none], self.version)
+        if self.device_no is not None:
+            result["deviceNo"] = from_union([from_int, from_none], self.device_no)
+        return result
+
+
+@dataclass
+class RepeaterList:
+    repeater: Optional[Repeater] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'RepeaterList':
+        assert isinstance(obj, dict)
+        repeater = from_union([Repeater.from_dict, from_none], obj.get("Repeater"))
+        return RepeaterList(repeater)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.repeater is not None:
+            result["Repeater"] = from_union([lambda x: to_class(Repeater, x), from_none], self.repeater)
+        return result
+
+
+@dataclass
+class Siren:
+    id: Optional[int] = None
+    seq: Optional[str] = None
+    name: Optional[str] = None
+    status: Optional[str] = None
+    tamper_evident: Optional[bool] = None
+    siren_attrib: Optional[str] = None
+    charge: Optional[str] = None
+    signal: Optional[int] = None
+    device_no: Optional[int] = None
+    main_power_supply: Optional[bool] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'Siren':
+        assert isinstance(obj, dict)
+        id = from_union([from_int, from_none], obj.get("id"))
+        seq = from_union([from_str, from_none], obj.get("seq"))
+        name = from_union([from_str, from_none], obj.get("name"))
+        status = from_union([from_str, from_none], obj.get("status"))
+        tamper_evident = from_union([from_bool, from_none], obj.get("tamperEvident"))
+        siren_attrib = from_union([from_str, from_none], obj.get("sirenAttrib"))
+        charge = from_union([from_str, from_none], obj.get("charge"))
+        signal = from_union([from_int, from_none], obj.get("signal"))
+        device_no = from_union([from_int, from_none], obj.get("deviceNo"))
+        main_power_supply = from_union([from_bool, from_none], obj.get("mainPowerSupply"))
+        return Siren(id, seq, name, status, tamper_evident, siren_attrib, charge, signal, device_no, main_power_supply)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.id is not None:
+            result["id"] = from_union([from_int, from_none], self.id)
+        if self.seq is not None:
+            result["seq"] = from_union([from_str, from_none], self.seq)
+        if self.name is not None:
+            result["name"] = from_union([from_str, from_none], self.name)
+        if self.status is not None:
+            result["status"] = from_union([from_str, from_none], self.status)
+        if self.tamper_evident is not None:
+            result["tamperEvident"] = from_union([from_bool, from_none], self.tamper_evident)
+        if self.siren_attrib is not None:
+            result["sirenAttrib"] = from_union([from_str, from_none], self.siren_attrib)
+        if self.charge is not None:
+            result["charge"] = from_union([from_str, from_none], self.charge)
+        if self.signal is not None:
+            result["signal"] = from_union([from_int, from_none], self.signal)
+        if self.device_no is not None:
+            result["deviceNo"] = from_union([from_int, from_none], self.device_no)
+        if self.main_power_supply is not None:
+            result["mainPowerSupply"] = from_union([from_bool, from_none], self.main_power_supply)
+        return result
+
+
+@dataclass
+class SirenList:
+    siren: Optional[Siren] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'SirenList':
+        assert isinstance(obj, dict)
+        siren = from_union([Siren.from_dict, from_none], obj.get("Siren"))
+        return SirenList(siren)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.siren is not None:
+            result["Siren"] = from_union([lambda x: to_class(Siren, x), from_none], self.siren)
+        return result
+
+
+@dataclass
+class TransmitterOutputList:
+    output_id: Optional[int] = None
+    sub_system_list: Optional[List[int]] = None
+    status: Optional[str] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'TransmitterOutputList':
+        assert isinstance(obj, dict)
+        output_id = from_union([from_int, from_none], obj.get("outputID"))
+        sub_system_list = from_union([lambda x: from_list(from_int, x), from_none], obj.get("subSystemList"))
+        status = from_union([from_str, from_none], obj.get("status"))
+        return TransmitterOutputList(output_id, sub_system_list, status)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.output_id is not None:
+            result["outputID"] = from_union([from_int, from_none], self.output_id)
+        if self.sub_system_list is not None:
+            result["subSystemList"] = from_union([lambda x: from_list(from_int, x), from_none], self.sub_system_list)
+        if self.status is not None:
+            result["status"] = from_union([from_str, from_none], self.status)
+        return result
+
+
+@dataclass
+class ZoneList:
+    zone_id: Optional[int] = None
+    detector_type: Optional[str] = None
+    is_bypassed: Optional[bool] = None
+    sub_system_list: Optional[List[int]] = None
+    zone_type: Optional[str] = None
+    tamper_evident: Optional[bool] = None
+    enter_delay: Optional[int] = None
+    exit_delay: Optional[int] = None
+    alarm: Optional[bool] = None
+    magnet_open_status: Optional[bool] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'ZoneList':
+        assert isinstance(obj, dict)
+        zone_id = from_union([from_int, from_none], obj.get("zoneID"))
+        detector_type = from_union([from_str, from_none], obj.get("detectorType"))
+        is_bypassed = from_union([from_bool, from_none], obj.get("isBypassed"))
+        sub_system_list = from_union([lambda x: from_list(from_int, x), from_none], obj.get("subSystemList"))
+        zone_type = from_union([from_str, from_none], obj.get("zoneType"))
+        tamper_evident = from_union([from_bool, from_none], obj.get("tamperEvident"))
+        enter_delay = from_union([from_int, from_none], obj.get("enterDelay"))
+        exit_delay = from_union([from_int, from_none], obj.get("exitDelay"))
+        alarm = from_union([from_bool, from_none], obj.get("alarm"))
+        magnet_open_status = from_union([from_bool, from_none], obj.get("magnetOpenStatus"))
+        return ZoneList(zone_id, detector_type, is_bypassed, sub_system_list, zone_type, tamper_evident, enter_delay, exit_delay, alarm, magnet_open_status)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.zone_id is not None:
+            result["zoneID"] = from_union([from_int, from_none], self.zone_id)
+        if self.detector_type is not None:
+            result["detectorType"] = from_union([from_str, from_none], self.detector_type)
+        if self.is_bypassed is not None:
+            result["isBypassed"] = from_union([from_bool, from_none], self.is_bypassed)
+        if self.sub_system_list is not None:
+            result["subSystemList"] = from_union([lambda x: from_list(from_int, x), from_none], self.sub_system_list)
+        if self.zone_type is not None:
+            result["zoneType"] = from_union([from_str, from_none], self.zone_type)
+        if self.tamper_evident is not None:
+            result["tamperEvident"] = from_union([from_bool, from_none], self.tamper_evident)
+        if self.enter_delay is not None:
+            result["enterDelay"] = from_union([from_int, from_none], self.enter_delay)
+        if self.exit_delay is not None:
+            result["exitDelay"] = from_union([from_int, from_none], self.exit_delay)
+        if self.alarm is not None:
+            result["alarm"] = from_union([from_bool, from_none], self.alarm)
+        if self.magnet_open_status is not None:
+            result["magnetOpenStatus"] = from_union([from_bool, from_none], self.magnet_open_status)
+        return result
+
+
+@dataclass
+class Transmitter:
+    id: Optional[int] = None
+    name: Optional[str] = None
+    sub_system_list: Optional[List[int]] = None
+    zone_list: Optional[List[ZoneList]] = None
+    output_list: Optional[List[TransmitterOutputList]] = None
+    seq: Optional[str] = None
+    status: Optional[str] = None
+    tamper_evident: Optional[bool] = None
+    charge: Optional[str] = None
+    charge_value: Optional[int] = None
+    signal: Optional[int] = None
+    model: Optional[str] = None
+    temperature: Optional[int] = None
+    is_via_repeater: Optional[bool] = None
+    repeater_name: Optional[str] = None
+    moved_alarm_enabled: Optional[bool] = None
+    tamper_port_enabled: Optional[bool] = None
+    voltage_output: Optional[str] = None
+    port_cfg: Optional[str] = None
+    version: Optional[str] = None
+    smoke_detector_alarm: Optional[str] = None
+    smoke_detector_power_supply: Optional[str] = None
+    power_supply: Optional[str] = None
+    main_power_supply: Optional[bool] = None
+    type: Optional[str] = None
+    device_no: Optional[int] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'Transmitter':
+        assert isinstance(obj, dict)
+        id = from_union([from_int, from_none], obj.get("id"))
+        name = from_union([from_str, from_none], obj.get("name"))
+        sub_system_list = from_union([lambda x: from_list(from_int, x), from_none], obj.get("subSystemList"))
+        zone_list = from_union([lambda x: from_list(ZoneList.from_dict, x), from_none], obj.get("ZoneList"))
+        output_list = from_union([lambda x: from_list(TransmitterOutputList.from_dict, x), from_none], obj.get("OutputList"))
+        seq = from_union([from_str, from_none], obj.get("seq"))
+        status = from_union([from_str, from_none], obj.get("status"))
+        tamper_evident = from_union([from_bool, from_none], obj.get("tamperEvident"))
+        charge = from_union([from_str, from_none], obj.get("charge"))
+        charge_value = from_union([from_int, from_none], obj.get("chargeValue"))
+        signal = from_union([from_int, from_none], obj.get("signal"))
+        model = from_union([from_str, from_none], obj.get("model"))
+        temperature = from_union([from_int, from_none], obj.get("temperature"))
+        is_via_repeater = from_union([from_bool, from_none], obj.get("isViaRepeater"))
+        repeater_name = from_union([from_str, from_none], obj.get("repeaterName"))
+        moved_alarm_enabled = from_union([from_bool, from_none], obj.get("movedAlarmEnabled"))
+        tamper_port_enabled = from_union([from_bool, from_none], obj.get("tamperPortEnabled"))
+        voltage_output = from_union([from_str, from_none], obj.get("voltageOutput"))
+        port_cfg = from_union([from_str, from_none], obj.get("portCfg"))
+        version = from_union([from_str, from_none], obj.get("version"))
+        smoke_detector_alarm = from_union([from_str, from_none], obj.get("smokeDetectorAlarm"))
+        smoke_detector_power_supply = from_union([from_str, from_none], obj.get("smokeDetectorPowerSupply"))
+        power_supply = from_union([from_str, from_none], obj.get("powerSupply"))
+        main_power_supply = from_union([from_bool, from_none], obj.get("mainPowerSupply"))
+        type = from_union([from_str, from_none], obj.get("type"))
+        device_no = from_union([from_int, from_none], obj.get("deviceNo"))
+        return Transmitter(id, name, sub_system_list, zone_list, output_list, seq, status, tamper_evident, charge, charge_value, signal, model, temperature, is_via_repeater, repeater_name, moved_alarm_enabled, tamper_port_enabled, voltage_output, port_cfg, version, smoke_detector_alarm, smoke_detector_power_supply, power_supply, main_power_supply, type, device_no)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.id is not None:
+            result["id"] = from_union([from_int, from_none], self.id)
+        if self.name is not None:
+            result["name"] = from_union([from_str, from_none], self.name)
+        if self.sub_system_list is not None:
+            result["subSystemList"] = from_union([lambda x: from_list(from_int, x), from_none], self.sub_system_list)
+        if self.zone_list is not None:
+            result["ZoneList"] = from_union([lambda x: from_list(lambda x: to_class(ZoneList, x), x), from_none], self.zone_list)
+        if self.output_list is not None:
+            result["OutputList"] = from_union([lambda x: from_list(lambda x: to_class(TransmitterOutputList, x), x), from_none], self.output_list)
+        if self.seq is not None:
+            result["seq"] = from_union([from_str, from_none], self.seq)
+        if self.status is not None:
+            result["status"] = from_union([from_str, from_none], self.status)
+        if self.tamper_evident is not None:
+            result["tamperEvident"] = from_union([from_bool, from_none], self.tamper_evident)
+        if self.charge is not None:
+            result["charge"] = from_union([from_str, from_none], self.charge)
+        if self.charge_value is not None:
+            result["chargeValue"] = from_union([from_int, from_none], self.charge_value)
+        if self.signal is not None:
+            result["signal"] = from_union([from_int, from_none], self.signal)
+        if self.model is not None:
+            result["model"] = from_union([from_str, from_none], self.model)
+        if self.temperature is not None:
+            result["temperature"] = from_union([from_int, from_none], self.temperature)
+        if self.is_via_repeater is not None:
+            result["isViaRepeater"] = from_union([from_bool, from_none], self.is_via_repeater)
+        if self.repeater_name is not None:
+            result["repeaterName"] = from_union([from_str, from_none], self.repeater_name)
+        if self.moved_alarm_enabled is not None:
+            result["movedAlarmEnabled"] = from_union([from_bool, from_none], self.moved_alarm_enabled)
+        if self.tamper_port_enabled is not None:
+            result["tamperPortEnabled"] = from_union([from_bool, from_none], self.tamper_port_enabled)
+        if self.voltage_output is not None:
+            result["voltageOutput"] = from_union([from_str, from_none], self.voltage_output)
+        if self.port_cfg is not None:
+            result["portCfg"] = from_union([from_str, from_none], self.port_cfg)
+        if self.version is not None:
+            result["version"] = from_union([from_str, from_none], self.version)
+        if self.smoke_detector_alarm is not None:
+            result["smokeDetectorAlarm"] = from_union([from_str, from_none], self.smoke_detector_alarm)
+        if self.smoke_detector_power_supply is not None:
+            result["smokeDetectorPowerSupply"] = from_union([from_str, from_none], self.smoke_detector_power_supply)
+        if self.power_supply is not None:
+            result["powerSupply"] = from_union([from_str, from_none], self.power_supply)
+        if self.main_power_supply is not None:
+            result["mainPowerSupply"] = from_union([from_bool, from_none], self.main_power_supply)
+        if self.type is not None:
+            result["type"] = from_union([from_str, from_none], self.type)
+        if self.device_no is not None:
+            result["deviceNo"] = from_union([from_int, from_none], self.device_no)
+        return result
+
+
+@dataclass
+class TransmitterList:
+    transmitter: Optional[Transmitter] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'TransmitterList':
+        assert isinstance(obj, dict)
+        transmitter = from_union([Transmitter.from_dict, from_none], obj.get("Transmitter"))
+        return TransmitterList(transmitter)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.transmitter is not None:
+            result["Transmitter"] = from_union([lambda x: to_class(Transmitter, x), from_none], self.transmitter)
+        return result
+
+
+@dataclass
+class ExDevStatus:
+    output_mod_list: Optional[List[OutputModList]] = None
+    output_list: Optional[List[ExDevStatusOutputList]] = None
+    siren_list: Optional[List[SirenList]] = None
+    repeater_list: Optional[List[RepeaterList]] = None
+    card_reader_list: Optional[List[CardReaderList]] = None
+    extension_list: Optional[List[ExtensionList]] = None
+    keypad_list: Optional[List[KeypadList]] = None
+    remote_list: Optional[List[RemoteList]] = None
+    transmitter_list: Optional[List[TransmitterList]] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'ExDevStatus':
+        assert isinstance(obj, dict)
+        output_mod_list = from_union([lambda x: from_list(OutputModList.from_dict, x), from_none], obj.get("OutputModList"))
+        output_list = from_union([lambda x: from_list(ExDevStatusOutputList.from_dict, x), from_none], obj.get("OutputList"))
+        siren_list = from_union([lambda x: from_list(SirenList.from_dict, x), from_none], obj.get("SirenList"))
+        repeater_list = from_union([lambda x: from_list(RepeaterList.from_dict, x), from_none], obj.get("RepeaterList"))
+        card_reader_list = from_union([lambda x: from_list(CardReaderList.from_dict, x), from_none], obj.get("CardReaderList"))
+        extension_list = from_union([lambda x: from_list(ExtensionList.from_dict, x), from_none], obj.get("ExtensionList"))
+        keypad_list = from_union([lambda x: from_list(KeypadList.from_dict, x), from_none], obj.get("KeypadList"))
+        remote_list = from_union([lambda x: from_list(RemoteList.from_dict, x), from_none], obj.get("RemoteList"))
+        transmitter_list = from_union([lambda x: from_list(TransmitterList.from_dict, x), from_none], obj.get("TransmitterList"))
+        return ExDevStatus(output_mod_list, output_list, siren_list, repeater_list, card_reader_list, extension_list, keypad_list, remote_list, transmitter_list)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.output_mod_list is not None:
+            result["OutputModList"] = from_union([lambda x: from_list(lambda x: to_class(OutputModList, x), x), from_none], self.output_mod_list)
+        if self.output_list is not None:
+            result["OutputList"] = from_union([lambda x: from_list(lambda x: to_class(ExDevStatusOutputList, x), x), from_none], self.output_list)
+        if self.siren_list is not None:
+            result["SirenList"] = from_union([lambda x: from_list(lambda x: to_class(SirenList, x), x), from_none], self.siren_list)
+        if self.repeater_list is not None:
+            result["RepeaterList"] = from_union([lambda x: from_list(lambda x: to_class(RepeaterList, x), x), from_none], self.repeater_list)
+        if self.card_reader_list is not None:
+            result["CardReaderList"] = from_union([lambda x: from_list(lambda x: to_class(CardReaderList, x), x), from_none], self.card_reader_list)
+        if self.extension_list is not None:
+            result["ExtensionList"] = from_union([lambda x: from_list(lambda x: to_class(ExtensionList, x), x), from_none], self.extension_list)
+        if self.keypad_list is not None:
+            result["KeypadList"] = from_union([lambda x: from_list(lambda x: to_class(KeypadList, x), x), from_none], self.keypad_list)
+        if self.remote_list is not None:
+            result["RemoteList"] = from_union([lambda x: from_list(lambda x: to_class(RemoteList, x), x), from_none], self.remote_list)
+        if self.transmitter_list is not None:
+            result["TransmitterList"] = from_union([lambda x: from_list(lambda x: to_class(TransmitterList, x), x), from_none], self.transmitter_list)
+        return result
+
+
+@dataclass
+class ExDevStatusResponse:
+    ex_dev_status: Optional[ExDevStatus] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'ExDevStatusResponse':
+        assert isinstance(obj, dict)
+        ex_dev_status = from_union([ExDevStatus.from_dict, from_none], obj.get("ExDevStatus"))
+        return ExDevStatusResponse(ex_dev_status)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.ex_dev_status is not None:
+            result["ExDevStatus"] = from_union([lambda x: to_class(ExDevStatus, x), from_none], self.ex_dev_status)
         return result
 

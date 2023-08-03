@@ -33,7 +33,7 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING, INTERNAL_API, ENABLE_DEBUG_OUTPUT
-from .model import ZonesResponse, Zone, SubSystemResponse, SubSys, Arming, ZonesConf, ZoneConfig, RelaySwitchConf, RelayStatus, RelayStatusSearchResponse, OutputConfList, JSONResponseStatus
+from .model import ZonesResponse, Zone, SubSystemResponse, SubSys, Arming, ZonesConf, ZoneConfig, RelaySwitchConf, OutputStatusFull, RelayStatusSearchResponse, OutputConfList, JSONResponseStatus, ExDevStatusResponse
 
 PLATFORMS: list[Platform] = [Platform.ALARM_CONTROL_PANEL, Platform.SENSOR, Platform.SWITCH]
 _LOGGER = logging.getLogger(__name__)
@@ -138,7 +138,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     """ Zones aka devices """
     devices: dict[int, ZoneConfig] = {}
     relays: dict[int, RelaySwitchConf] = {}
-    relays_status: dict[int, RelayStatus] = {}
+    relays_status: dict[int, OutputStatusFull] = {}
 
 
     def __init__(
@@ -165,7 +165,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
 
     def _get_device_info(self):
         endpoint = self.axpro.build_url(f"http://{self.host}" + hikaxpro.consts.Endpoints.SystemDeviceInfo, False)
-        response = self.axpro.make_request(endpoint, "GET", False)
+        response = self.axpro.make_request(endpoint, "GET", None, True)
 
         if response.status_code != 200:
             raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
@@ -190,12 +190,28 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
 
     def _load_relays(self) -> OutputConfList:
         endpoint = self.axpro.build_url(f"http://{self.host}" + hikaxpro.consts.Endpoints.OutputConfig, True)
-        response = self.axpro.make_request(endpoint, "GET", False)
+        response = self.axpro.make_request(endpoint, "GET", None, True)
 
         if response.status_code != 200:
             raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
         _LOGGER.debug(response.text)
         return OutputConfList.from_dict(response.json())
+
+    def load_ext_devices_status(self):
+        statuses = self._load_ext_devices_status()
+        if statuses is not None:
+            self.relays_status = {}
+            for item in statuses.ex_dev_status.output_list:
+                self.relays_status[item.output.id] = item.output
+
+    def _load_ext_devices_status(self) -> ExDevStatusResponse:
+        endpoint = self.axpro.build_url(f"http://{self.host}" + "/ISAPI/SecurityCP/status/exDevStatus", True)
+        response = self.axpro.make_request(endpoint, "GET", None, True)
+
+        if response.status_code != 200:
+            raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
+        _LOGGER.debug(response.text)
+        return ExDevStatusResponse.from_dict(response.json())
 
     def load_devices(self):
         devices = self._load_devices()
@@ -206,7 +222,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
 
     def _load_devices(self) -> ZonesConf:
         endpoint = self.axpro.build_url(f"http://{self.host}" + hikaxpro.consts.Endpoints.ZonesConfig, True)
-        response = self.axpro.make_request(endpoint, "GET", False)
+        response = self.axpro.make_request(endpoint, "GET", None, True)
 
         if response.status_code != 200:
             raise hikaxpro.errors.UnexpectedResponseCodeError(response.status_code, response.text)
@@ -266,9 +282,9 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.zones = zones
         _LOGGER.debug("Zones: %s", zone_response)
         # relays
-        current_relays_state = self._update_relays_status()
+        devices_status = self._load_ext_devices_status()
         relays_status = {}
-        for item in current_relays_state.output_search.output_list:
+        for item in devices_status.ex_dev_status.output_list:
             relays_status[item.output.id] = item.output
         self.relays_status = relays_status
         _LOGGER.debug("Relay status: %s", relays_status)
