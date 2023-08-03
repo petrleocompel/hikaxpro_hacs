@@ -658,6 +658,7 @@ class ZoneConfig:
     delay_time: Optional[int] = None
     timeout_limit: Optional[bool] = None
     check_time: Optional[int] = None
+    fault_resistence: Optional[float] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'ZoneConfig':
@@ -750,6 +751,7 @@ class ZoneConfig:
         delay_time = from_union([from_int, from_none], obj.get("delayTime"))
         timeout_limit = from_union([from_bool, from_none], obj.get("timeoutLimit"))
         check_time = from_union([from_int, from_none], obj.get("checkTime"))
+        fault_resistence = from_union([from_float, from_none], obj.get("faultResistence"))
         return ZoneConfig(
             id,
             zone_name,
@@ -797,6 +799,7 @@ class ZoneConfig:
             delay_time,
             timeout_limit,
             check_time,
+            fault_resistence,
         )
 
     def to_dict(self) -> dict:
@@ -890,6 +893,8 @@ class ZoneConfig:
             result["timeoutLimit"] = from_union([from_bool, from_none], self.timeout_limit)
         if self.check_time is not None:
             result["checkTime"] = from_union([from_int, from_none], self.check_time)
+        if self.fault_resistence is not None:
+            result["faultResistence"] = from_union([to_float, from_none], self.fault_resistence)
         return result
 
 
