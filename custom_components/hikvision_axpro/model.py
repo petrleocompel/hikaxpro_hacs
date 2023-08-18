@@ -96,6 +96,7 @@ class DetectorType(Enum):
     SLIM_MAGNETIC_CONTACT = "slimMagneticContact"
     SMART_LOCK = "smartLock"
     SMOKE_DETECTOR = "smokeDetector"
+    TAMPER_DETECTOR = "tamperDetector"
     TEMPERATURE_DETECTOR = "temperatureDetector"
     TRIPLE_TECHNOLOGY_DETECTOR = "tripleTechnologyPirDetector"
     WATER_DETECTOR = "waterDetector"
