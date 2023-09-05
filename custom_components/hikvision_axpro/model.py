@@ -613,6 +613,7 @@ class TimeoutType(Enum):
 
 class ZoneStatusCFG(Enum):
     TRIGGER_ARM = "triggerArm"
+    TRIGGER_DISARM = "triggerDisArm"
 
 
 @dataclass
@@ -2502,7 +2503,13 @@ class ExDevStatusResponse:
     @staticmethod
     def from_dict(obj: Any) -> 'ExDevStatusResponse':
         assert isinstance(obj, dict)
-        ex_dev_status = from_union([ExDevStatus.from_dict, from_none], obj.get("ExDevStatus"))
+        try:
+            ex_dev_status = from_union([ExDevStatus.from_dict, from_none], obj.get("ExDevStatus"))
+        except:
+            _LOGGER.warning("Invalid external device status %s", obj.get("ExDevStatus"))
+            _LOGGER.warning("ExDevStatusResponse info: %s", obj)
+            ex_dev_status = None
+
         return ExDevStatusResponse(ex_dev_status)
 
     def to_dict(self) -> dict:

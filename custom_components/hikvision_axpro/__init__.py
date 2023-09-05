@@ -201,8 +201,9 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         statuses = self._load_ext_devices_status()
         if statuses is not None:
             self.relays_status = {}
-            for item in statuses.ex_dev_status.output_list:
-                self.relays_status[item.output.id] = item.output
+            if statuses.ex_dev_status is not None:
+                for item in statuses.ex_dev_status.output_list:
+                    self.relays_status[item.output.id] = item.output
 
     def _load_ext_devices_status(self) -> ExDevStatusResponse:
         endpoint = self.axpro.build_url(f"http://{self.host}" + "/ISAPI/SecurityCP/status/exDevStatus", True)
@@ -284,8 +285,9 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         # relays
         devices_status = self._load_ext_devices_status()
         relays_status = {}
-        for item in devices_status.ex_dev_status.output_list:
-            relays_status[item.output.id] = item.output
+        if devices_status.ex_dev_status is not None:
+            for item in devices_status.ex_dev_status.output_list:
+                relays_status[item.output.id] = item.output
         self.relays_status = relays_status
         _LOGGER.debug("Relay status: %s", relays_status)
 
