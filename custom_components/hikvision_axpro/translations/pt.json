@@ -15,7 +15,7 @@
                 "title": "Adicionar sistema AX Pro",
                 "data": {
                     "host": "IP do alarme",
-                    "password": "Palava passe",
+                    "password": "Palavra passe",
                     "username": "Usuário",
                     "enabled": "Usar código para desarmar",
                     "code_format": "Formato do código (TEXTO ou NÚMERO)",
