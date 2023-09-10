@@ -1,0 +1,51 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Das Gerät ist bereits konfiguriert"
+        },
+        "error": {
+            "cannot_connect": "Verbindung fehlgeschlagen",
+            "invalid_auth": "Ungültige Authentifizierung",
+            "invalid_code": "Ungültiger Code",
+            "invalid_code_format": "Ungültiges Code-Format. Sie können nur TEXT oder NUMMER als Wert verwenden",
+            "unknown": "Unerwarteter Fehler"
+        },
+        "step": {
+            "user": {
+                "title": "AX Pro-System hinzufügen",
+                "data": {
+                    "host": "IP-Adresse der Alarmzentrale",
+                    "password": "Passwort",
+                    "username": "Benutzername",
+                    "enabled": "Code zum Deaktivieren verwenden",
+                    "code_format": "Code-Format (TEXT oder NUMMER)",
+                    "use_code_arming": "Code zum Aktivieren verwenden",
+                    "allow_subsystems": "Bereiche als separate Zonen zum Aktivieren/Deaktivieren einbeziehen",
+                    "code": "Code",
+                    "scan_interval": "Scan-Intervall des Systems",
+                    "internal_api": "Interne API-Bibliothek verwenden (AXHub)",
+                    "debug": "Debug-Ausgabe aktivieren"
+                }
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Konfiguration aktualisieren",
+                "data": {
+                    "password": "Passwort",
+                    "username": "Benutzername",
+                    "enabled": "Code zum Deaktivieren verwenden",
+                    "code_format": "Code-Format (TEXT oder NUMMER)",
+                    "use_code_arming": "Code zum Aktivieren verwenden",
+                    "allow_subsystems": "Bereiche als separate Zonen zum Aktivieren/Deaktivieren einbeziehen",
+                    "code": "Code",
+                    "scan_interval": "Scan-Intervall des Systems",
+                    "internal_api": "VERALTET - Interne API-Bibliothek verwenden (AXHub)",
+                    "debug": "Debug-Ausgabe aktivieren"
+                }
+            }
+        }
+    }
+}

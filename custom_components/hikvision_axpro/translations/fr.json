@@ -1,0 +1,51 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Le dispositif est déjà configuré"
+        },
+        "error": {
+            "cannot_connect": "Échec de la connexion",
+            "invalid_auth": "Authentification invalide",
+            "invalid_code": "Code invalide",
+            "invalid_code_format": "Format de code invalide. Vous ne pouvez utiliser que TEXTE ou NUMÉRO comme valeur",
+            "unknown": "Erreur inattendue"
+        },
+        "step": {
+            "user": {
+                "title": "Ajouter un système AX Pro",
+                "data": {
+                    "host": "Adresse IP de l'alarme",
+                    "password": "Mot de passe",
+                    "username": "Nom d'utilisateur",
+                    "enabled": "Utiliser un code pour désarmer",
+                    "code_format": "Format du code (TEXTE ou NUMÉRO)",
+                    "use_code_arming": "Utiliser un code pour armer",
+                    "allow_subsystems": "Inclure des zones comme des zones distinctes pour armer/désarmer",
+                    "code": "Code",
+                    "scan_interval": "Intervalle de balayage du système",
+                    "internal_api": "Utiliser une bibliothèque API interne (AXHub)",
+                    "debug": "Activer la sortie de débogage"
+                }
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Mettre à jour la configuration",
+                "data": {
+                    "password": "Mot de passe",
+                    "username": "Nom d'utilisateur",
+                    "enabled": "Utiliser un code pour désarmer",
+                    "code_format": "Format du code (TEXTE ou NUMÉRO)",
+                    "use_code_arming": "Utiliser un code pour armer",
+                    "allow_subsystems": "Inclure des zones comme des zones distinctes pour armer/désarmer",
+                    "code": "Code",
+                    "scan_interval": "Intervalle de balayage du système",
+                    "internal_api": "OBSOLÈTE - Utiliser une bibliothèque API interne (AXHub)",
+                    "debug": "Activer la sortie de débogage"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,51 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "O dispositivo já está configurado"
+        },
+        "error": {
+            "cannot_connect": "Falha ao conectar",
+            "invalid_auth": "Autenticação inválida",
+            "invalid_code": "Código inválido",
+            "invalid_code_format": "Formato do código inválido. Só pode usar TEXTO ou NÚMERO como valor",
+            "unknown": "Erro inesperado"
+        },
+        "step": {
+            "user": {
+                "title": "Adicionar sistema AX Pro",
+                "data": {
+                    "host": "IP do alarme",
+                    "password": "Palavra passe",
+                    "username": "Usuário",
+                    "enabled": "Usar código para desarmar",
+                    "code_format": "Formato do código (TEXTO ou NÚMERO)",
+                    "use_code_arming": "Usar código para armar",
+                    "allow_subsystems": "Incluir áreas como zonas separadas para armar/desarmar",
+                    "code": "Código",
+                    "scan_interval": "Intervalo de extração do sistema",
+                    "internal_api": "Usar livraria API interna (AXHub)",
+                    "debug": "Habilitar saída de depuração"
+                }
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Atualizar configuração",
+                "data": {
+                    "password": "Palava passe",
+                    "username": "Usuário",
+                    "enabled": "Usar código para desarmar",
+                    "code_format": "Formato do código (TEXTO ou NÚMERO)",
+                    "use_code_arming": "Usar código para armar",
+                    "allow_subsystems": "Incluir áreas como zonas separadas para armar/desarmar",
+                    "code": "Código",
+                    "scan_interval": "Intervalo de extração do sistema",
+                    "internal_api": "DESCONTINUADO - Usar livraria API interna (AXHub)",
+                    "debug": "Habilitar saída de depuração"
+                }
+            }
+        }
+    }
+}

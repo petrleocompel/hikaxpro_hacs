@@ -1,0 +1,51 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Il dispositivo è già configurato"
+        },
+        "error": {
+            "cannot_connect": "Impossibile connettersi",
+            "invalid_auth": "Autenticazione non valida",
+            "invalid_code": "Codice non valido",
+            "invalid_code_format": "Formato del codice non valido. Puoi utilizzare solo TESTO o NUMERO come valore",
+            "unknown": "Errore imprevisto"
+        },
+        "step": {
+            "user": {
+                "title": "Aggiungi sistema AX Pro",
+                "data": {
+                    "host": "Indirizzo IP dell'allarme",
+                    "password": "Password",
+                    "username": "Nome utente",
+                    "enabled": "Usa il codice per disattivare",
+                    "code_format": "Formato del codice (TESTO o NUMERO)",
+                    "use_code_arming": "Usa il codice per armare",
+                    "allow_subsystems": "Includi aree come zone separate per armare/disarmare",
+                    "code": "Codice",
+                    "scan_interval": "Intervallo di scansione del sistema",
+                    "internal_api": "Usa la libreria API interna (AXHub)",
+                    "debug": "Abilita l'output di debug"
+                }
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Aggiorna configurazione",
+                "data": {
+                    "password": "Password",
+                    "username": "Nome utente",
+                    "enabled": "Usa il codice per disattivare",
+                    "code_format": "Formato del codice (TESTO o NUMERO)",
+                    "use_code_arming": "Usa il codice per armare",
+                    "allow_subsystems": "Includi aree come zone separate per armare/disarmare",
+                    "code": "Codice",
+                    "scan_interval": "Intervallo di scansione del sistema",
+                    "internal_api": "OBSOLETA - Usa la libreria API interna (AXHub)",
+                    "debug": "Abilita l'output di debug"
+                }
+            }
+        }
+    }
+}
