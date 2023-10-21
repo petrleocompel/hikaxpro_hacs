@@ -202,6 +202,8 @@ class ZoneType(Enum):
     NON_ALARM = "Non-Alarm"
     """ 24 - hour silent zone """
     NO_SOUND_24 = "24hNoSound"
+    """ 24 - hour silent zone """
+    H24 = "24h"
     """ perimeter zone """
     PERIMETER = "Perimeter"
     """ timeout zone """
