@@ -32,7 +32,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING, INTERNAL_API, ENABLE_DEBUG_OUTPUT
+from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING, INTERNAL_API, ENABLE_DEBUG_OUTPUT, ALLOW_SUBSYSTEMS
 from .model import ZonesResponse, Zone, SubSystemResponse, SubSys, Arming, ZonesConf, ZoneConfig, RelaySwitchConf, OutputStatusFull, RelayStatusSearchResponse, OutputConfList, JSONResponseStatus, ExDevStatusResponse
 
 PLATFORMS: list[Platform] = [Platform.ALARM_CONTROL_PANEL, Platform.SENSOR, Platform.SWITCH]
@@ -73,6 +73,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     code_format = entry.data[ATTR_CODE_FORMAT]
     code = entry.data[CONF_CODE]
     use_code_arming = entry.data[USE_CODE_ARMING]
+    use_sub_systems = entry.data.get(ALLOW_SUBSYSTEMS, False)
     axpro = hikaxpro.HikAxPro(host, username, password)
     if entry.data.get(INTERNAL_API):
         axpro = hikax.HikAx(host, username, password)
@@ -98,7 +99,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         code_format,
         use_code_arming,
         code,
-        update_interval
+        update_interval,
+        use_sub_systems
     )
     try:
         async with timeout(10):
@@ -139,6 +141,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     devices: dict[int, ZoneConfig] = {}
     relays: dict[int, RelaySwitchConf] = {}
     relays_status: dict[int, OutputStatusFull] = {}
+    use_sub_systems: bool
 
 
     def __init__(
@@ -150,7 +153,8 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         code_format,
         use_code_arming,
         code,
-        update_interval: float
+        update_interval: float,
+        use_sub_systems = False
     ):
         self.axpro = axpro
         self.state = None
@@ -161,6 +165,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.code_format = code_format
         self.use_code_arming = use_code_arming
         self.code = code
+        self.use_sub_systems = use_sub_systems
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=update_interval))
 
     def _get_device_info(self):
@@ -260,6 +265,8 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
             self.sub_systems = {}
             for subsys in subsys_arr:
                 self.sub_systems[subsys.id] = subsys
+                if self.use_sub_systems and subsys.id is not 1:
+                    continue
                 if subsys.alarm:
                     status = STATE_ALARM_TRIGGERED
                 elif subsys.arming == Arming.AWAY:
