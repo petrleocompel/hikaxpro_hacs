@@ -722,7 +722,12 @@ class ZoneConfig:
         stay_arm_delay_time = from_union([from_int, from_none], obj.get("stayArmDelayTime"))
         siren_delay_time = from_union([from_int, from_none], obj.get("sirenDelayTime"))
         detector_seq = from_union([from_str, from_none], obj.get("detectorSeq"))
-        cross_zone_cfg = from_union([CrossZoneCFG.from_dict, from_none], obj.get("CrossZoneCfg"))
+        try:
+            cross_zone_cfg = from_union([CrossZoneCFG.from_dict, from_none], obj.get("CrossZoneCfg"))
+        except:
+            _LOGGER.warning("Invalid CrossZoneCfg %s", obj.get("CrossZoneCfg"))
+            _LOGGER.warning("Detector info: %s", obj)
+            cross_zone_cfg = None
         arm_no_bypass_enabled = from_union([from_bool, from_none], obj.get("armNoBypassEnabled"))
         related_pircam = from_union([RelatedPIRCAM.from_dict, from_none], obj.get("RelatedPIRCAM"))
         arm_mode = from_union([ArmModeConf, from_none], obj.get("armMode"))
