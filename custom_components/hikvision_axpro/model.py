@@ -101,6 +101,7 @@ class DetectorType(Enum):
     TRIPLE_TECHNOLOGY_DETECTOR = "tripleTechnologyPirDetector"
     WATER_DETECTOR = "waterDetector"
     WATER_LEAK_DETECTOR = "waterLeakDetector"
+    WIRELESS_180_PANORAMIC_DETECTOR = "wireless180PanoramicDetector"
     WIRELESS_CODETECTOR = "wirelessCODetector"
     WIRELESS_DTAMCURTAIN_DETECTOR = "wirelessDTAMCurtainDetector"
     WIRELESS_EXTERNAL_MAGNET_DETECTOR = "wirelessExternalMagnetDetector"
