@@ -265,7 +265,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
             self.sub_systems = {}
             for subsys in subsys_arr:
                 self.sub_systems[subsys.id] = subsys
-                if self.use_sub_systems and subsys.id is not 1:
+                if self.use_sub_systems and subsys.id != 1:
                     continue
                 if subsys.alarm:
                     status = STATE_ALARM_TRIGGERED
