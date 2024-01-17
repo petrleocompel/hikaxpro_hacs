@@ -214,6 +214,32 @@ class ZoneType(Enum):
 
 
 @dataclass
+class MagnetShockCurrentStatus:
+    magnet_open_status: Optional[bool] = None
+    magnet_shock_status: Optional[bool] = None
+    magnet_tilt_status: Optional[bool] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'MagnetShockCurrentStatus':
+        assert isinstance(obj, dict)
+        magnet_open_status = from_union([from_bool, from_none], obj.get("magnetOpenStatus"))
+        magnet_shock_status = from_union([from_bool, from_none], obj.get("magnetShockStatus"))
+        magnet_tilt_status = from_union([from_bool, from_none], obj.get("magnetTiltStatus"))
+        return MagnetShockCurrentStatus(magnet_open_status, magnet_shock_status, magnet_tilt_status)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.magnet_open_status is not None:
+            result["magnetOpenStatus"] = from_union([from_bool, from_none], self.magnet_open_status)
+        if self.magnet_shock_status is not None:
+            result["magnetShockStatus"] = from_union([from_bool, from_none], self.magnet_shock_status)
+        if self.magnet_tilt_status is not None:
+            result["magnetTiltStatus"] = from_union([from_bool, from_none], self.magnet_tilt_status)
+        return result
+
+
+
+@dataclass
 class Zone:
     id: int
     name: str
@@ -245,6 +271,7 @@ class Zone:
     is_support_add_type: Optional[bool] = None
     access_module_type: Optional[AccessModuleType] = None
     module_channel: Optional[int] = None
+    magnet_shock_current_status: Optional[MagnetShockCurrentStatus] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'Zone':
@@ -315,10 +342,18 @@ class Zone:
             _LOGGER.warning("Invalid accessModuleType %s", obj.get("accessModuleType"))
             _LOGGER.warning("Detector info: %s", obj)
             access_module_type = None
+        try:
+            magnet_shock_current_status = from_union([MagnetShockCurrentStatus, from_none], obj.get("MagnetShockCurrentStatus"))
+        except:
+            _LOGGER.warning("Invalid MagnetShockCurrentStatus %s", obj.get("MagnetShockCurrentStatus"))
+            _LOGGER.warning("Detector info: %s", obj)
+            magnet_shock_current_status = None
+
         return Zone(id, name, status, tamper_evident, shielded, bypassed, armed, is_arming, alarm, sub_system_no,
                     linkage_sub_system, detector_type, stay_away, zone_type, zone_attrib, device_no, abnormal_or_not,
                     charge, charge_value, signal, temperature, humidity, model, is_via_repeater, version,
-                    magnet_open_status, input_list, is_support_add_type, access_module_type, module_channel)
+                    magnet_open_status, input_list, is_support_add_type, access_module_type, module_channel,
+                    magnet_shock_current_status)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -355,6 +390,8 @@ class Zone:
         result["accessModuleType"] = from_union([lambda x: to_enum(AccessModuleType, x), from_none],
                                                 self.access_module_type)
         result["moduleChannel"] = from_union([from_int, from_none], self.module_channel)
+        if self.magnet_shock_current_status is not None:
+            result["MagnetShockCurrentStatus"] = from_union([lambda x: to_class(MagnetShockCurrentStatus, x), from_none], self.magnet_shock_current_status)
         return result
 
 

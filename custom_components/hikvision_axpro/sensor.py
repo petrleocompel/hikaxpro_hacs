@@ -73,9 +73,12 @@ async def async_setup_entry(
             if detector_type == DetectorType.WIRELESS_EXTERNAL_MAGNET_DETECTOR:
                 devices.append(HikWirelessExtMagnetDetector(coordinator, zone.zone, entry.entry_id))
             if detector_type == DetectorType.DOOR_MAGNETIC_CONTACT_DETECTOR \
-                    or detector_type == DetectorType.SLIM_MAGNETIC_CONTACT \
-                    or detector_type == DetectorType.MAGNET_SHOCK_DETECTOR:
+                    or detector_type == DetectorType.SLIM_MAGNETIC_CONTACT:
                 devices.append(HikMagneticContactDetector(coordinator, zone.zone, entry.entry_id))
+            if detector_type == DetectorType.MAGNET_SHOCK_DETECTOR:
+                devices.append(HikMagnetTiltDetector(coordinator, zone.zone, entry.entry_id))
+                devices.append(HikMagnetOpenDetector(coordinator, zone.zone, entry.entry_id))
+                devices.append(HikMagnetShockDetector(coordinator, zone.zone, entry.entry_id))
             if detector_type == DetectorType.WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR:
                 devices.append(HikHumidity(coordinator, zone.zone, entry.entry_id))
             # Generic Attrs
@@ -215,6 +218,141 @@ class HikMagneticContactDetector(CoordinatorEntity, HikDevice, BinarySensorEntit
             return value == Status.ONLINE
         else:
             return False
+
+class HikMagnetShockDetector(CoordinatorEntity, HikDevice, BinarySensorEntity):
+    """Representation of Hikvision external magnet detector."""
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-magnet-shock-{zone.id}"
+        self._device_class = BinarySensorDeviceClass.PRESENCE
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-magnet-shock-{zone.id}"
+
+    @property
+    def name(self) -> str | None:
+        return "Magnet shock detection"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id] and self.coordinator.zones[self.zone.id].magnet_shock_current_status:
+            value = self.coordinator.zones[self.zone.id].magnet_shock_current_status.magnet_shock_status
+            if value is True:
+                self._attr_state = value
+                self._attr_icon = "mdi:magnet-on"
+            elif value is False:
+                self._attr_state = value
+                self._attr_icon = "mdi:magnet"
+            else:
+                self._attr_state = None
+                self._attr_icon = "mdi:help"
+        else:
+            self._attr_state = None
+            self._attr_icon = "mdi:help"
+        self.async_write_ha_state()
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id] and self.coordinator.zones[self.zone.id].magnet_shock_current_status:
+            return self.coordinator.zones[self.zone.id].magnet_shock_current_status.magnet_shock_status
+        else:
+            return None
+
+class HikMagnetOpenDetector(CoordinatorEntity, HikDevice, BinarySensorEntity):
+    """Representation of Hikvision external magnet detector."""
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-magnet-open-{zone.id}"
+        self._device_class = BinarySensorDeviceClass.PRESENCE
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-magnet-open-{zone.id}"
+
+    @property
+    def name(self) -> str | None:
+        return "Magnet open detection"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id] and self.coordinator.zones[self.zone.id].magnet_shock_current_status:
+            value = self.coordinator.zones[self.zone.id].magnet_shock_current_status.magnet_open_status
+            if value is True:
+                self._attr_state = value
+                self._attr_icon = "mdi:magnet-on"
+            elif value is False:
+                self._attr_state = value
+                self._attr_icon = "mdi:magnet"
+            else:
+                self._attr_state = None
+                self._attr_icon = "mdi:help"
+        else:
+            self._attr_state = None
+            self._attr_icon = "mdi:help"
+        self.async_write_ha_state()
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id] and self.coordinator.zones[self.zone.id].magnet_shock_current_status:
+            return self.coordinator.zones[self.zone.id].magnet_shock_current_status.magnet_open_status
+        else:
+            return None
+
+class HikMagnetTiltDetector(CoordinatorEntity, HikDevice, BinarySensorEntity):
+    """Representation of Hikvision external magnet detector."""
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-magnet-tilt-{zone.id}"
+        self._device_class = BinarySensorDeviceClass.PRESENCE
+        self._attr_has_entity_name = True
+        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-magnet-tilt-{zone.id}"
+
+    @property
+    def name(self) -> str | None:
+        return "Magnet tilt detection"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id] and self.coordinator.zones[self.zone.id].magnet_shock_current_status:
+            value = self.coordinator.zones[self.zone.id].magnet_shock_current_status.magnet_tilt_status
+            if value is True:
+                self._attr_state = value
+                self._attr_icon = "mdi:magnet-on"
+            elif value is False:
+                self._attr_state = value
+                self._attr_icon = "mdi:magnet"
+            else:
+                self._attr_state = None
+                self._attr_icon = "mdi:help"
+        else:
+            self._attr_state = None
+            self._attr_icon = "mdi:help"
+        self.async_write_ha_state()
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        if self.coordinator.zones and self.coordinator.zones[self.zone.id] and self.coordinator.zones[self.zone.id].magnet_shock_current_status:
+            return self.coordinator.zones[self.zone.id].magnet_shock_current_status.magnet_tilt_status
+        else:
+            return None
 
 
 class HikTemperature(CoordinatorEntity, HikDevice, SensorEntity):
