@@ -1869,7 +1869,7 @@ class OutputMod:
     power_load: Optional[int] = None
     energy_sum_vaule: Optional[int] = None
     relay_list: Optional[List[RelayList]] = None
-    volt_value_v20: Optional[int] = None
+    volt_value_v20: Optional[float] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'OutputMod':
@@ -1889,7 +1889,7 @@ class OutputMod:
         power_load = from_union([from_int, from_none], obj.get("powerLoad"))
         energy_sum_vaule = from_union([from_int, from_none], obj.get("energySumVaule"))
         relay_list = from_union([lambda x: from_list(RelayList.from_dict, x), from_none], obj.get("relayList"))
-        volt_value_v20 = from_union([from_int, from_none], obj.get("voltValueV20"))
+        volt_value_v20 = from_union([from_float, from_none], obj.get("voltValueV20"))
         return OutputMod(id, seq, status, tamper_evident, charge, signal, model, temperature, is_via_repeater, repeater_name, volt_value, current_value, power_load, energy_sum_vaule, relay_list, volt_value_v20)
 
     def to_dict(self) -> dict:
@@ -1925,7 +1925,7 @@ class OutputMod:
         if self.relay_list is not None:
             result["relayList"] = from_union([lambda x: from_list(lambda x: to_class(RelayList, x), x), from_none], self.relay_list)
         if self.volt_value_v20 is not None:
-            result["voltValueV20"] = from_union([from_int, from_none], self.volt_value_v20)
+            result["voltValueV20"] = from_union([from_float, from_none], self.volt_value_v20)
         return result
 
 
