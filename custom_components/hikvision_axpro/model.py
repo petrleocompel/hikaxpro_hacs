@@ -343,7 +343,7 @@ class Zone:
             _LOGGER.warning("Detector info: %s", obj)
             access_module_type = None
         try:
-            magnet_shock_current_status = from_union([MagnetShockCurrentStatus, from_none], obj.get("MagnetShockCurrentStatus"))
+            magnet_shock_current_status = from_union([MagnetShockCurrentStatus.from_dict, from_none], obj.get("MagnetShockCurrentStatus"))
         except:
             _LOGGER.warning("Invalid MagnetShockCurrentStatus %s", obj.get("MagnetShockCurrentStatus"))
             _LOGGER.warning("Detector info: %s", obj)
