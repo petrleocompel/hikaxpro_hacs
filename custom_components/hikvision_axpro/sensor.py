@@ -32,7 +32,7 @@ from homeassistant.helpers.typing import StateType
 
 
 from . import HikAxProDataUpdateCoordinator
-from .const import DATA_COORDINATOR, DOMAIN
+from .const import DATA_COORDINATOR, DOMAIN, ENTITY_DESC_KEY_BATTERY, ENTITY_DESC_KEY_HUMIDITY, ENTITY_DESC_KEY_SIGNAL_STRENGTH, ENTITY_DESC_KEY_TEMPERATURE
 from .model import DetectorType, Zone, Status, detector_model_to_name
 
 _LOGGER = logging.getLogger(__name__)
@@ -502,7 +502,7 @@ class HikTemperature(CoordinatorEntity, HikDevice, SensorEntity):
             f"{SENSOR_DOMAIN}.{coordinator.device_name}-temperature-{zone.id}"
         )
         self.entity_description = SensorEntityDescription(
-            SensorDeviceClass.TEMPERATURE,
+            key=ENTITY_DESC_KEY_TEMPERATURE,
             device_class=SensorDeviceClass.TEMPERATURE,
             state_class=SensorStateClass.MEASUREMENT,
             native_unit_of_measurement=UnitOfTemperature.CELSIUS,
@@ -546,7 +546,7 @@ class HikHumidity(CoordinatorEntity, HikDevice, SensorEntity):
         self._attr_has_entity_name = True
         self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-humidity-{zone.id}"
         self.entity_description = SensorEntityDescription(
-            SensorDeviceClass.HUMIDITY,
+            key=ENTITY_DESC_KEY_HUMIDITY,
             device_class=SensorDeviceClass.HUMIDITY,
             state_class=SensorStateClass.MEASUREMENT,
             native_unit_of_measurement=PERCENTAGE,
@@ -590,7 +590,7 @@ class HikBatteryInfo(CoordinatorEntity, HikDevice, SensorEntity):
         self._attr_has_entity_name = True
         self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-battery-{zone.id}"
         self.entity_description = SensorEntityDescription(
-            SensorDeviceClass.BATTERY,
+            key=ENTITY_DESC_KEY_BATTERY,
             device_class=SensorDeviceClass.BATTERY,
             entity_category=EntityCategory.DIAGNOSTIC,
             state_class=SensorStateClass.MEASUREMENT,
@@ -635,7 +635,7 @@ class HikSignalInfo(CoordinatorEntity, HikDevice, SensorEntity):
         self._attr_has_entity_name = True
         self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-signal-{zone.id}"
         self.entity_description = SensorEntityDescription(
-            SensorDeviceClass.SIGNAL_STRENGTH,
+            key=ENTITY_DESC_KEY_SIGNAL_STRENGTH,
             device_class=SensorDeviceClass.SIGNAL_STRENGTH,
             entity_category=EntityCategory.DIAGNOSTIC,
             state_class=SensorStateClass.MEASUREMENT,
