@@ -507,6 +507,7 @@ class SubSystemResponse:
 
 class AMMode(Enum):
     ARM = "arm"
+    DISARM = "disarm"
 
 
 class ArmModeConf(Enum):
@@ -786,7 +787,12 @@ class ZoneConfig:
             _LOGGER.warning("Detector info: %s", obj)
             detector_access_mode = None
         anti_masking_enabled = from_union([from_bool, from_none], obj.get("antiMaskingEnabled"))
-        am_mode = from_union([AMMode, from_none], obj.get("AMMode"))
+        try:
+            am_mode = from_union([AMMode, from_none], obj.get("AMMode"))
+        except:
+            _LOGGER.warning("Invalid AMMode %s", obj.get("AMMode"))
+            _LOGGER.warning("Detector info: %s", obj)
+            am_mode = None
         am_delay_time = from_union([from_int, from_none], obj.get("AMDelayTime"))
         pulse_sensitivity = from_union([from_int, from_none], obj.get("pulseSensitivity"))
         alarm_resistence = from_union([from_float, from_none], obj.get("alarmResistence"))
