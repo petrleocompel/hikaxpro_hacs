@@ -51,6 +51,9 @@ Example screens of integration.
 
 ## Installation
 
+### Precheck
+> ⚠️ Please make sure your user you will be using will have role "Admin" and it is not same as "Installer" or remove the "Installer" completely. (Reffering to issue #108)
+
 ### HACS
 
 1. Install HACS if you don't have it already
