@@ -1,4 +1,6 @@
 # Changelog
+## v2.1.1
+- **fix**: fix: add `wirelessDoublePIRDetector` #114
 
 ## v2.1.0
 - **feat**: hikaxpro update to 2.2.0 #56
