@@ -113,6 +113,7 @@ class DetectorType(Enum):
     WIRELESS_SMOKE_DETECTOR = "wirelessSmokeDetector"
     WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR = "wirelessTemperatureHumidityDetector"
     WIRELESS_TRI_TECH_DETECTOR = "wirelesTriTechDetector"
+    WIRELESS_DOUBLE_PIR_DETECTOR = "wirelessDoublePIRDetector"
     OTHER = "other"
 
 
@@ -143,6 +144,8 @@ def detector_model_to_name(model_id: Optional[str]) -> str:
         return "Wireless CO Detector"
     if model_id == "0x00032":
         return "Wireless PIR AM Curtain Detector"
+    if model_id == "0x00040":
+        return "Wireless Double PIR Detector"
     if model_id is not None:
         return str(model_id)
     return "Unknown"
