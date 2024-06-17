@@ -47,7 +47,7 @@ async def async_setup_entry(
 
 class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
     """Representation of Hikvision Ax Pro alarm panel."""
-
+    _attr_code_arm_required = False
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
