@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.1.3
+- **fix**: compatibility with 2024.6.x #118
+
 ## v2.1.2
 - **fix**: add `wirelessDoublePIRDetector` #114
 
