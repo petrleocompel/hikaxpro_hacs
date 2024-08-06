@@ -771,7 +771,12 @@ class ZoneConfig:
             _LOGGER.warning("Detector info: %s", obj)
             cross_zone_cfg = None
         arm_no_bypass_enabled = from_union([from_bool, from_none], obj.get("armNoBypassEnabled"))
-        related_pircam = from_union([RelatedPIRCAM.from_dict, from_none], obj.get("RelatedPIRCAM"))
+        try:
+            related_pircam = from_union([RelatedPIRCAM.from_dict, from_none], obj.get("RelatedPIRCAM"))
+        except:
+            _LOGGER.warning("Invalid relatedPIRCAM %s", obj.get("CrossZoneCfg"))
+            _LOGGER.warning("Detector info: %s", obj)
+            related_pircam = None
         arm_mode = from_union([ArmModeConf, from_none], obj.get("armMode"))
         zone_attrib = from_union([ZoneAttrib, from_none], obj.get("zoneAttrib"))
         final_door_exit_enabled = from_union([from_bool, from_none], obj.get("finalDoorExitEnabled"))
