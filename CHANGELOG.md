@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.1.5
+- **fix**: version display fix `v2.1.5` #121
+
 ## v2.1.4
 - **fix**: crash on parsing `related_pircam` #120
 

@@ -14,5 +14,5 @@
     "hikaxpro==2.2.1",
     "requests"
   ],
-  "version": "2.1.0-beta"
+  "version": "2.1.5"
 }
