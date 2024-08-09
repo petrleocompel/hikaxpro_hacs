@@ -14,6 +14,8 @@ INTERNAL_API: Final[str] = "internal_api"
 
 ENABLE_DEBUG_OUTPUT: Final[str] = "debug"
 
+DISABLE_ARM_HOME: Final[str] = "disable_arm_home"
+
 
 # Sensor entity description constants
 ENTITY_DESC_KEY_BATTERY: Final[str] = "battery"
