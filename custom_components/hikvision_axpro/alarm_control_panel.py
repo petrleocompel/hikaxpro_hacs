@@ -50,7 +50,7 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
     def __init__(self, coordinator: HikAxProDataUpdateCoordinator):
         if not coordinator.disable_arm_home:
             """if ARM_HOME shouldn't be disabled, add it to the supported features"""
-            self._attr_supported_features |= AlarmControlPanelEntityFeature.ARM_AWAY
+            self._attr_supported_features |= AlarmControlPanelEntityFeature.ARM_HOME
 
         super().__init__(coordinator=coordinator)
     _attr_code_arm_required = False
@@ -59,7 +59,7 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
         """Handle updated data from the coordinator."""
         self.async_write_ha_state()
 
-    _attr_supported_features = (AlarmControlPanelEntityFeature.ARM_HOME)
+    _attr_supported_features = (AlarmControlPanelEntityFeature.ARM_AWAY)
 
    
 
@@ -144,7 +144,7 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
         self.sys = sys
         if not coordinator.disable_arm_home:
             """if ARM_HOME shouldn't be disabled, add it to the supported features"""
-            self._attr_supported_features |= AlarmControlPanelEntityFeature.ARM_AWAY
+            self._attr_supported_features |= AlarmControlPanelEntityFeature.ARM_HOME
         super().__init__(coordinator=coordinator)
 
 
@@ -158,7 +158,7 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
             logging.warning("Area %s was not found", self.sys.id)
         self.async_write_ha_state()
 
-    _attr_supported_features = (AlarmControlPanelEntityFeature.ARM_HOME)
+    _attr_supported_features = (AlarmControlPanelEntityFeature.ARM_AWAY)
 
 
 
