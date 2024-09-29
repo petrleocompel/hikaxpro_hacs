@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.1.6
+- **fix**: adding sensors during initialisation
+
 ## v2.1.5
 - **fix**: version display fix `v2.1.5` #121
 
