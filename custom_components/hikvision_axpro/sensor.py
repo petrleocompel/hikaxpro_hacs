@@ -51,7 +51,7 @@ async def async_setup_entry(
         for zone in coordinator.zone_status.zone_list:
             zone_config = coordinator.devices.get(zone.zone.id)
             detector_type: DetectorType | None
-            if zone_config is not None and False:
+            if zone_config is not None:
                 _LOGGER.debug("Adding device with zone config: %s", zone)
                 _LOGGER.debug("+ config: %s", zone_config)
                 device_registry.async_get_or_create(
