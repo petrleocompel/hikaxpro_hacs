@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.2.0
+- **fix**: magnet presence value
+- **fix**: limit magnets sensors to be present only when system is sending presence value
+- **feat**: show detector type if model is missing
+- **feat**: low battery binary sensor
+ 
 ## v2.1.6
 - **fix**: adding sensors during initialisation
 
