@@ -126,6 +126,11 @@ async def async_setup_entry(
                 devices.append(HikTemperature(coordinator, zone.zone, entry.entry_id))
             if zone.zone.charge_value is not None:
                 devices.append(HikBatteryInfo(coordinator, zone.zone, entry.entry_id))
+            if zone.zone.charge is not None:
+                devices.append(
+                    HikBinaryBatteryInfo(coordinator, zone.zone, entry.entry_id)
+                )
+
             if zone.zone.signal is not None:
                 devices.append(HikSignalInfo(coordinator, zone.zone, entry.entry_id))
             if zone.zone.tamper_evident is not None:
@@ -982,5 +987,58 @@ class HikIsViaRepeaterInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
         """Return true if the binary sensor is on."""
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
             return self.coordinator.zones[self.zone.id].is_via_repeater
+        else:
+            return False
+
+
+class HikBinaryBatteryInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
+    """Representation of Hikvision binary battery info."""
+
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(
+        self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str
+    ) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-battery-low-{zone.id}"
+        self._attr_icon = "mdi:battery"
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_has_entity_name = True
+        self.entity_id = (
+            f"{SENSOR_DOMAIN}.{coordinator.device_name}-battery-low-{zone.id}"
+        )
+
+    @property
+    def name(self) -> str | None:
+        return "Battery low"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+        if (
+            self.coordinator.zones
+            and self.coordinator.zones[self.zone.id]
+            and self.coordinator.zones[self.zone.id].charge is not None
+        ):
+            value = self.coordinator.zones[self.zone.id].charge == "lowPower"
+            self._attr_is_on = value
+            self._attr_available = True
+        else:
+            self._attr_is_on = None
+            self._attr_available = False
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        if (
+            self.coordinator.zones
+            and self.coordinator.zones[self.zone.id]
+            and self.coordinator.zones[self.zone.id].charge is not None
+        ):
+            return self.coordinator.zones[self.zone.id].charge == "lowPower"
         else:
             return False
