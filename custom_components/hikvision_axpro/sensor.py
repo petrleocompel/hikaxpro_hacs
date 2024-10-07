@@ -54,6 +54,7 @@ async def async_setup_entry(
             if zone_config is not None:
                 _LOGGER.debug("Adding device with zone config: %s", zone)
                 _LOGGER.debug("+ config: %s", zone_config)
+                detector_type = zone_config.detector_type
                 device_registry.async_get_or_create(
                     config_entry_id=entry.entry_id,
                     # connections={},
@@ -66,13 +67,13 @@ async def async_setup_entry(
                     # suggested_area=zone.zone.,
                     name=zone_config.zone_name,
                     via_device=(DOMAIN, str(coordinator.mac)),
-                    model=detector_model_to_name(zone.zone.model),
+                    model=detector_model_to_name(zone.zone.model) if zone.zone.model is not None else detector_type,
                     sw_version=zone.zone.version,
                 )
-                detector_type = zone_config.detector_type
             else:
                 _LOGGER.debug("Zone config empty")
                 _LOGGER.debug("Adding device: %s", zone)
+                detector_type = zone.zone.detector_type
                 device_registry.async_get_or_create(
                     config_entry_id=entry.entry_id,
                     # connections={},
@@ -85,10 +86,9 @@ async def async_setup_entry(
                     # suggested_area=zone.zone.,
                     name=zone.zone.name,
                     via_device=(DOMAIN, str(coordinator.mac)),
-                    model=detector_model_to_name(zone.zone.model),
+                    model=detector_model_to_name(zone.zone.model) if zone.zone.model is not None else detector_type,
                     sw_version=zone.zone.version,
                 )
-                detector_type = zone.zone.detector_type
 
             _LOGGER.debug(
                 "Compare %s is %s == %s",
