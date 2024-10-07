@@ -191,7 +191,6 @@ class HikWirelessExtMagnetDetector(CoordinatorEntity, HikDevice, BinarySensorEnt
         self._ref_id = entry_id
         self._attr_unique_id = f"{self.coordinator.device_name}-magnet-{zone.id}"
         self._attr_icon = "mdi:magnet"
-        # self._attr_name = f"Magnet presence"
         self._device_class = BinarySensorDeviceClass.PRESENCE
         self._attr_has_entity_name = True
         self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-magnet-{zone.id}"
@@ -215,10 +214,12 @@ class HikWirelessExtMagnetDetector(CoordinatorEntity, HikDevice, BinarySensorEnt
                 self._attr_icon = "mdi:magnet"
             else:
                 self._attr_is_on = None
+                self._attr_state = None
                 self._attr_available = False
                 self._attr_icon = "mdi:help"
         else:
             self._attr_is_on = None
+            self._attr_state = None
             self._attr_available = False
             self._attr_icon = "mdi:help"
         self.async_write_ha_state()
@@ -227,10 +228,10 @@ class HikWirelessExtMagnetDetector(CoordinatorEntity, HikDevice, BinarySensorEnt
     def is_on(self) -> bool | None:
         """Return true if the binary sensor is on."""
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
-            value = self.coordinator.zones[self.zone.id].status
-            return value == Status.ONLINE
-        else:
-            return False
+            value = self.coordinator.zones[self.zone.id].magnet_open_status
+            if value is True or value is False:
+                return value
+        return None
 
 
 class HikMagneticContactDetector(CoordinatorEntity, HikDevice, BinarySensorEntity):
@@ -268,10 +269,12 @@ class HikMagneticContactDetector(CoordinatorEntity, HikDevice, BinarySensorEntit
                 self._attr_available = True
                 self._attr_icon = "mdi:magnet"
             else:
+                self._attr_is_on = None
                 self._attr_state = None
                 self._attr_available = False
                 self._attr_icon = "mdi:help"
         else:
+            self._attr_is_on = None
             self._attr_state = None
             self._attr_available = False
             self._attr_icon = "mdi:help"
@@ -281,10 +284,10 @@ class HikMagneticContactDetector(CoordinatorEntity, HikDevice, BinarySensorEntit
     def is_on(self) -> bool | None:
         """Return true if the binary sensor is on."""
         if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
-            value = self.coordinator.zones[self.zone.id].status
-            return value == Status.ONLINE
-        else:
-            return False
+            value = self.coordinator.zones[self.zone.id].magnet_open_status
+            if value is True or value is False:
+                return value
+        return None
 
 
 class HikMagnetShockDetector(CoordinatorEntity, HikDevice, BinarySensorEntity):
