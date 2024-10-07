@@ -97,33 +97,36 @@ async def async_setup_entry(
                 detector_type == DetectorType.MAGNET_SHOCK_DETECTOR,
             )
             # Specific entity
-            if detector_type == DetectorType.WIRELESS_EXTERNAL_MAGNET_DETECTOR:
+            if detector_type == DetectorType.WIRELESS_EXTERNAL_MAGNET_DETECTOR and zone.zone.magnet_open_status is not None:
                 devices.append(
                     HikWirelessExtMagnetDetector(coordinator, zone.zone, entry.entry_id)
                 )
             if detector_type in (
-                DetectorType.DOOR_MAGNETIC_CONTACT_DETECTOR,
-                DetectorType.SLIM_MAGNETIC_CONTACT,
-            ):
+                    DetectorType.DOOR_MAGNETIC_CONTACT_DETECTOR,
+                    DetectorType.SLIM_MAGNETIC_CONTACT,
+            ) and zone.zone.magnet_open_status is not None:
                 devices.append(
                     HikMagneticContactDetector(coordinator, zone.zone, entry.entry_id)
                 )
-            if detector_type is DetectorType.MAGNET_SHOCK_DETECTOR:
-                _LOGGER.debug("ADDED")
-                devices.append(
-                    HikMagnetTiltDetector(coordinator, zone.zone, entry.entry_id)
-                )
-                devices.append(
-                    HikMagnetOpenDetector(coordinator, zone.zone, entry.entry_id)
-                )
-                devices.append(
-                    HikMagnetShockDetector(coordinator, zone.zone, entry.entry_id)
-                )
+            if detector_type is DetectorType.MAGNET_SHOCK_DETECTOR and zone.zone.magnet_shock_current_status is not None:
+                if zone.zone.magnet_shock_current_status.magnet_tilt_status is not None:
+                    devices.append(
+                        HikMagnetTiltDetector(coordinator, zone.zone, entry.entry_id)
+                    )
+                if zone.zone.magnet_shock_current_status.magnet_open_status is not None:
+                    devices.append(
+                        HikMagnetOpenDetector(coordinator, zone.zone, entry.entry_id)
+                    )
+                if zone.zone.magnet_shock_current_status.magnet_shock_current_status is not None:
+                    devices.append(
+                        HikMagnetShockDetector(coordinator, zone.zone, entry.entry_id)
+                    )
             if detector_type == DetectorType.WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR:
                 devices.append(HikHumidity(coordinator, zone.zone, entry.entry_id))
             # Generic Attrs
             if zone.zone.temperature is not None:
                 devices.append(HikTemperature(coordinator, zone.zone, entry.entry_id))
+
             if zone.zone.charge_value is not None:
                 devices.append(HikBatteryInfo(coordinator, zone.zone, entry.entry_id))
             if zone.zone.charge is not None:
