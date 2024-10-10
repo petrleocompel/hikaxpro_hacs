@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.2.1
+- **fix**: Magnet shock status error #131
+
 ## v2.2.0
 - **fix**: magnet presence value
 - **fix**: limit magnets sensors to be present only when system is sending presence value
