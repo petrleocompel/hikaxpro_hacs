@@ -117,7 +117,7 @@ async def async_setup_entry(
                     devices.append(
                         HikMagnetOpenDetector(coordinator, zone.zone, entry.entry_id)
                     )
-                if zone.zone.magnet_shock_current_status.magnet_shock_current_status is not None:
+                if zone.zone.magnet_shock_current_status.magnet_shock_status is not None:
                     devices.append(
                         HikMagnetShockDetector(coordinator, zone.zone, entry.entry_id)
                     )
