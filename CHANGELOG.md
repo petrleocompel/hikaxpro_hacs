@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.2.2
+- **fix**: Sensor magnet sensors type classes change to `SAFETY` to match documentation and remove unused entity descriptions #133
+
 ## v2.2.1
 - **fix**: Magnet shock status error #131
 
