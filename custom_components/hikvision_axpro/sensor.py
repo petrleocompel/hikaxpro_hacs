@@ -191,7 +191,7 @@ class HikWirelessExtMagnetDetector(CoordinatorEntity, HikDevice, BinarySensorEnt
         self._ref_id = entry_id
         self._attr_unique_id = f"{self.coordinator.device_name}-magnet-{zone.id}"
         self._attr_icon = "mdi:magnet"
-        self._device_class = BinarySensorDeviceClass.PRESENCE
+        self._device_class = BinarySensorDeviceClass.SAFETY
         self._attr_has_entity_name = True
         self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-magnet-{zone.id}"
 
@@ -247,7 +247,7 @@ class HikMagneticContactDetector(CoordinatorEntity, HikDevice, BinarySensorEntit
         self.zone = zone
         self._ref_id = entry_id
         self._attr_unique_id = f"{self.coordinator.device_name}-magnet-{zone.id}"
-        self._device_class = BinarySensorDeviceClass.PRESENCE
+        self._device_class = BinarySensorDeviceClass.SAFETY
         self._attr_has_entity_name = True
         self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-magnet-{zone.id}"
 
@@ -303,7 +303,7 @@ class HikMagnetShockDetector(CoordinatorEntity, HikDevice, BinarySensorEntity):
         self.zone = zone
         self._ref_id = entry_id
         self._attr_unique_id = f"{self.coordinator.device_name}-magnet-shock-{zone.id}"
-        self._device_class = BinarySensorDeviceClass.PRESENCE
+        self._device_class = BinarySensorDeviceClass.SAFETY
         self._attr_has_entity_name = True
         self.entity_id = (
             f"{SENSOR_DOMAIN}.{coordinator.device_name}-magnet-shock-{zone.id}"
@@ -370,7 +370,7 @@ class HikMagnetOpenDetector(CoordinatorEntity, HikDevice, BinarySensorEntity):
         self.zone = zone
         self._ref_id = entry_id
         self._attr_unique_id = f"{self.coordinator.device_name}-magnet-open-{zone.id}"
-        self._device_class = BinarySensorDeviceClass.PRESENCE
+        self._device_class = BinarySensorDeviceClass.SAFETY
         self._attr_has_entity_name = True
         self.entity_id = (
             f"{SENSOR_DOMAIN}.{coordinator.device_name}-magnet-open-{zone.id}"
@@ -437,7 +437,7 @@ class HikMagnetTiltDetector(CoordinatorEntity, HikDevice, BinarySensorEntity):
         self.zone = zone
         self._ref_id = entry_id
         self._attr_unique_id = f"{self.coordinator.device_name}-magnet-tilt-{zone.id}"
-        self._device_class = BinarySensorDeviceClass.PRESENCE
+        self._device_class = BinarySensorDeviceClass.SAFETY
         self._attr_has_entity_name = True
         self.entity_id = (
             f"{SENSOR_DOMAIN}.{coordinator.device_name}-magnet-tilt-{zone.id}"
@@ -512,12 +512,7 @@ class HikTemperature(CoordinatorEntity, HikDevice, SensorEntity):
         self.entity_id = (
             f"{SENSOR_DOMAIN}.{coordinator.device_name}-temperature-{zone.id}"
         )
-        self.entity_description = SensorEntityDescription(
-            key=ENTITY_DESC_KEY_TEMPERATURE,
-            device_class=SensorDeviceClass.TEMPERATURE,
-            state_class=SensorStateClass.MEASUREMENT,
-            native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        )
+        self._attr_state_class = SensorStateClass.MEASUREMENT
 
     @property
     def name(self) -> str | None:
@@ -554,14 +549,9 @@ class HikHumidity(CoordinatorEntity, HikDevice, SensorEntity):
         # self._attr_name = f"{self.zone.name} Humidity"
         self._device_class = SensorDeviceClass.HUMIDITY
         self._attr_native_unit_of_measurement = PERCENTAGE
+        self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_has_entity_name = True
         self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-humidity-{zone.id}"
-        self.entity_description = SensorEntityDescription(
-            key=ENTITY_DESC_KEY_HUMIDITY,
-            device_class=SensorDeviceClass.HUMIDITY,
-            state_class=SensorStateClass.MEASUREMENT,
-            native_unit_of_measurement=PERCENTAGE,
-        )
 
     @property
     def name(self) -> str | None:
@@ -598,15 +588,9 @@ class HikBatteryInfo(CoordinatorEntity, HikDevice, SensorEntity):
         self._device_class = SensorDeviceClass.BATTERY
         self._attr_native_unit_of_measurement = PERCENTAGE
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_has_entity_name = True
         self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-battery-{zone.id}"
-        self.entity_description = SensorEntityDescription(
-            key=ENTITY_DESC_KEY_BATTERY,
-            device_class=SensorDeviceClass.BATTERY,
-            entity_category=EntityCategory.DIAGNOSTIC,
-            state_class=SensorStateClass.MEASUREMENT,
-            native_unit_of_measurement=PERCENTAGE,
-        )
 
     @property
     def name(self) -> str | None:
@@ -643,15 +627,9 @@ class HikSignalInfo(CoordinatorEntity, HikDevice, SensorEntity):
         self._device_class = SensorDeviceClass.SIGNAL_STRENGTH
         self._attr_native_unit_of_measurement = SIGNAL_STRENGTH_DECIBELS_MILLIWATT
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_has_entity_name = True
         self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-signal-{zone.id}"
-        self.entity_description = SensorEntityDescription(
-            key=ENTITY_DESC_KEY_SIGNAL_STRENGTH,
-            device_class=SensorDeviceClass.SIGNAL_STRENGTH,
-            entity_category=EntityCategory.DIAGNOSTIC,
-            state_class=SensorStateClass.MEASUREMENT,
-            native_unit_of_measurement=SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
-        )
 
     @property
     def name(self) -> str | None:
