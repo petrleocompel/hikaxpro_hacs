@@ -74,7 +74,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     code = entry.data[CONF_CODE]
     use_code_arming = entry.data[USE_CODE_ARMING]
     use_sub_systems = entry.data.get(ALLOW_SUBSYSTEMS, False)
-    axpro = hikaxpro.HikAxPro(host, username, password)
+    axpro = hikaxpro.HikAxPro(host, username, password, user_level=hikaxpro.USER_LEVEL_ADMIN_OPERATOR)
     if entry.data.get(INTERNAL_API):
         axpro = hikax.HikAx(host, username, password)
     update_interval: float = entry.data.get(CONF_SCAN_INTERVAL, SCAN_INTERVAL.total_seconds())
