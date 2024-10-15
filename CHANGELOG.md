@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.3.0
+- **feat**: implementation of "X-Userlevel" header to prevent "installer account" conflict #108 #132
+
 ## v2.2.2
 - **fix**: Sensor magnet sensors type classes change to `SAFETY` to match documentation and remove unused entity descriptions #133
 
