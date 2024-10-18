@@ -32,7 +32,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING, INTERNAL_API, ENABLE_DEBUG_OUTPUT, ALLOW_SUBSYSTEMS
+from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING, INTERNAL_API, ENABLE_DEBUG_OUTPUT, ALLOW_SUBSYSTEMS, DISABLE_ARM_HOME
 from .model import ZonesResponse, Zone, SubSystemResponse, SubSys, Arming, ZonesConf, ZoneConfig, RelaySwitchConf, OutputStatusFull, RelayStatusSearchResponse, OutputConfList, JSONResponseStatus, ExDevStatusResponse
 
 PLATFORMS: list[Platform] = [Platform.ALARM_CONTROL_PANEL, Platform.SENSOR, Platform.SWITCH]
@@ -73,6 +73,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     code_format = entry.data[ATTR_CODE_FORMAT]
     code = entry.data[CONF_CODE]
     use_code_arming = entry.data[USE_CODE_ARMING]
+    disable_arm_home = entry.data[DISABLE_ARM_HOME]
     use_sub_systems = entry.data.get(ALLOW_SUBSYSTEMS, False)
     axpro = hikaxpro.HikAxPro(host, username, password, user_level=hikaxpro.USER_LEVEL_ADMIN_OPERATOR)
     if entry.data.get(INTERNAL_API):
@@ -100,6 +101,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         use_code_arming,
         code,
         update_interval,
+        disable_arm_home,
         use_sub_systems
     )
     try:
@@ -154,6 +156,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         use_code_arming,
         code,
         update_interval: float,
+        disable_arm_home,
         use_sub_systems = False
     ):
         self.axpro = axpro
@@ -165,6 +168,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.code_format = code_format
         self.use_code_arming = use_code_arming
         self.code = code
+        self.disable_arm_home = disable_arm_home
         self.use_sub_systems = use_sub_systems
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=update_interval))
 

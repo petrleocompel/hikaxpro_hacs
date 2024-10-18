@@ -23,6 +23,7 @@
                     "allow_subsystems": "Includi aree come zone separate per armare/disarmare",
                     "code": "Codice",
                     "scan_interval": "Intervallo di scansione del sistema",
+                    "disable_arm_home": "Rimuovi l'opzione per armare in modalità a Casa",
                     "internal_api": "Usa la libreria API interna (AXHub)",
                     "debug": "Abilita l'output di debug"
                 }
@@ -42,6 +43,7 @@
                     "allow_subsystems": "Includi aree come zone separate per armare/disarmare",
                     "code": "Codice",
                     "scan_interval": "Intervallo di scansione del sistema",
+                    "disable_arm_home": "Rimuovi l'opzione per armare in modalità a Casa",
                     "internal_api": "OBSOLETA - Usa la libreria API interna (AXHub)",
                     "debug": "Abilita l'output di debug"
                 }
