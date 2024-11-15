@@ -3,8 +3,6 @@ from __future__ import annotations
 import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_ALARM_TRIGGERED, STATE_ALARM_ARMED_AWAY, STATE_ALARM_ARMED_HOME, \
-    STATE_ALARM_ARMED_VACATION, STATE_ALARM_DISARMED
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity import DeviceInfo
@@ -13,6 +11,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.components.alarm_control_panel import (
     AlarmControlPanelEntity,
     AlarmControlPanelEntityFeature,
+    AlarmControlPanelState,
     CodeFormat,
 )
 from homeassistant.helpers import device_registry as dr
@@ -182,15 +181,15 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
     def state(self):
         """Return the state of the device."""
         if self.sys.alarm:
-            return STATE_ALARM_TRIGGERED
+            return AlarmControlPanelState.TRIGGERED
         if self.sys.arming == Arming.AWAY:
-            return STATE_ALARM_ARMED_AWAY
+            return AlarmControlPanelState.ARMED_AWAY
         if self.sys.arming == Arming.STAY:
-            return STATE_ALARM_ARMED_HOME
+            return AlarmControlPanelState.ARMED_HOME
         if self.sys.arming == Arming.VACATION:
-            return STATE_ALARM_ARMED_VACATION
+            return AlarmControlPanelState.ARMED_VACATION
         if self.sys.arming == Arming.DISARM:
-            return STATE_ALARM_DISARMED
+            return AlarmControlPanelState.DISARMED
         return None
 
     @property
