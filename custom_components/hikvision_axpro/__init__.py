@@ -10,7 +10,10 @@ import xmltodict
 
 from async_timeout import timeout
 
-from homeassistant.components.alarm_control_panel import SCAN_INTERVAL
+from homeassistant.components.alarm_control_panel import (
+    SCAN_INTERVAL,
+    AlarmControlPanelState,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_CODE_FORMAT,
@@ -21,11 +24,7 @@ from homeassistant.const import (
     CONF_CODE,
     CONF_SCAN_INTERVAL,
     Platform,
-    STATE_ALARM_ARMED_HOME,
-    STATE_ALARM_ARMED_VACATION,
-    STATE_ALARM_ARMED_AWAY,
-    STATE_ALARM_DISARMED,
-    STATE_ALARM_TRIGGERED, SERVICE_RELOAD
+    SERVICE_RELOAD
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
@@ -248,7 +247,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
 
     def _update_data(self) -> None:
         """Fetch data from axpro via sync functions."""
-        status = STATE_ALARM_DISARMED
+        status = AlarmControlPanelState.DISARMED
         status_json = self.axpro.subsystem_status()
         try:
             subsys_resp = SubSystemResponse.from_dict(status_json)
@@ -265,13 +264,13 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
                 if self.use_sub_systems and subsys.id != 1:
                     continue
                 if subsys.alarm:
-                    status = STATE_ALARM_TRIGGERED
+                    status = AlarmControlPanelState.TRIGGERED
                 elif subsys.arming == Arming.AWAY:
-                    status = STATE_ALARM_ARMED_AWAY
+                    status = AlarmControlPanelState.ARMED_AWAY
                 elif subsys.arming == Arming.STAY:
-                    status = STATE_ALARM_ARMED_HOME
+                    status = AlarmControlPanelState.ARMED_HOME
                 elif subsys.arming == Arming.VACATION:
-                    status = STATE_ALARM_ARMED_VACATION
+                    status = AlarmControlPanelState.ARMED_VACATION
             _LOGGER.debug("SubSystem status: %s", subsys_resp)
         except:
             _LOGGER.warning("Error getting status: %s", status_json)

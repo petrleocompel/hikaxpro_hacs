@@ -4,6 +4,7 @@
 BREAKING CHANGE: subsystem IDs are changing due conflict of multi "instance" conflict 
 Can break automations, dashboards or anything connected to "SubSystems IDs"
 
+- **fix**: deprecation warnings for alarm states @uvera #136 #137
 - **fix**: subsystem - duplicate IDs  
 - **chore**: remove Deprecated option to use internal API lib
 
