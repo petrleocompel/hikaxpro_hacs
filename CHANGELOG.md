@@ -1,6 +1,6 @@
 # Changelog
 
-## v3.0.0
+## v3.0.0-beta1
 BREAKING CHANGE: subsystem IDs are changing due conflict of multi "instance" conflict 
 Can break automations, dashboards or anything connected to "SubSystems IDs"
 
