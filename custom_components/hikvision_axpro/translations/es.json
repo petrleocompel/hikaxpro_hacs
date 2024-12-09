@@ -23,7 +23,6 @@
                     "allow_subsystems": "Incluir áreas como zonas separadas para armar/desarmar",
                     "code": "Código",
                     "scan_interval": "Intervalo de escaneo del sistema",
-                    "internal_api": "Usar biblioteca API interna (AXHub)",
                     "debug": "Habilitar salida de depuración"
                 }
             }
@@ -42,7 +41,6 @@
                     "allow_subsystems": "Incluir áreas como zonas separadas para armar/desarmar",
                     "code": "Código",
                     "scan_interval": "Intervalo de escaneo del sistema",
-                    "internal_api": "DESCONTINUADO - Usar biblioteca API interna (AXHub)",
                     "debug": "Habilitar salida de depuración"
                 }
             }

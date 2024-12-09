@@ -23,7 +23,6 @@
                     "allow_subsystems": "Inclure des zones comme des zones distinctes pour armer/désarmer",
                     "code": "Code",
                     "scan_interval": "Intervalle de balayage du système",
-                    "internal_api": "Utiliser une bibliothèque API interne (AXHub)",
                     "debug": "Activer la sortie de débogage"
                 }
             }
@@ -42,7 +41,6 @@
                     "allow_subsystems": "Inclure des zones comme des zones distinctes pour armer/désarmer",
                     "code": "Code",
                     "scan_interval": "Intervalle de balayage du système",
-                    "internal_api": "OBSOLÈTE - Utiliser une bibliothèque API interne (AXHub)",
                     "debug": "Activer la sortie de débogage"
                 }
             }

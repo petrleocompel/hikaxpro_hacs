@@ -1,5 +1,8 @@
 # Changelog
 
+## v3.0.0
+- **chore**: remove Deprecated option to use internal API lib
+
 ## v2.3.0
 - **feat**: implementation of "X-Userlevel" header to prevent "installer account" conflict #108 #132
 

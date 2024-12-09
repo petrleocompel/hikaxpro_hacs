@@ -23,7 +23,6 @@
                     "allow_subsystems": "Includi aree come zone separate per armare/disarmare",
                     "code": "Codice",
                     "scan_interval": "Intervallo di scansione del sistema",
-                    "internal_api": "Usa la libreria API interna (AXHub)",
                     "debug": "Abilita l'output di debug"
                 }
             }
@@ -42,7 +41,6 @@
                     "allow_subsystems": "Includi aree come zone separate per armare/disarmare",
                     "code": "Codice",
                     "scan_interval": "Intervallo di scansione del sistema",
-                    "internal_api": "OBSOLETA - Usa la libreria API interna (AXHub)",
                     "debug": "Abilita l'output di debug"
                 }
             }

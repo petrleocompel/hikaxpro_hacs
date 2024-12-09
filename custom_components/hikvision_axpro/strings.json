@@ -11,7 +11,6 @@
             "use_code_arming": "[%key:common::config_flow::data::use_code_arming%]",
             "code": "[%key:common::config_flow::data::code%]",
             "scan_interval": "[%key:common::config_flow::data::scan_interval%]",
-            "internal_api": "[%key:common::config_flow::data::internal_api%]"
           }
         }
       },
@@ -38,7 +37,6 @@
             "use_code_arming": "[%key:common::config_flow::data::use_code_arming%]",
             "code": "[%key:common::config_flow::data::code%]",
             "scan_interval": "[%key:common::config_flow::data::scan_interval%]",
-            "internal_api": "[%key:common::config_flow::data::internal_api%]"
           }
         }
       },

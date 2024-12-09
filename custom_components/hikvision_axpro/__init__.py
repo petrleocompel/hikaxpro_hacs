@@ -7,7 +7,6 @@ from collections.abc import Callable
 
 import hikaxpro
 import xmltodict
-from .hikax import hikax
 
 from async_timeout import timeout
 
@@ -32,7 +31,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING, INTERNAL_API, ENABLE_DEBUG_OUTPUT, ALLOW_SUBSYSTEMS
+from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING, ENABLE_DEBUG_OUTPUT, ALLOW_SUBSYSTEMS
 from .model import ZonesResponse, Zone, SubSystemResponse, SubSys, Arming, ZonesConf, ZoneConfig, RelaySwitchConf, OutputStatusFull, RelayStatusSearchResponse, OutputConfList, JSONResponseStatus, ExDevStatusResponse
 
 PLATFORMS: list[Platform] = [Platform.ALARM_CONTROL_PANEL, Platform.SENSOR, Platform.SWITCH]
@@ -75,8 +74,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     use_code_arming = entry.data[USE_CODE_ARMING]
     use_sub_systems = entry.data.get(ALLOW_SUBSYSTEMS, False)
     axpro = hikaxpro.HikAxPro(host, username, password, user_level=hikaxpro.USER_LEVEL_ADMIN_OPERATOR)
-    if entry.data.get(INTERNAL_API):
-        axpro = hikax.HikAx(host, username, password)
     update_interval: float = entry.data.get(CONF_SCAN_INTERVAL, SCAN_INTERVAL.total_seconds())
 
     if entry.data.get(ENABLE_DEBUG_OUTPUT):
@@ -130,7 +127,7 @@ async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry):
 
 class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching ax pro data."""
-    axpro: hikaxpro.HikAxPro | hikax.HikAx
+    axpro: hikaxpro.HikAxPro
     zone_status: Optional[ZonesResponse]
     zones: Optional[dict[int, Zone]] = None
     device_info: Optional[dict] = None
@@ -147,7 +144,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(
         self,
         hass,
-        axpro: hikaxpro.HikAxPro | hikax.HikAx,
+        axpro: hikaxpro.HikAxPro,
         mac,
         use_code,
         code_format,

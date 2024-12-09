@@ -23,7 +23,6 @@
                     "allow_subsystems": "Bereiche als separate Zonen zum Aktivieren/Deaktivieren einbeziehen",
                     "code": "Code",
                     "scan_interval": "Scan-Intervall des Systems",
-                    "internal_api": "Interne API-Bibliothek verwenden (AXHub)",
                     "debug": "Debug-Ausgabe aktivieren"
                 }
             }
@@ -42,7 +41,6 @@
                     "allow_subsystems": "Bereiche als separate Zonen zum Aktivieren/Deaktivieren einbeziehen",
                     "code": "Code",
                     "scan_interval": "Scan-Intervall des Systems",
-                    "internal_api": "VERALTET - Interne API-Bibliothek verwenden (AXHub)",
                     "debug": "Debug-Ausgabe aktivieren"
                 }
             }
