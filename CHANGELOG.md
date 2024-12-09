@@ -1,10 +1,14 @@
 # Changelog
 
+## v3.0.0-beta2
+- **fix**: translations strings.json  
+- **doc**: README, FAQ about arming and installer user
+- **fix**: deprecation warnings for alarm states @uvera #136 #137
+
 ## v3.0.0-beta1
 BREAKING CHANGE: subsystem IDs are changing due conflict of multi "instance" conflict 
 Can break automations, dashboards or anything connected to "SubSystems IDs"
 
-- **fix**: deprecation warnings for alarm states @uvera #136 #137
 - **fix**: subsystem - duplicate IDs  
 - **chore**: remove Deprecated option to use internal API lib
 
