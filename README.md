@@ -1,6 +1,8 @@
 # hikaxpro_hacs
 HACS repository of Hikvision Ax Pro integration for home assistant
 
+**Type**: Local integration (not using any cloud connection - only connecting to device)
+
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
 ## Supported devices
@@ -68,3 +70,24 @@ Example screens of integration.
 
 Download the [zip](https://github.com/petrleocompel/hikaxpro_hacs/archive/refs/heads/master.zip) and extract it. Copy the folder `hikaxpro_hacs` to your `custom_components` folder.
 
+## FAQ
+
+### Cannot arm my system with HA
+
+Check your batteries for devices. Check that all zones are closed / not triggered.
+
+If you use Hik-Connect app - you can press the **diagnosis** button on the "system overview page".
+It will tell you why you cannot arm the system. 
+
+This integration is not bypassing any "zones" so you might have to set it up via "Hik-Connect" / Web interface.
+
+### Everything seems fine I can arm in "Hik-Connect" app but not in HA
+
+Is installer account in the system ? What account you are using with the integration?
+Sadly to make it work we need to be an Admin user.
+
+Some systems work with login "admin" some with the user who set it up via Hik-Connect account.
+So even your "Hik-Connect" used email address might be the correct one.
+
+But still in "Web Interface" of your device after you log in there should not be and Installer account. 
+If there is and if it has a same email as your user it is the problem and needs to be removed.
