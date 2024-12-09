@@ -10,7 +10,7 @@
             "code_format": "[%key:common::config_flow::data::code_format%]",
             "use_code_arming": "[%key:common::config_flow::data::use_code_arming%]",
             "code": "[%key:common::config_flow::data::code%]",
-            "scan_interval": "[%key:common::config_flow::data::scan_interval%]",
+            "scan_interval": "[%key:common::config_flow::data::scan_interval%]"
           }
         }
       },
@@ -36,7 +36,7 @@
             "code_format": "[%key:common::config_flow::data::code_format%]",
             "use_code_arming": "[%key:common::config_flow::data::use_code_arming%]",
             "code": "[%key:common::config_flow::data::code%]",
-            "scan_interval": "[%key:common::config_flow::data::scan_interval%]",
+            "scan_interval": "[%key:common::config_flow::data::scan_interval%]"
           }
         }
       },
