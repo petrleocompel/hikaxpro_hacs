@@ -170,7 +170,7 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
     @property
     def unique_id(self):
         """Return a unique id."""
-        return "subsys-" + str(self.sys.id)
+        return "subsys-" + self.coordinator.mac + str(self.sys.id)
 
     @property
     def name(self):
