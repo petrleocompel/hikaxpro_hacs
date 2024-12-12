@@ -79,7 +79,7 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
         # "HikvisionAxPro"
 
     @property
-    def state(self):
+    def alarm_state(self):
         """Return the state of the device."""
         return self.coordinator.state
 
@@ -178,7 +178,7 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
         # "HikvisionAxPro"
 
     @property
-    def state(self):
+    def alarm_state(self):
         """Return the state of the device."""
         if self.sys.alarm:
             return AlarmControlPanelState.TRIGGERED
