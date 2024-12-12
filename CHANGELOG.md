@@ -1,5 +1,8 @@
 # Changelog
 
+## v3.0.0-beta3
+- **fix**: battery device class attribute missing #145
+
 ## v3.0.0-beta2
 - **fix**: translations strings.json  
 - **doc**: README, FAQ about arming and installer user
