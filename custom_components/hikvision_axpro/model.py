@@ -114,6 +114,7 @@ class DetectorType(Enum):
     WIRELESS_TEMPERATURE_HUMIDITY_DETECTOR = "wirelessTemperatureHumidityDetector"
     WIRELESS_TRI_TECH_DETECTOR = "wirelesTriTechDetector"
     WIRELESS_DOUBLE_PIR_DETECTOR = "wirelessDoublePIRDetector"
+    MOTION_DETECTOR = "motionDetector"
     OTHER = "other"
 
 
@@ -715,7 +716,12 @@ class ZoneConfig:
         assert isinstance(obj, dict)
         id = from_int(obj.get("id"))
         zone_name = from_str(obj.get("zoneName"))
-        detector_type = DetectorType(obj.get("detectorType"))
+        try:
+            detector_type = DetectorType(obj.get("detectorType"))
+        except:
+            _LOGGER.warning("Invalid detectorType %s", obj.get("detectorType"))
+            _LOGGER.warning("Detector info: %s", obj)
+            detector_type = DetectorType.OTHER
         try:
             zone_type = from_union([ZoneType, from_none], obj.get("zoneType"))
         except:
