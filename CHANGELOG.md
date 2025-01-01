@@ -1,5 +1,8 @@
 # Changelog
 
+## v3.0.0-beta5
+- **fix**: detector type missing "MotionSensor" #149
+
 ## v3.0.0-beta4
 - **fix**: alarm_state instead of state for AlarmControlPanelEntities #137
 
