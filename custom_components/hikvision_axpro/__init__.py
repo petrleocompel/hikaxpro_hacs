@@ -29,6 +29,7 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers.service import async_register_admin_service
 
 from .const import DATA_COORDINATOR, DOMAIN, USE_CODE_ARMING, ENABLE_DEBUG_OUTPUT, ALLOW_SUBSYSTEMS
 from .model import ZonesResponse, Zone, SubSystemResponse, SubSys, Arming, ZonesConf, ZoneConfig, RelaySwitchConf, OutputStatusFull, RelayStatusSearchResponse, OutputConfList, JSONResponseStatus, ExDevStatusResponse
@@ -54,7 +55,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigEntry):
 
         await asyncio.gather(*reload_tasks)
 
-    hass.helpers.service.async_register_admin_service(
+    async_register_admin_service(
+        hass,
         DOMAIN,
         SERVICE_RELOAD,
         _handle_reload,

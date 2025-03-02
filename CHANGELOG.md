@@ -2,6 +2,7 @@
 
 ## v3.0.0-beta6
 - **feat**: add Wireless heat Detector #14
+- **fix**: HA 2025.5 compliance #159
 
 ## v3.0.0-beta5
 - **fix**: detector type missing "MotionSensor" #149
