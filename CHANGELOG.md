@@ -1,6 +1,6 @@
 # Changelog
 
-## v3.0.0-beta3
+## v3.0.0-beta6
 - **feat**: add Wireless heat Detector #14
 
 ## v3.0.0-beta5
