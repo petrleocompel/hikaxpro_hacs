@@ -1,31 +1,35 @@
+"""Alarm control panel."""
+
 from __future__ import annotations
 
 import logging
 
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.components.alarm_control_panel import (
     AlarmControlPanelEntity,
     AlarmControlPanelEntityFeature,
     AlarmControlPanelState,
     CodeFormat,
 )
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import HikAxProDataUpdateCoordinator, SubSys, Arming
-from .const import DATA_COORDINATOR, DOMAIN, ALLOW_SUBSYSTEMS
+from . import Arming, HikAxProDataUpdateCoordinator, SubSys
+from .const import ALLOW_SUBSYSTEMS, DATA_COORDINATOR, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
+
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up a Hikvision ax pro alarm control panel based on a config entry."""
-    coordinator: HikAxProDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
+    coordinator: HikAxProDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id][
+        DATA_COORDINATOR
+    ]
     device_registry = dr.async_get(hass)
     device_registry.async_get_or_create(
         config_entry_id=entry.entry_id,
@@ -34,19 +38,23 @@ async def async_setup_entry(
         manufacturer="HikVision" if coordinator.device_model is not None else "Unknown",
         # suggested_area=zone.zone.,
         name=coordinator.device_name,
-        #via_device=(DOMAIN, str(coordinator.mac)),
+        # via_device=(DOMAIN, str(coordinator.mac)),
         model=coordinator.device_model,
     )
     panels = [HikAxProPanel(coordinator)]
     if bool(entry.data.get(ALLOW_SUBSYSTEMS, False)):
-        for sub_system in coordinator.sub_systems.values():
-            panels.append(HikAxProSubPanel(coordinator, sub_system))
+        panels.extend(
+            HikAxProSubPanel(coordinator, sub_system)
+            for sub_system in coordinator.sub_systems.values()
+        )
     async_add_entities(panels, False)
 
 
 class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
     """Representation of Hikvision Ax Pro alarm panel."""
+
     _attr_code_arm_required = False
+
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
@@ -89,7 +97,7 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
         return self.__get_code_format(self.coordinator.code_format)
 
     def __get_code_format(self, code_format_str) -> CodeFormat:
-        """Returns CodeFormat according to the given code format string."""
+        """Return CodeFormat according to the given code format string."""
         code_format: CodeFormat | None = None
 
         if not self.coordinator.use_code:
@@ -131,13 +139,14 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
 
 class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
     """Representation of Hikvision Ax Pro alarm panel."""
+
     sys: SubSys
     coordinator: HikAxProDataUpdateCoordinator
 
-    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, sys: SubSys):
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator, sys: SubSys) -> None:
+        """Initialize subpanel."""
         self.sys = sys
         super().__init__(coordinator=coordinator)
-
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -153,8 +162,6 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
         AlarmControlPanelEntityFeature.ARM_HOME
         | AlarmControlPanelEntityFeature.ARM_AWAY
     )
-
-
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -198,7 +205,7 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
         return self.__get_code_format(self.coordinator.code_format)
 
     def __get_code_format(self, code_format_str) -> CodeFormat:
-        """Returns CodeFormat according to the given code format string."""
+        """Return CodeFormat according to the given code format string."""
         code_format: CodeFormat = None
 
         if not self.coordinator.use_code:
@@ -236,4 +243,3 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
 
     def __is_code_valid(self, code):
         return code == self.coordinator.code
-

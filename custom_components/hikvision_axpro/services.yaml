@@ -1,3 +1,6 @@
 reload:
   name: Reload
   description: Reload all sensor entities and config
+purge:
+  name: Purge invalid sensors
+  description: Purge old invalid binary sensors registered as sensors

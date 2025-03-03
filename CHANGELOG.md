@@ -1,6 +1,25 @@
 # Changelog
 
+
+
 ## v3.0.0-beta6
+BREAKING CHANGE: Binary sensors!! Correct separation and initialization of binary sensors. 
+Old entities can be removed via "Action / service" -> `hikvision_axpro.purge`.
+Can break automations, dashboards or anything connected to "binary sensors" as:
+- magnet
+- magnet shock
+- magnet open
+- magnet tilt
+- tamper
+- bypass
+- armed
+- alarm
+- stay away
+- is via repeater
+- battery low
+
+- **feat**: Purge admin service - for removing invalid sensors registered previously as sensors #91
+- **feat**: Binary sensors migrated from sensors #91
 - **feat**: add Wireless heat Detector #14
 - **fix**: HA 2025.5 compliance #159
 
