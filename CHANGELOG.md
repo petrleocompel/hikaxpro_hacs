@@ -1,7 +1,5 @@
 # Changelog
 
-
-
 ## v3.0.0-beta6
 BREAKING CHANGE: Binary sensors!! Correct separation and initialization of binary sensors. 
 Old entities can be removed via "Action / service" -> `hikvision_axpro.purge`.
