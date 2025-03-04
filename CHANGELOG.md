@@ -1,6 +1,6 @@
 # Changelog
 
-## v3.0.0-beta6
+## v3.0.0
 BREAKING CHANGE: Binary sensors!! Correct separation and initialization of binary sensors. 
 Old entities can be removed via "Action / service" -> `hikvision_axpro.purge`.
 Can break automations, dashboards or anything connected to "binary sensors" as:
@@ -16,29 +16,23 @@ Can break automations, dashboards or anything connected to "binary sensors" as:
 - is via repeater
 - battery low
 
+
+BREAKING CHANGE: subsystem IDs are changing due conflict of multi "instance" conflict 
+Can break automations, dashboards or anything connected to "SubSystems IDs"
+
+
+----
+
 - **feat**: Purge admin service - for removing invalid sensors registered previously as sensors #91
 - **feat**: Binary sensors migrated from sensors #91
 - **feat**: add Wireless heat Detector #14
 - **fix**: HA 2025.5 compliance #159
-
-## v3.0.0-beta5
 - **fix**: detector type missing "MotionSensor" #149
-
-## v3.0.0-beta4
 - **fix**: alarm_state instead of state for AlarmControlPanelEntities #137
-
-## v3.0.0-beta3
 - **fix**: battery device class attribute missing #145
-
-## v3.0.0-beta2
 - **fix**: translations strings.json  
 - **doc**: README, FAQ about arming and installer user
 - **fix**: deprecation warnings for alarm states @uvera #136 #137
-
-## v3.0.0-beta1
-BREAKING CHANGE: subsystem IDs are changing due conflict of multi "instance" conflict 
-Can break automations, dashboards or anything connected to "SubSystems IDs"
-
 - **fix**: subsystem - duplicate IDs  
 - **chore**: remove Deprecated option to use internal API lib
 
