@@ -61,6 +61,12 @@ Example screens of integration.
 ### Pre-check
 > ⚠️ Please make sure your user you will be using will have role "Admin" and it is not same as "Installer" or remove the "Installer" completely. (Referring to issue #108)
 
+
+#### Firmware
+⚠️ Last working stable FW - `1.2.9 Build: 240621`.
+Warning for now. Newer firmware was reported that causes instabilities. 
+
+
 ### HACS
 
 1. Install HACS if you don't have it already
