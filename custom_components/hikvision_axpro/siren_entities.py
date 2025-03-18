@@ -32,7 +32,7 @@ class HikSirenBatteryInfo(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.siren = siren
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-siren-temp-{siren.id}"
+        self._attr_unique_id = f"{self.coordinator.device_name}-siren-battery-{siren.id}"
         self._attr_icon = "mdi:battery"
         self._attr_native_unit_of_measurement = PERCENTAGE
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
@@ -46,7 +46,7 @@ class HikSirenBatteryInfo(CoordinatorEntity, SensorEntity):
             via_device=(DOMAIN, str(coordinator.mac)),
         )
         self.entity_id = (
-            f"{SENSOR_DOMAIN}.{coordinator.device_name}-siren-temperature-{siren.id}"
+            f"{SENSOR_DOMAIN}.{coordinator.device_name}-siren-battery-{siren.id}"
         )
 
     @property
@@ -79,7 +79,7 @@ class HikSirenTemperature(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.siren = siren
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-siren-batt-{siren.id}"
+        self._attr_unique_id = f"{self.coordinator.device_name}-siren-temperature-{siren.id}"
         self._attr_icon = "mdi:thermometer"
         # self._attr_name = f"{self.siren.name} Temperature"
         self._device_class = SensorDeviceClass.TEMPERATURE
@@ -93,7 +93,7 @@ class HikSirenTemperature(CoordinatorEntity, SensorEntity):
         self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
         self._attr_has_entity_name = True
         self.entity_id = (
-            f"{SENSOR_DOMAIN}.{coordinator.device_name}-siren-battery-{siren.id}"
+            f"{SENSOR_DOMAIN}.{coordinator.device_name}-siren-temperature-{siren.id}"
         )
         self._attr_state_class = SensorStateClass.MEASUREMENT
 
