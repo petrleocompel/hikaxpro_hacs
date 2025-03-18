@@ -149,6 +149,10 @@ def detector_model_to_name(model_id: Optional[str]) -> str:
         return "Wireless PIR AM Curtain Detector"
     if model_id == "0x00040":
         return "Wireless Double PIR Detector"
+    if model_id == "0x7D001":
+        return "Wireless Outdoor Siren"
+    if model_id == "0x7A001":
+        return "Wireless Indoor Siren"
     if model_id is not None:
         return str(model_id)
     return "Unknown"
