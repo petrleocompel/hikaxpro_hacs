@@ -23,6 +23,7 @@ from . import HikAxProDataUpdateCoordinator
 from .const import DATA_COORDINATOR, DOMAIN
 from .hik_device import HikDevice
 from .model import DetectorType, Zone, detector_model_to_name
+from .siren_entities import HikSirenTamperDetection
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,6 +39,21 @@ async def async_setup_entry(
     devices = []
     await coordinator.async_request_refresh()
     device_registry = dr.async_get(hass)
+
+    if coordinator.sirens is not None:
+        for [siren_id, siren] in coordinator.sirens.items():
+            _LOGGER.debug("Adding siren with config: %s", siren)
+            siren_status = coordinator.sirens_status[siren.id]
+            device_registry.async_get_or_create(
+                config_entry_id=entry.entry_id,
+                identifiers={(DOMAIN, str(entry.entry_id) + "-siren-" + str(siren_id))},
+                manufacturer="HikVision",
+                model=detector_model_to_name(siren_status.model),
+                name=siren.name,
+                via_device=(DOMAIN, str(coordinator.mac)),
+            )
+            _LOGGER.debug("Adding siren status with config: %s", siren_status)
+            devices.append(HikSirenTamperDetection(coordinator, siren_status, entry.entry_id))
 
     if coordinator.zone_status is not None:
         for zone in coordinator.zone_status.zone_list:

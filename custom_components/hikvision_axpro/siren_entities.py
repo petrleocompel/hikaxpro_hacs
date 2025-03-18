@@ -4,6 +4,11 @@ from typing import cast
 
 import logging
 
+from homeassistant.components.binary_sensor import (
+    DOMAIN as BINARY_SENSOR_DOMAIN,
+    BinarySensorDeviceClass,
+    BinarySensorEntity,
+)
 from homeassistant.components.siren import DOMAIN as SIREN_DOMAIN
 from homeassistant.components.siren import (SirenEntity, SirenEntityFeature)
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
@@ -256,3 +261,53 @@ class HikSirenSwitch(CoordinatorEntity, SirenEntity):
             _LOGGER.exception(
                 "Error turn on for switch %s", self.entity_id
             )
+
+
+class HikSirenTamperDetection(CoordinatorEntity, BinarySensorEntity):
+    """Representation of Hikvision siren tamper detection."""
+
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(
+        self, coordinator: HikAxProDataUpdateCoordinator, siren: SirenStatus, entry_id: str
+    ) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.siren = siren
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-siren-tamper-{siren.id}"
+        self._attr_icon = "mdi:electric-switch"
+        self._device_class = BinarySensorDeviceClass.TAMPER
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_has_entity_name = True
+        self.entity_id = f"{BINARY_SENSOR_DOMAIN}.{coordinator.device_name}-siren-tamper-{siren.id}"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, str(self._ref_id) +  "-siren-" + str(siren.id))},
+            manufacturer="HikVision",
+            name=siren.name,
+            via_device=(DOMAIN, str(coordinator.mac)),
+        )
+
+    @property
+    def name(self) -> str | None:
+        return "Tamper"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+        if self.coordinator.sirens_status and self.coordinator.sirens_status[self.siren.id]:
+            value = self.coordinator.sirens_status[self.siren.id].tamper_evident
+            self._attr_is_on = value
+            self._attr_available = True
+        else:
+            self._attr_state = None
+            self._attr_available = False
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        if self.coordinator.sirens_status and self.coordinator.sirens_status[self.siren.id]:
+            return self.coordinator.sirens_status[self.siren.id].tamper_evident
+        else:
+            return False
