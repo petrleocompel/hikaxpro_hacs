@@ -1311,6 +1311,12 @@ class RelayStatusEnum(Enum):
     ON = "on"
 
 
+class SirenStatusEnum(Enum):
+    NOT_RELATED = "notRelated"
+    OFF = "off"
+    ON = "on"
+
+
 @dataclass
 class RelayStatus:
     id: Optional[int] = None
@@ -2235,6 +2241,113 @@ class RepeaterList:
 @dataclass
 class Siren:
     id: Optional[int] = None
+    name: Optional[str] = None
+    volume: Optional[int] = None
+    related: Optional[bool] = None
+    seq: Optional[str] = None
+    address: Optional[int] = None
+    linkage_address: Optional[int] = None
+    check_time: Optional[int] = None
+    siren_attrib: Optional[str] = None
+    linkage: Optional[str] = None
+    zone_event: Optional[str] = None
+    sub_system: Optional[List[int]] = None
+    linkage_list: Optional[List[dict]] = None
+    led_enabled: Optional[bool] = None
+    led_latch_time: Optional[int] = None
+    find_me_enabled: Optional[bool] = None
+    location: Optional[str] = None
+    arm_disarm_indicator_cfg: Optional[dict] = None
+    company: Optional[str] = None
+    tamper_enabled: Optional[bool] = None
+    try_alarm_enabled: Optional[bool] = None
+    pre_register_enabled: Optional[bool] = None
+    buzz_enabled: Optional[bool] = None
+    disarm_tamper_enabled: Optional[bool] = None
+    alarm_strobe_flash_enabled: Optional[bool] = None
+    sounder_alarm_duration: Optional[int] = None
+    heart_beat_interval: Optional[int] = None
+    siren_color: Optional[str] = None
+    alarm_linked_event_cfg: Optional[List[str]] = None
+    access_module_type: Optional[str] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'Siren':
+        assert isinstance(obj, dict)
+        return Siren(
+            id=from_union([from_int, from_none], obj.get("id")),
+            name=from_union([from_str, from_none], obj.get("name")),
+            volume=from_union([from_int, from_none], obj.get("volume")),
+            related=from_union([from_bool, from_none], obj.get("related")),
+            seq=from_union([from_str, from_none], obj.get("seq")),
+            address=from_union([from_int, from_none], obj.get("address")),
+            linkage_address=from_union([from_int, from_none], obj.get("linkageAddress")),
+            check_time=from_union([from_int, from_none], obj.get("checkTime")),
+            siren_attrib=from_union([from_str, from_none], obj.get("sirenAttrib")),
+            linkage=from_union([from_str, from_none], obj.get("linkage")),
+            zone_event=from_union([from_str, from_none], obj.get("zoneEvent")),
+            sub_system=from_union([lambda x: from_list(from_int, x), from_none], obj.get("subSystem")),
+            linkage_list=from_union([lambda x: from_list(lambda y: y, x), from_none], obj.get("LinkageList")),
+            led_enabled=from_union([from_bool, from_none], obj.get("LEDEnabled")),
+            led_latch_time=from_union([from_int, from_none], obj.get("LEDLatchTime")),
+            find_me_enabled=from_union([from_bool, from_none], obj.get("findMeEnabled")),
+            location=from_union([from_str, from_none], obj.get("location")),
+            arm_disarm_indicator_cfg=from_union([lambda x: x, from_none], obj.get("ArmAndDisarmIndicatorCfg")),
+            company=from_union([from_str, from_none], obj.get("company")),
+            tamper_enabled=from_union([from_bool, from_none], obj.get("tamperEnabled")),
+            try_alarm_enabled=from_union([from_bool, from_none], obj.get("tryAlarmEnabled")),
+            pre_register_enabled=from_union([from_bool, from_none], obj.get("preRegisterEnabled")),
+            buzz_enabled=from_union([from_bool, from_none], obj.get("buzzEnabled")),
+            disarm_tamper_enabled=from_union([from_bool, from_none], obj.get("disarmTamperEnabled")),
+            alarm_strobe_flash_enabled=from_union([from_bool, from_none], obj.get("alarmStrobeFlashEnabled")),
+            sounder_alarm_duration=from_union([from_int, from_none], obj.get("sounderAlarmDuration")),
+            heart_beat_interval=from_union([from_int, from_none], obj.get("heartBeatInterval")),
+            siren_color=from_union([from_str, from_none], obj.get("sirenColor")),
+            alarm_linked_event_cfg=from_union([lambda x: from_list(from_str, x), from_none], obj.get("alarmLinkedEventCfg")),
+            access_module_type=from_union([from_str, from_none], obj.get("accessModuleType")),
+        )
+
+    def to_dict(self) -> dict:
+        return {k: v for k, v in self.__dict__.items() if v is not None}
+
+
+@dataclass
+class SirenListWrap:
+    siren: Optional[Siren] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'SirenListWrap':
+        assert isinstance(obj, dict)
+        siren = from_union([Siren.from_dict, from_none], obj.get("Siren"))
+        return SirenListWrap(siren)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.siren is not None:
+            result["Siren"] = from_union([lambda x: to_class(Siren, x), from_none], self.siren)
+        return result
+
+
+@dataclass
+class SirenList:
+    list: Optional[List[Siren]] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'SirenList':
+        assert isinstance(obj, dict)
+        list = from_union([lambda x: from_list(SirenListWrap.from_dict, x), from_none], obj.get("List"))
+        return SirenList(list)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.list is not None:
+            result["List"] = from_union([lambda x: from_list(lambda x: to_class(Siren, x), x), from_none], self.list)
+        return result
+
+
+@dataclass
+class SirenStatus:
+    id: Optional[int] = None
     seq: Optional[str] = None
     name: Optional[str] = None
     status: Optional[str] = None
@@ -2244,9 +2357,13 @@ class Siren:
     signal: Optional[int] = None
     device_no: Optional[int] = None
     main_power_supply: Optional[bool] = None
+    temperature: Optional[int] = None
+    model: Optional[str] = None
+    version: Optional[str] = None
+    charge_value: Optional[int] = None
 
     @staticmethod
-    def from_dict(obj: Any) -> 'Siren':
+    def from_dict(obj: Any) -> 'SirenStatus':
         assert isinstance(obj, dict)
         id = from_union([from_int, from_none], obj.get("id"))
         seq = from_union([from_str, from_none], obj.get("seq"))
@@ -2258,7 +2375,11 @@ class Siren:
         signal = from_union([from_int, from_none], obj.get("signal"))
         device_no = from_union([from_int, from_none], obj.get("deviceNo"))
         main_power_supply = from_union([from_bool, from_none], obj.get("mainPowerSupply"))
-        return Siren(id, seq, name, status, tamper_evident, siren_attrib, charge, signal, device_no, main_power_supply)
+        temperature = from_union([from_int, from_none], obj.get("temperature"))
+        model = from_union([from_str, from_none], obj.get("model"))
+        version = from_union([from_str, from_none], obj.get("version"))
+        charge_value = from_union([from_int, from_none], obj.get("chargeValue"))
+        return SirenStatus(id, seq, name, status, tamper_evident, siren_attrib, charge, signal, device_no, main_power_supply, temperature, model, version, charge_value)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -2282,25 +2403,31 @@ class Siren:
             result["deviceNo"] = from_union([from_int, from_none], self.device_no)
         if self.main_power_supply is not None:
             result["mainPowerSupply"] = from_union([from_bool, from_none], self.main_power_supply)
+        if self.temperature is not None:
+            result["temperature"] = from_union([from_int, from_none], self.temperature)
+        if self.model is not None:
+            result["model"] = from_union([from_str, from_none], self.model)
+        if self.version is not None:
+            result["version"] = from_union([from_str, from_none], self.version)
+        if self.charge_value is not None:
+            result["charge_value"] = from_union([from_int, from_none], self.charge_value)
         return result
 
-
 @dataclass
-class SirenList:
-    siren: Optional[Siren] = None
+class SirenStatusList:
+    siren: Optional[SirenStatus] = None
 
     @staticmethod
-    def from_dict(obj: Any) -> 'SirenList':
+    def from_dict(obj: Any) -> 'SirenStatusList':
         assert isinstance(obj, dict)
-        siren = from_union([Siren.from_dict, from_none], obj.get("Siren"))
-        return SirenList(siren)
+        siren = from_union([SirenStatus.from_dict, from_none], obj.get("Siren"))
+        return SirenStatusList(siren)
 
     def to_dict(self) -> dict:
         result: dict = {}
         if self.siren is not None:
-            result["Siren"] = from_union([lambda x: to_class(Siren, x), from_none], self.siren)
+            result["Siren"] = from_union([lambda x: to_class(SirenStatus, x), from_none], self.siren)
         return result
-
 
 @dataclass
 class TransmitterOutputList:
@@ -2518,7 +2645,7 @@ class TransmitterList:
 class ExDevStatus:
     output_mod_list: Optional[List[OutputModList]] = None
     output_list: Optional[List[ExDevStatusOutputList]] = None
-    siren_list: Optional[List[SirenList]] = None
+    siren_list: Optional[List[SirenStatusList]] = None
     repeater_list: Optional[List[RepeaterList]] = None
     card_reader_list: Optional[List[CardReaderList]] = None
     extension_list: Optional[List[ExtensionList]] = None
@@ -2531,7 +2658,7 @@ class ExDevStatus:
         assert isinstance(obj, dict)
         output_mod_list = from_union([lambda x: from_list(OutputModList.from_dict, x), from_none], obj.get("OutputModList"))
         output_list = from_union([lambda x: from_list(ExDevStatusOutputList.from_dict, x), from_none], obj.get("OutputList"))
-        siren_list = from_union([lambda x: from_list(SirenList.from_dict, x), from_none], obj.get("SirenList"))
+        siren_list = from_union([lambda x: from_list(SirenStatusList.from_dict, x), from_none], obj.get("SirenList"))
         repeater_list = from_union([lambda x: from_list(RepeaterList.from_dict, x), from_none], obj.get("RepeaterList"))
         card_reader_list = from_union([lambda x: from_list(CardReaderList.from_dict, x), from_none], obj.get("CardReaderList"))
         extension_list = from_union([lambda x: from_list(ExtensionList.from_dict, x), from_none], obj.get("ExtensionList"))
@@ -2547,7 +2674,7 @@ class ExDevStatus:
         if self.output_list is not None:
             result["OutputList"] = from_union([lambda x: from_list(lambda x: to_class(ExDevStatusOutputList, x), x), from_none], self.output_list)
         if self.siren_list is not None:
-            result["SirenList"] = from_union([lambda x: from_list(lambda x: to_class(SirenList, x), x), from_none], self.siren_list)
+            result["SirenList"] = from_union([lambda x: from_list(lambda x: to_class(SirenStatusList, x), x), from_none], self.siren_list)
         if self.repeater_list is not None:
             result["RepeaterList"] = from_union([lambda x: from_list(lambda x: to_class(RepeaterList, x), x), from_none], self.repeater_list)
         if self.card_reader_list is not None:

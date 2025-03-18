@@ -46,6 +46,10 @@ from .model import (
     ExDevStatusResponse,
     JSONResponseStatus,
     OutputConfList,
+    SirenList,
+    Siren,
+    SirenStatus,
+    SirenStatusList,
     OutputStatusFull,
     RelayStatusSearchResponse,
     RelaySwitchConf,
@@ -62,6 +66,7 @@ PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
     Platform.SENSOR,
     Platform.SWITCH,
+    Platform.SIREN,
 ]
 _LOGGER = logging.getLogger(__name__)
 
@@ -215,6 +220,8 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     sub_systems: dict[int, SubSys] = {}
     """ Zones aka devices """
     devices: dict[int, ZoneConfig] = {}
+    sirens: dict[int, Siren] = {}
+    sirens_status: dict[int, SirenStatus] = {}
     relays: dict[int, RelaySwitchConf] = {}
     relays_status: dict[int, OutputStatusFull] = {}
     use_sub_systems: bool
@@ -270,7 +277,30 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         _LOGGER.debug(self.device_info)
         self.load_devices()
         self.load_relays()
+        self.load_sirens()
         self._update_data()
+
+    def load_sirens(self):
+        """Load sirens."""
+        devices = self._load_sirens()
+        if devices is not None:
+            self.sirens = {}
+            for item in devices.list:
+                self.sirens[item.siren.id] = item.siren
+
+    def _load_sirens(self) -> SirenList:
+        endpoint = self.axpro.build_url(
+            f"http://{self.host}" + hikaxpro.consts.Endpoints.SirensConfig, True
+        )
+        response = self.axpro.make_request(endpoint, "GET", None, True)
+
+        if response.status_code != 200:
+            raise hikaxpro.errors.UnexpectedResponseCodeError(
+                response.status_code, response.text
+            )
+        _LOGGER.debug(response.text)
+
+        return SirenList.from_dict(response.json())
 
     def load_relays(self):
         """Load relays."""
@@ -293,14 +323,37 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         _LOGGER.debug(response.text)
         return OutputConfList.from_dict(response.json())
 
-    def load_ext_devices_status(self):
-        """Load status of external devices."""
-        statuses = self._load_ext_devices_status()
-        if statuses is not None:
-            self.relays_status = {}
-            if statuses.ex_dev_status is not None:
-                for item in statuses.ex_dev_status.output_list:
-                    self.relays_status[item.output.id] = item.output
+    def load_sirens_statuses(self, response: ExDevStatusResponse):
+        """Load status of sirens."""
+        ex_dev_status = response.ex_dev_status
+        if ex_dev_status is None:
+            return
+        siren_list = ex_dev_status.siren_list
+
+        if siren_list is None:
+            return
+
+        self.sirens_status = {}
+        for item in siren_list:
+            self.sirens_status[item.siren.id] = item.siren
+
+        _LOGGER.debug("Siren status: %s", self.sirens_status)
+
+
+    def load_relays_statuses(self, response: ExDevStatusResponse):
+        """Load status of relays."""
+        ex_dev_status = response.ex_dev_status
+        if ex_dev_status is None:
+            return
+        output_list = ex_dev_status.output_list
+        if output_list is None:
+            return
+
+        self.relays_status = {}
+        for item in output_list:
+            self.relays_status[item.output.id] = item.output
+
+        _LOGGER.debug("Relay status: %s", self.relays_status)
 
     def _load_ext_devices_status(self) -> ExDevStatusResponse:
         endpoint = self.axpro.build_url(
@@ -401,14 +454,11 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
             zones[zone.zone.id] = zone.zone
         self.zones = zones
         _LOGGER.debug("Zones: %s", zone_response)
-        # relays
+
+        # device statuses
         devices_status = self._load_ext_devices_status()
-        relays_status = {}
-        if devices_status.ex_dev_status is not None:
-            for item in devices_status.ex_dev_status.output_list:
-                relays_status[item.output.id] = item.output
-        self.relays_status = relays_status
-        _LOGGER.debug("Relay status: %s", relays_status)
+        self.load_sirens_statuses(devices_status)
+        self.load_relays_statuses(devices_status)
 
     async def _async_update_data(self) -> None:
         """Fetch data from Axpro."""
@@ -472,5 +522,39 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         """Turn off relay by ID."""
         response: JSONResponseStatus = await self.hass.async_add_executor_job(
             self._relay_call, relay_id, False
+        )
+        return response.status_code == 1
+
+    def _siren_call(self, relay_id: int, is_enabled: bool) -> JSONResponseStatus:
+        api_url = "/ISAPI/SecurityCP/control/siren/{}"
+        endpoint = self.axpro.build_url(
+            f"http://{self.host}"
+            + api_url.replace("{}", str(relay_id)),
+            True,
+        )
+        response = self.axpro.make_request(
+            endpoint,
+            "POST",
+            {"SirenCtrl": {"switch": "open" if is_enabled else "close"}},
+            True,
+        )
+        if response.status_code != 200:
+            raise hikaxpro.errors.UnexpectedResponseCodeError(
+                response.status_code, response.text
+            )
+        _LOGGER.debug(response.text)
+        return JSONResponseStatus.from_dict(response.json())
+
+    async def siren_on(self, relay_id: int):
+        """Turn on siren by ID."""
+        response: JSONResponseStatus = await self.hass.async_add_executor_job(
+            self._siren_call, relay_id, True
+        )
+        return response.status_code == 1
+
+    async def siren_off(self, relay_id: int):
+        """Turn off siren by ID."""
+        response: JSONResponseStatus = await self.hass.async_add_executor_job(
+            self._siren_call, relay_id, False
         )
         return response.status_code == 1

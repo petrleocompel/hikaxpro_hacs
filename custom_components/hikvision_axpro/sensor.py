@@ -8,18 +8,13 @@ from __future__ import annotations
 import logging
 from typing import cast
 
-from homeassistant.components.sensor import (
-    DOMAIN as SENSOR_DOMAIN,
-    SensorDeviceClass,
-    SensorEntity,
-    SensorStateClass,
-)
+from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
+from homeassistant.components.sensor import (SensorDeviceClass, SensorEntity,
+                                             SensorStateClass)
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    PERCENTAGE,
-    SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
-    UnitOfTemperature,
-)
+from homeassistant.const import (PERCENTAGE,
+                                 SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+                                 UnitOfTemperature)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity import EntityCategory
@@ -30,6 +25,7 @@ from . import HikAxProDataUpdateCoordinator
 from .const import DATA_COORDINATOR, DOMAIN
 from .hik_device import HikDevice
 from .model import DetectorType, Status, Zone, detector_model_to_name
+from .siren_entities import HikSirenBatteryInfo, HikSirenTemperature, HikSirenSignalInfo
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -45,6 +41,24 @@ async def async_setup_entry(
     devices = []
     await coordinator.async_request_refresh()
     device_registry = dr.async_get(hass)
+
+    _LOGGER.debug("Coordinator with sirens: %s", coordinator.sirens_status)
+    if coordinator.sirens is not None:
+        for [siren_id, siren] in coordinator.sirens.items():
+            _LOGGER.debug("Adding siren with config: %s", siren)
+            device_registry.async_get_or_create(
+                config_entry_id=entry.entry_id,
+                identifiers={(DOMAIN, str(entry.entry_id) + "-siren-" + str(siren_id))},
+                manufacturer="HikVision",
+                name=siren.name,
+                via_device=(DOMAIN, str(coordinator.mac)),
+            )
+            siren_status = coordinator.sirens_status[siren.id]
+            _LOGGER.debug("Adding siren status with config: %s", siren_status)
+            devices.append(HikSirenTemperature(coordinator, siren_status, entry.entry_id))
+            devices.append(HikSirenBatteryInfo(coordinator, siren_status, entry.entry_id))
+            devices.append(HikSirenSignalInfo(coordinator, siren_status, entry.entry_id))
+
     if coordinator.zone_status is not None:
         for zone in coordinator.zone_status.zone_list:
             zone_config = coordinator.devices.get(zone.zone.id)
