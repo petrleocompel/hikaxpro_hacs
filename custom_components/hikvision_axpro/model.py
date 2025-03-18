@@ -2495,6 +2495,184 @@ class SirenStatusList:
         return result
 
 @dataclass
+class SirenCapabilities:
+    id_min: Optional[int] = None
+    id_max: Optional[int] = None
+    name_min: Optional[int] = None
+    name_max: Optional[int] = None
+    volume_min: Optional[int] = None
+    volume_max: Optional[int] = None
+    support_volume_id_list: Optional[List[int]] = None
+    related: Optional[str] = None
+    seq_min: Optional[int] = None
+    seq_max: Optional[int] = None
+    address: Optional[List[int]] = None
+    linkage_address: Optional[List[int]] = None
+    check_time_min: Optional[int] = None
+    check_time_max: Optional[int] = None
+    siren_attrib: Optional[List[str]] = None
+    siren_linkage_type: Optional[List[str]] = None
+    linkage: Optional[List[str]] = None
+    method: Optional[List[str]] = None
+    sub_system_min: Optional[int] = None
+    sub_system_max: Optional[int] = None
+    sub_system_no_min: Optional[int] = None
+    sub_system_no_max: Optional[int] = None
+    led_enabled: Optional[bool] = None
+    led_latch_time_min: Optional[int] = None
+    led_latch_time_max: Optional[int] = None
+    find_me_enabled: Optional[bool] = None
+    location: Optional[List[str]] = None
+    company: Optional[List[str]] = None
+    support_siren_ctrl_id_list: Optional[List[int]] = None
+    tamper_enabled: Optional[bool] = None
+    try_alarm_enabled: Optional[bool] = None
+    pre_register_enabled: Optional[bool] = None
+    buzz_enabled: Optional[bool] = None
+    disarm_tamper_enabled: Optional[bool] = None
+    alarm_strobe_flash_enabled: Optional[bool] = None
+    sounder_alarm_duration_min: Optional[int] = None
+    sounder_alarm_duration_max: Optional[int] = None
+    heart_beat_interval: Optional[List[int]] = None
+    is_support_signal_test: Optional[bool] = None
+    is_support_zone_test: Optional[bool] = None
+    access_module_type: Optional[List[str]] = None
+    alarm_linked_event_cfg_size: Optional[int] = None
+    alarm_linked_event_cfg_opt: Optional[List[str]] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'SirenCapabilities':
+        assert isinstance(obj, dict)
+        return SirenCapabilities(
+            id_min=from_union([from_int, from_none], obj.get("id", {}).get("@min")),
+            id_max=from_union([from_int, from_none], obj.get("id", {}).get("@max")),
+            name_min=from_union([from_int, from_none], obj.get("name", {}).get("@min")),
+            name_max=from_union([from_int, from_none], obj.get("name", {}).get("@max")),
+            volume_min=from_union([from_int, from_none], obj.get("volume", {}).get("@min")),
+            volume_max=from_union([from_int, from_none], obj.get("volume", {}).get("@max")),
+            support_volume_id_list=from_union([lambda x: from_list(from_int, x), from_none], obj.get("supportVolumeIDList")),
+            related=from_union([from_str, from_none], obj.get("related", {}).get("@opt")),
+            seq_min=from_union([from_int, from_none], obj.get("seq", {}).get("@min")),
+            seq_max=from_union([from_int, from_none], obj.get("seq", {}).get("@max")),
+            address=from_union([lambda x: from_list(from_int, x), from_none], obj.get("address", {}).get("@opt")),
+            linkage_address=from_union([lambda x: from_list(from_int, x), from_none], obj.get("linkageAddress", {}).get("@opt")),
+            check_time_min=from_union([from_int, from_none], obj.get("checkTime", {}).get("@min")),
+            check_time_max=from_union([from_int, from_none], obj.get("checkTime", {}).get("@max")),
+            siren_attrib=from_union([lambda x: from_list(from_str, x), from_none], obj.get("sirenAttrib", {}).get("@opt")),
+            siren_linkage_type=from_union([lambda x: from_list(from_str, x), from_none], obj.get("sirenLinkageType", {}).get("@opt")),
+            linkage=from_union([lambda x: from_list(from_str, x), from_none], obj.get("linkage", {}).get("@opt")),
+            method=from_union([lambda x: from_list(from_str, x.split(',')), from_none], obj.get("method", {}).get("@opt")),
+            sub_system_min=from_union([from_int, from_none], obj.get("subSystem", {}).get("@min")),
+            sub_system_max=from_union([from_int, from_none], obj.get("subSystem", {}).get("@max")),
+            sub_system_no_min=from_union([from_int, from_none], obj.get("subSystemNo", {}).get("@min")),
+            sub_system_no_max=from_union([from_int, from_none], obj.get("subSystemNo", {}).get("@max")),
+            led_enabled=from_union([from_bool, from_none], obj.get("LEDEnabled", {}).get("@opt")),
+            led_latch_time_min=from_union([from_int, from_none], obj.get("LEDLatchTime", {}).get("@min")),
+            led_latch_time_max=from_union([from_int, from_none], obj.get("LEDLatchTime", {}).get("@max")),
+            find_me_enabled=from_union([from_bool, from_none], obj.get("findMeEnabled", {}).get("@opt")),
+            location=from_union([lambda x: from_list(from_str, x), from_none], obj.get("location", {}).get("@opt")),
+            company=from_union([lambda x: from_list(from_str, x), from_none], obj.get("company", {}).get("@opt")),
+            support_siren_ctrl_id_list=from_union([lambda x: from_list(from_int, x), from_none], obj.get("supportSirenCtrlIDList")),
+            tamper_enabled=from_union([from_bool, from_none], obj.get("tamperEnabled", {}).get("@opt")),
+            try_alarm_enabled=from_union([from_bool, from_none], obj.get("tryAlarmEnabled", {}).get("@opt")),
+            pre_register_enabled=from_union([from_bool, from_none], obj.get("preRegisterEnabled", {}).get("@opt")),
+            buzz_enabled = from_union([lambda x: from_list(from_bool, x), from_none], obj.get("buzzEnabled", {}).get("@opt")),
+            disarm_tamper_enabled = from_union([lambda x: from_list(from_bool, x), from_none], obj.get("disarmTamperEnabled", {}).get("@opt")),
+            alarm_strobe_flash_enabled = from_union([lambda x: from_list(from_bool, x), from_none], obj.get("alarmStrobeFlashEnabled", {}).get("@opt")),
+            sounder_alarm_duration_min=from_union([from_int, from_none], obj.get("sounderAlarmDuration", {}).get("@min")),
+            sounder_alarm_duration_max=from_union([from_int, from_none], obj.get("sounderAlarmDuration", {}).get("@max")),
+            heart_beat_interval=from_union([lambda x: from_list(from_int, x), from_none], obj.get("heartBeatInterval", {}).get("@opt")),
+            is_support_signal_test=from_union([from_bool, from_none], obj.get("isSupportSignalTest")),
+            is_support_zone_test=from_union([from_bool, from_none], obj.get("isSupportZoneTest")),
+            access_module_type=from_union([lambda x: from_list(from_str, x), from_none], obj.get("accessModuleType", {}).get("@opt")),
+            alarm_linked_event_cfg_size=from_union([from_int, from_none], obj.get("alarmLinkedEventCfg", {}).get("@size")),
+            alarm_linked_event_cfg_opt=from_union([lambda x: from_list(from_str, x), from_none], obj.get("alarmLinkedEventCfg", {}).get("@opt")),
+        )
+
+    def to_dict(self) -> dict:
+        return {
+            "id": {
+                "@min": self.id_min,
+                "@max": self.id_max
+            } if self.id_min is not None and self.id_max is not None else None,
+            "name": {
+                "@min": self.name_min,
+                "@max": self.name_max
+            } if self.name_min is not None and self.name_max is not None else None,
+            "volume": {
+                "@min": self.volume_min,
+                "@max": self.volume_max
+            } if self.volume_min is not None and self.volume_max is not None else None,
+            "supportVolumeIDList": self.support_volume_id_list,
+            "related": {"@opt": "true" if self.related else "false"},
+            "seq": {
+                "@min": self.seq_min,
+                "@max": self.seq_max
+            } if self.seq_min is not None and self.seq_max is not None else None,
+            "address": {"@opt": self.address} if self.address is not None else None,
+            "linkageAddress": {"@opt": self.linkage_address} if self.linkage_address is not None else None,
+            "checkTime": {
+                "@min": self.check_time_min,
+                "@max": self.check_time_max
+            } if self.check_time_min is not None and self.check_time_max is not None else None,
+            "sirenAttrib": {"@opt": self.siren_attrib} if self.siren_attrib is not None else None,
+            "sirenLinkageType": {"@opt": self.siren_linkage_type} if self.siren_linkage_type is not None else None,
+            "linkage": {"@opt": self.linkage} if self.linkage is not None else None,
+            "method": {"@opt": ','.join(self.method)} if self.method is not None else None,
+            "subSystem": {
+                "@min": self.sub_system_min,
+                "@max": self.sub_system_max
+            } if self.sub_system_min is not None and self.sub_system_max is not None else None,
+            "subSystemNo": {
+                "@min": self.sub_system_no_min,
+                "@max": self.sub_system_no_max
+            } if self.sub_system_no_min is not None and self.sub_system_no_max is not None else None,
+            "LEDEnabled": {"@opt": ["true", "false"][not self.led_enabled]},
+            "LEDLatchTime": {
+                "@min": self.led_latch_time_min,
+                "@max": self.led_latch_time_max
+            } if self.led_latch_time_min is not None and self.led_latch_time_max is not None else None,
+            "findMeEnabled": {"@opt": ["true", "false"][not self.find_me_enabled]},
+            "location": {"@opt": self.location} if self.location is not None else None,
+            "company": {"@opt": self.company} if self.company is not None else None,
+            "supportSirenCtrlIDList": self.support_siren_ctrl_id_list,
+            "tamperEnabled": {"@opt": ["true", "false"][not self.tamper_enabled]},
+            "tryAlarmEnabled": {"@opt": ["true", "false"][not self.try_alarm_enabled]},
+            "preRegisterEnabled": {"@opt": ["true", "false"][not self.pre_register_enabled]},
+            "buzzEnabled": {"@opt": ["true", "false"][not self.buzz_enabled]},
+            "disarmTamperEnabled": {"@opt": ["true", "false"][not self.disarm_tamper_enabled]},
+            "alarmStrobeFlashEnabled": {"@opt": ["true", "false"][not self.alarm_strobe_flash_enabled]},
+            "sounderAlarmDuration": {
+                "@min": self.sounder_alarm_duration_min,
+                "@max": self.sounder_alarm_duration_max
+            } if self.sounder_alarm_duration_min is not None and self.sounder_alarm_duration_max is not None else None,
+            "heartBeatInterval": {"@opt": self.heart_beat_interval} if self.heart_beat_interval is not None else None,
+            "isSupportSignalTest": self.is_support_signal_test,
+            "isSupportZoneTest": self.is_support_zone_test,
+            "accessModuleType": {"@opt": self.access_module_type} if self.access_module_type is not None else None,
+            "alarmLinkedEventCfg": {
+                "@size": self.alarm_linked_event_cfg_size,
+                "@opt": self.alarm_linked_event_cfg_opt
+            } if self.alarm_linked_event_cfg_size is not None and self.alarm_linked_event_cfg_opt is not None else None,
+        }
+
+@dataclass
+class SirenCapabilitiesResponse:
+    capabilities: Optional[SirenCapabilities] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'SirenCapabilitiesResponse':
+        assert isinstance(obj, dict)
+        capabilities = from_union([SirenCapabilities.from_dict, from_none], obj.get("SirenCap"))
+        return SirenCapabilitiesResponse(capabilities)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.capabilities is not None:
+            result["SirenCap"] = from_union([lambda x: to_class(SirenCapabilities, x), from_none], self.capabilities)
+        return result
+
+@dataclass
 class TransmitterOutputList:
     output_id: Optional[int] = None
     sub_system_list: Optional[List[int]] = None

@@ -48,7 +48,11 @@ async def async_setup_entry(
             )
             siren_status = coordinator.sirens_status[siren.id]
             _LOGGER.debug("Adding siren status with config: %s", siren_status)
-            devices.append(HikSirenSwitch(coordinator, siren_status, entry.entry_id))
+
+            siren_capabilities = coordinator.siren_capabilities
+            if siren_capabilities is not None and siren_capabilities.support_siren_ctrl_id_list is not None:
+                if siren.id in siren_capabilities.support_siren_ctrl_id_list:
+                    devices.append(HikSirenSwitch(coordinator, siren_status, entry.entry_id))
 
     _LOGGER.debug("setting up - sirens: %s", ",".join(x.name for x in devices))
     async_add_entities(devices, False)

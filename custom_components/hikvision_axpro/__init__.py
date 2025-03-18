@@ -9,6 +9,8 @@ import logging
 import hikaxpro
 import xmltodict
 
+from typing import Optional
+
 from homeassistant.components.alarm_control_panel import (
     SCAN_INTERVAL,
     AlarmControlPanelState,
@@ -59,6 +61,8 @@ from .model import (
     ZoneConfig,
     ZonesConf,
     ZonesResponse,
+    SirenCapabilitiesResponse,
+    SirenCapabilities,
 )
 
 PLATFORMS: list[Platform] = [
@@ -222,6 +226,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     devices: dict[int, ZoneConfig] = {}
     sirens: dict[int, Siren] = {}
     sirens_status: dict[int, SirenStatus] = {}
+    siren_capabilities: Optional[SirenCapabilities] = None
     relays: dict[int, RelaySwitchConf] = {}
     relays_status: dict[int, OutputStatusFull] = {}
     use_sub_systems: bool
@@ -278,6 +283,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.load_devices()
         self.load_relays()
         self.load_sirens()
+        self.load_siren_capabilities()
         self._update_data()
 
     def load_sirens(self):
@@ -301,6 +307,31 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         _LOGGER.debug(response.text)
 
         return SirenList.from_dict(response.json())
+
+    def load_siren_capabilities(self):
+        """Load siren capabilities."""
+        capabilities_response = self._load_siren_capabilities()
+        if capabilities_response is None:
+            return
+        capabilities = capabilities_response.capabilities
+        if capabilities is None:
+            return
+
+        self.siren_capabilities = capabilities
+
+    def _load_siren_capabilities(self) -> SirenList:
+        endpoint = self.axpro.build_url(
+            f"http://{self.host}" + "/ISAPI/SecurityCP/Configuration/wirelessSiren/capabilities", True
+        )
+        response = self.axpro.make_request(endpoint, "GET", None, True)
+
+        if response.status_code != 200:
+            raise hikaxpro.errors.UnexpectedResponseCodeError(
+                response.status_code, response.text
+            )
+        _LOGGER.debug(response.text)
+
+        return SirenCapabilitiesResponse.from_dict(response.json())
 
     def load_relays(self):
         """Load relays."""
