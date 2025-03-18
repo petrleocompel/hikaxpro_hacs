@@ -2525,12 +2525,12 @@ class SirenCapabilities:
     location: Optional[List[str]] = None
     company: Optional[List[str]] = None
     support_siren_ctrl_id_list: Optional[List[int]] = None
-    tamper_enabled: Optional[bool] = None
-    try_alarm_enabled: Optional[bool] = None
-    pre_register_enabled: Optional[bool] = None
-    buzz_enabled: Optional[bool] = None
-    disarm_tamper_enabled: Optional[bool] = None
-    alarm_strobe_flash_enabled: Optional[bool] = None
+    tamper_enabled: Optional[List[bool]] = None
+    try_alarm_enabled: Optional[List[bool]] = None
+    pre_register_enabled: Optional[List[bool]] = None
+    buzz_enabled: Optional[List[bool]] = None
+    disarm_tamper_enabled: Optional[List[bool]] = None
+    alarm_strobe_flash_enabled: Optional[List[bool]] = None
     sounder_alarm_duration_min: Optional[int] = None
     sounder_alarm_duration_max: Optional[int] = None
     heart_beat_interval: Optional[List[int]] = None
@@ -2573,9 +2573,9 @@ class SirenCapabilities:
             location=from_union([lambda x: from_list(from_str, x), from_none], obj.get("location", {}).get("@opt")),
             company=from_union([lambda x: from_list(from_str, x), from_none], obj.get("company", {}).get("@opt")),
             support_siren_ctrl_id_list=from_union([lambda x: from_list(from_int, x), from_none], obj.get("supportSirenCtrlIDList")),
-            tamper_enabled=from_union([from_bool, from_none], obj.get("tamperEnabled", {}).get("@opt")),
-            try_alarm_enabled=from_union([from_bool, from_none], obj.get("tryAlarmEnabled", {}).get("@opt")),
-            pre_register_enabled=from_union([from_bool, from_none], obj.get("preRegisterEnabled", {}).get("@opt")),
+            tamper_enabled=from_union([lambda x: from_list(from_bool, x), from_none], obj.get("tamperEnabled", {}).get("@opt")),
+            try_alarm_enabled=from_union([lambda x: from_list(from_bool, x), from_none], obj.get("tryAlarmEnabled", {}).get("@opt")),
+            pre_register_enabled=from_union([lambda x: from_list(from_bool, x), from_none], obj.get("preRegisterEnabled", {}).get("@opt")),
             buzz_enabled = from_union([lambda x: from_list(from_bool, x), from_none], obj.get("buzzEnabled", {}).get("@opt")),
             disarm_tamper_enabled = from_union([lambda x: from_list(from_bool, x), from_none], obj.get("disarmTamperEnabled", {}).get("@opt")),
             alarm_strobe_flash_enabled = from_union([lambda x: from_list(from_bool, x), from_none], obj.get("alarmStrobeFlashEnabled", {}).get("@opt")),
@@ -2636,12 +2636,12 @@ class SirenCapabilities:
             "location": {"@opt": self.location} if self.location is not None else None,
             "company": {"@opt": self.company} if self.company is not None else None,
             "supportSirenCtrlIDList": self.support_siren_ctrl_id_list,
-            "tamperEnabled": {"@opt": ["true", "false"][not self.tamper_enabled]},
-            "tryAlarmEnabled": {"@opt": ["true", "false"][not self.try_alarm_enabled]},
-            "preRegisterEnabled": {"@opt": ["true", "false"][not self.pre_register_enabled]},
-            "buzzEnabled": {"@opt": ["true", "false"][not self.buzz_enabled]},
-            "disarmTamperEnabled": {"@opt": ["true", "false"][not self.disarm_tamper_enabled]},
-            "alarmStrobeFlashEnabled": {"@opt": ["true", "false"][not self.alarm_strobe_flash_enabled]},
+            "tamperEnabled": {"@opt": self.tamper_enabled} if self.tamper_enabled is not None else None,
+            "tryAlarmEnabled": {"@opt": self.try_alarm_enabled} if self.try_alarm_enabled is not None else None,
+            "preRegisterEnabled": {"@opt": self.pre_register_enabled} if self.pre_register_enabled is not None else None,
+            "buzzEnabled": {"@opt": self.buzz_enabled} if self.buzz_enabled is not None else None,
+            "disarmTamperEnabled": {"@opt": self.disarm_tamper_enabled} if self.disarm_tamper_enabled is not None else None,
+            "alarmStrobeFlashEnabled": {"@opt": self.alarm_strobe_flash_enabled} if self.alarm_strobe_flash_enabled is not None else None,
             "sounderAlarmDuration": {
                 "@min": self.sounder_alarm_duration_min,
                 "@max": self.sounder_alarm_duration_max
