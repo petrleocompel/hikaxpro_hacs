@@ -17,6 +17,7 @@ from . import HikAxProDataUpdateCoordinator
 from .const import DATA_COORDINATOR, DOMAIN
 
 from .siren_entities import HikSirenSwitch
+from .model import detector_model_to_name
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,10 +37,12 @@ async def async_setup_entry(
     if coordinator.sirens is not None:
         for [siren_id, siren] in coordinator.sirens.items():
             _LOGGER.debug("Adding siren with config: %s", siren)
+            siren_status = coordinator.sirens_status[siren.id]
             device_registry.async_get_or_create(
                 config_entry_id=entry.entry_id,
                 identifiers={(DOMAIN, str(entry.entry_id) + "-siren-" + str(siren_id))},
                 manufacturer="HikVision",
+                model=detector_model_to_name(siren_status.model),
                 name=siren.name,
                 via_device=(DOMAIN, str(coordinator.mac)),
             )
