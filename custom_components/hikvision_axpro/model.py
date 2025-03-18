@@ -1,7 +1,7 @@
 import logging
-from enum import Enum
 from dataclasses import dataclass
-from typing import Any, List, Optional, TypeVar, Callable, Type, cast
+from enum import Enum
+from typing import Any, Callable, List, Optional, Type, TypeVar, cast
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -2308,7 +2308,68 @@ class Siren:
         )
 
     def to_dict(self) -> dict:
-        return {k: v for k, v in self.__dict__.items() if v is not None}
+        result: dict = {}
+        if self.id is not None:
+            result["id"] = from_union([from_int, from_none], self.id)
+        if self.name is not None:
+            result["name"] = from_union([from_str, from_none], self.name)
+        if self.volume is not None:
+            result["volume"] = from_union([from_int, from_none], self.volume)
+        if self.related is not None:
+            result["related"] = from_union([from_bool, from_none], self.related)
+        if self.seq is not None:
+            result["seq"] = from_union([from_str, from_none], self.seq)
+        if self.address is not None:
+            result["address"] = from_union([from_int, from_none], self.address)
+        if self.linkage_address is not None:
+            result["linkageAddress"] = from_union([from_int, from_none], self.linkage_address)
+        if self.check_time is not None:
+            result["checkTime"] = from_union([from_int, from_none], self.check_time)
+        if self.siren_attrib is not None:
+            result["sirenAttrib"] = from_union([from_str, from_none], self.siren_attrib)
+        if self.linkage is not None:
+            result["linkage"] = from_union([from_str, from_none], self.linkage)
+        if self.zone_event is not None:
+            result["zoneEvent"] = from_union([from_str, from_none], self.zone_event)
+        if self.sub_system is not None:
+            result["subSystem"] = from_union([lambda x: from_list(from_int, x), from_none], self.sub_system)
+        if self.linkage_list is not None:
+            result["LinkageList"] = from_union([lambda x: from_list(lambda y: y, x), from_none], self.linkage_list)
+        if self.led_enabled is not None:
+            result["LEDEnabled"] = from_union([from_bool, from_none], self.led_enabled)
+        if self.led_latch_time is not None:
+            result["LEDLatchTime"] = from_union([from_int, from_none], self.led_latch_time)
+        if self.find_me_enabled is not None:
+            result["findMeEnabled"] = from_union([from_bool, from_none], self.find_me_enabled)
+        if self.location is not None:
+            result["location"] = from_union([from_str, from_none], self.location)
+        if self.arm_disarm_indicator_cfg is not None:
+            result["ArmAndDisarmIndicatorCfg"] = from_union([lambda x: x, from_none], self.arm_disarm_indicator_cfg)
+        if self.company is not None:
+            result["company"] = from_union([from_str, from_none], self.company)
+        if self.tamper_enabled is not None:
+            result["tamperEnabled"] = from_union([from_bool, from_none], self.tamper_enabled)
+        if self.try_alarm_enabled is not None:
+            result["tryAlarmEnabled"] = from_union([from_bool, from_none], self.try_alarm_enabled)
+        if self.pre_register_enabled is not None:
+            result["preRegisterEnabled"] = from_union([from_bool, from_none], self.pre_register_enabled)
+        if self.buzz_enabled is not None:
+            result["buzzEnabled"] = from_union([from_bool, from_none], self.buzz_enabled)
+        if self.disarm_tamper_enabled is not None:
+            result["disarmTamperEnabled"] = from_union([from_bool, from_none], self.disarm_tamper_enabled)
+        if self.alarm_strobe_flash_enabled is not None:
+            result["alarmStrobeFlashEnabled"] = from_union([from_bool, from_none], self.alarm_strobe_flash_enabled)
+        if self.sounder_alarm_duration is not None:
+            result["sounderAlarmDuration"] = from_union([from_int, from_none], self.sounder_alarm_duration)
+        if self.heart_beat_interval is not None:
+            result["heartBeatInterval"] = from_union([from_int, from_none], self.heart_beat_interval)
+        if self.siren_color is not None:
+            result["sirenColor"] = from_union([from_str, from_none], self.siren_color)
+        if self.alarm_linked_event_cfg is not None:
+            result["alarmLinkedEventCfg"] = from_union([lambda x: from_list(from_str, x), from_none], self.alarm_linked_event_cfg)
+        if self.access_module_type is not None:
+            result["accessModuleType"] = from_union([from_str, from_none], self.access_module_type)
+        return result
 
 
 @dataclass
