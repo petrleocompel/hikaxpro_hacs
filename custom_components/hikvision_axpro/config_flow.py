@@ -138,7 +138,7 @@ class AxProConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry):
         """Get options flow for this handler."""
-        return AxProOptionsFlowHandler(config_entry)
+        return AxProOptionsFlowHandler()
 
     async def async_step_user(self, user_input=None) -> FlowResult:
         """Handle the initial step."""
@@ -173,9 +173,8 @@ class AxProConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class AxProOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle options flow for AxPro integration."""
 
-    def __init__(self, config_entry):
+    def __init__(self):
         """Initialize AxPro options flow."""
-        self.config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
         """Manage basic options."""
