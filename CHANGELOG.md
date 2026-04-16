@@ -1,5 +1,8 @@
 # Changelog
 
+## v3..
+- **fix**: detector `DetectorWiringMode` #195
+
 ## v3.1.0
 - **feat**: HA 2025.12 compliance #162
 
