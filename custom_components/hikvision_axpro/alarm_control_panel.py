@@ -140,6 +140,8 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
 class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
     """Representation of Hikvision Ax Pro alarm panel."""
 
+    _attr_code_arm_required = False
+
     sys: SubSys
     coordinator: HikAxProDataUpdateCoordinator
 
