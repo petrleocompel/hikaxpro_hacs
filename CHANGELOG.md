@@ -1,5 +1,15 @@
 # Changelog
 
+## v3.2.0
+- **fix**: use `_attr_device_class` so temperature unit conversion works (#139)
+- **fix**: relay ON/OFF state from exDevStatus string status (#195)
+- **fix**: register battery-low binary and charge diagnostic sensors (#181, #197)
+- **feat**: siren / keypad / repeater / extension entities from exDevStatus (#33, #178, #14, #36)
+- **feat**: host / AC power / hub battery diagnostics (#14, #181)
+- **feat**: opt-in auto-bypass and arm-with-bypass services (#176, #97)
+- **feat**: capability-gated local siren control (#44, #160)
+- **docs**: alertStream research notes (`docs/ALERTSTREAM_RESEARCH.md`) (#143)
+
 ## v3.1.1
 - **fix**: slugify entity IDs and migrate invalid registry entries for HA 2026.x (#190, #194)
 - **fix**: pass device registry `model` as a string (never `DetectorType`) (#198)
