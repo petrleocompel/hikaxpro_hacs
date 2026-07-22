@@ -174,6 +174,17 @@ async def async_setup(hass: HomeAssistant, config: ConfigEntry):
     hass.services.async_register(
         DOMAIN, "arm_home_with_bypass", _service_arm_home_with_bypass
     )
+
+    async def _service_control_siren(call):
+        coordinator = _coordinator_for_service(hass, call)
+        siren_id = int(call.data["siren_id"])
+        enabled = bool(call.data["enabled"])
+        if enabled:
+            await coordinator.siren_on(siren_id)
+        else:
+            await coordinator.siren_off(siren_id)
+
+    hass.services.async_register(DOMAIN, "control_siren", _service_control_siren)
     return True
 
 
@@ -279,6 +290,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     host_status: dict | None = None
     ac_power_status: dict | None = None
     hub_batteries: list[dict] = []
+    siren_control_supported: dict[int, bool] = {}
     use_sub_systems: bool
     auto_bypass_on_arm: bool
 
@@ -314,6 +326,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.host_status = None
         self.ac_power_status = None
         self.hub_batteries = []
+        self.siren_control_supported = {}
         super().__init__(
             hass,
             _LOGGER,
@@ -694,3 +707,59 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
             self._relay_call, relay_id, False
         )
         return response.status_code == 1
+
+    def _siren_call(self, siren_id: int, is_enabled: bool) -> JSONResponseStatus:
+        endpoint = self.axpro.build_url(
+            f"http://{self.host}/ISAPI/SecurityCP/control/siren/{siren_id}",
+            True,
+        )
+        response = self.axpro.make_request(
+            endpoint,
+            "PUT",
+            {"SirenCtrl": {"switch": "open" if is_enabled else "close"}},
+            True,
+        )
+        if response.status_code != 200:
+            raise hikaxpro.errors.UnexpectedResponseCodeError(
+                response.status_code, response.text
+            )
+        _LOGGER.debug(response.text)
+        return JSONResponseStatus.from_dict(response.json())
+
+    async def siren_on(self, siren_id: int) -> bool:
+        """Turn on / open a siren by ID."""
+        try:
+            response: JSONResponseStatus = await self.hass.async_add_executor_job(
+                self._siren_call, siren_id, True
+            )
+            ok = response.status_code == 1
+            if ok:
+                self.siren_control_supported[siren_id] = True
+            return ok
+        except hikaxpro.errors.UnexpectedResponseCodeError as err:
+            if "notSupport" in str(err):
+                self.siren_control_supported[siren_id] = False
+                _LOGGER.warning(
+                    "Siren %s control not supported by this panel/device", siren_id
+                )
+                return False
+            raise
+
+    async def siren_off(self, siren_id: int) -> bool:
+        """Turn off / close a siren by ID."""
+        try:
+            response: JSONResponseStatus = await self.hass.async_add_executor_job(
+                self._siren_call, siren_id, False
+            )
+            ok = response.status_code == 1
+            if ok:
+                self.siren_control_supported[siren_id] = True
+            return ok
+        except hikaxpro.errors.UnexpectedResponseCodeError as err:
+            if "notSupport" in str(err):
+                self.siren_control_supported[siren_id] = False
+                _LOGGER.warning(
+                    "Siren %s control not supported by this panel/device", siren_id
+                )
+                return False
+            raise

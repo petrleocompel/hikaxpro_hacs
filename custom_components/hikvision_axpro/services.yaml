@@ -74,3 +74,25 @@ arm_home_with_bypass:
       required: false
       selector:
         text:
+control_siren:
+  name: Control siren
+  description: Open or close a siren when the panel supports local siren control
+  fields:
+    siren_id:
+      name: Siren ID
+      required: true
+      selector:
+        number:
+          min: 1
+          mode: box
+    enabled:
+      name: Sound siren
+      description: Turn siren on (true) or off (false)
+      required: true
+      selector:
+        boolean:
+    config_entry_id:
+      name: Config entry ID
+      required: false
+      selector:
+        text:

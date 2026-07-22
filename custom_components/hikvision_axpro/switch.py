@@ -15,15 +15,14 @@ from homeassistant.components.switch import SwitchEntity, DOMAIN as SWITCH_DOMAI
 from . import HikAxProDataUpdateCoordinator
 from .const import DATA_COORDINATOR, DOMAIN
 from .entity_id import build_entity_id
-from .model import RelaySwitchConf, OutputStatusFull, relay_status_is_on
-from homeassistant.const import STATE_ON, STATE_OFF, STATE_UNKNOWN
+from .model import RelaySwitchConf, detector_model_to_name, relay_status_is_on
 
 _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    """Set up a Hikvision ax pro alarm control panel based on a config entry."""
+    """Set up Hikvision AX Pro switches (relays and siren control)."""
     coordinator: HikAxProDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
     await coordinator.async_request_refresh()
     device_registry = dr.async_get(hass)
@@ -33,14 +32,26 @@ async def async_setup_entry(
             _LOGGER.debug("Adding switch with config: %s", switch)
             device_registry.async_get_or_create(
                 config_entry_id=entry.entry_id,
-                # connections={},
                 identifiers={(DOMAIN, str(entry.entry_id) + "-relay-" + str(switch_id))},
                 manufacturer="HikVision",
-                # suggested_area=zone.zone.,
                 name=switch.name,
                 via_device=(DOMAIN, str(coordinator.mac)),
             )
             devices.append(HikRelaySwitch(coordinator, switch, entry.entry_id))
+    for siren_id, siren in coordinator.sirens.items():
+        # Skip devices already marked unsupported after a prior control attempt.
+        if coordinator.siren_control_supported.get(siren_id) is False:
+            continue
+        device_registry.async_get_or_create(
+            config_entry_id=entry.entry_id,
+            identifiers={(DOMAIN, str(entry.entry_id) + "-siren-" + str(siren_id))},
+            manufacturer="HikVision",
+            name=siren.name or f"Siren {siren_id}",
+            via_device=(DOMAIN, str(coordinator.mac)),
+            model=detector_model_to_name(siren.model) if siren.model else "Siren",
+            sw_version=siren.version,
+        )
+        devices.append(HikSirenSwitch(coordinator, siren_id, entry.entry_id))
     _LOGGER.debug("setting up - switches: %s", devices)
     async_add_entities(devices, False)
 
