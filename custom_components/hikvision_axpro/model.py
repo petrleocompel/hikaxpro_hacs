@@ -73,6 +73,7 @@ class AccessModuleType(Enum):
     # Undocumented type
     INPUT_MAIN_ZONE = "inputMainZone"
     TRANSMITTER = "transmitter"
+    FOUR_WIRED_OUTPUT = "fourWiredOutput"
 
 
 class DetectorType(Enum):
@@ -170,6 +171,9 @@ class InputList:
     id: int
     enabled: bool
     mode: str
+    input_zone_id: Optional[int] = None
+    pulse_num: Optional[int] = None
+    timeout: Optional[int] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'InputList':
@@ -177,13 +181,22 @@ class InputList:
         id = from_int(obj.get("id"))
         enabled = from_bool(obj.get("enabled"))
         mode = from_str(obj.get("mode"))
-        return InputList(id, enabled, mode)
+        input_zone_id = from_union([from_int, from_none], obj.get("inputZoneID"))
+        pulse_num = from_union([from_int, from_none], obj.get("pulseNum"))
+        timeout = from_union([from_int, from_none], obj.get("timeout"))
+        return InputList(id, enabled, mode, input_zone_id, pulse_num, timeout)
 
     def to_dict(self) -> dict:
         result: dict = {}
         result["id"] = from_int(self.id)
         result["enabled"] = from_bool(self.enabled)
         result["mode"] = from_str(self.mode)
+        if self.input_zone_id is not None:
+            result["inputZoneID"] = from_union([from_int, from_none], self.input_zone_id)
+        if self.pulse_num is not None:
+            result["pulseNum"] = from_union([from_int, from_none], self.pulse_num)
+        if self.timeout is not None:
+            result["timeout"] = from_union([from_int, from_none], self.timeout)
         return result
 
 
@@ -289,6 +302,19 @@ class Zone:
     access_module_type: Optional[AccessModuleType] = None
     module_channel: Optional[int] = None
     magnet_shock_current_status: Optional[MagnetShockCurrentStatus] = None
+    sensor_status: Optional[str] = None
+    real_signal: Optional[int] = None
+    signal_type: Optional[str] = None
+    is_masking: Optional[bool] = None
+    anti_masking_enabled: Optional[bool] = None
+    mounting_type: Optional[str] = None
+    module_type: Optional[str] = None
+    related_access_module_id: Optional[int] = None
+    water_detector_alarm: Optional[str] = None
+    health_status: Optional[str] = None
+    work_mode: Optional[str] = None
+    polling_option_enable: Optional[bool] = None
+    associate_relay_cfg: Optional[List[Any]] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'Zone':
@@ -328,6 +354,19 @@ class Zone:
         input_list = from_union([lambda x: from_list(InputList.from_dict, x), from_none], obj.get("InputList"))
         is_support_add_type = from_union([from_bool, from_none], obj.get("isSupportAddType"))
         module_channel = from_union([from_int, from_none], obj.get("moduleChannel"))
+        sensor_status = from_union([from_str, from_none], obj.get("sensorStatus"))
+        real_signal = from_union([from_int, from_none], obj.get("realSignal"))
+        signal_type = from_union([from_str, from_none], obj.get("signalType"))
+        is_masking = from_union([from_bool, from_none], obj.get("isMasking"))
+        anti_masking_enabled = from_union([from_bool, from_none], obj.get("antiMaskingEnabled"))
+        mounting_type = from_union([from_str, from_none], obj.get("mountingType"))
+        module_type = from_union([from_str, from_none], obj.get("moduleType"))
+        related_access_module_id = from_union([from_int, from_none], obj.get("relatedAccessModuleID"))
+        water_detector_alarm = from_union([from_str, from_none], obj.get("waterDetectorAlarm"))
+        health_status = from_union([from_str, from_none], obj.get("healthStatus"))
+        work_mode = from_union([from_str, from_none], obj.get("workMode"))
+        polling_option_enable = from_union([from_bool, from_none], obj.get("pollingOptionEnable"))
+        associate_relay_cfg = from_union([lambda x: from_list(lambda x: x, x), from_none], obj.get("associateRelayCfg"))
 
         try:
             status = Status(obj.get("status"))
@@ -370,7 +409,9 @@ class Zone:
                     linkage_sub_system, detector_type, stay_away, zone_type, zone_attrib, device_no, abnormal_or_not,
                     charge, charge_value, signal, temperature, humidity, model, is_via_repeater, version,
                     magnet_open_status, input_list, is_support_add_type, access_module_type, module_channel,
-                    magnet_shock_current_status)
+                    magnet_shock_current_status, sensor_status, real_signal, signal_type, is_masking,
+                    anti_masking_enabled, mounting_type, module_type, related_access_module_id,
+                    water_detector_alarm, health_status, work_mode, polling_option_enable, associate_relay_cfg)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -409,6 +450,32 @@ class Zone:
         result["moduleChannel"] = from_union([from_int, from_none], self.module_channel)
         if self.magnet_shock_current_status is not None:
             result["MagnetShockCurrentStatus"] = from_union([lambda x: to_class(MagnetShockCurrentStatus, x), from_none], self.magnet_shock_current_status)
+        if self.sensor_status is not None:
+            result["sensorStatus"] = from_union([from_str, from_none], self.sensor_status)
+        if self.real_signal is not None:
+            result["realSignal"] = from_union([from_int, from_none], self.real_signal)
+        if self.signal_type is not None:
+            result["signalType"] = from_union([from_str, from_none], self.signal_type)
+        if self.is_masking is not None:
+            result["isMasking"] = from_union([from_bool, from_none], self.is_masking)
+        if self.anti_masking_enabled is not None:
+            result["antiMaskingEnabled"] = from_union([from_bool, from_none], self.anti_masking_enabled)
+        if self.mounting_type is not None:
+            result["mountingType"] = from_union([from_str, from_none], self.mounting_type)
+        if self.module_type is not None:
+            result["moduleType"] = from_union([from_str, from_none], self.module_type)
+        if self.related_access_module_id is not None:
+            result["relatedAccessModuleID"] = from_union([from_int, from_none], self.related_access_module_id)
+        if self.water_detector_alarm is not None:
+            result["waterDetectorAlarm"] = from_union([from_str, from_none], self.water_detector_alarm)
+        if self.health_status is not None:
+            result["healthStatus"] = from_union([from_str, from_none], self.health_status)
+        if self.work_mode is not None:
+            result["workMode"] = from_union([from_str, from_none], self.work_mode)
+        if self.polling_option_enable is not None:
+            result["pollingOptionEnable"] = from_union([from_bool, from_none], self.polling_option_enable)
+        if self.associate_relay_cfg is not None:
+            result["associateRelayCfg"] = from_union([lambda x: from_list(lambda x: x, x), from_none], self.associate_relay_cfg)
         return result
 
 
@@ -583,7 +650,7 @@ class DetectorWiringMode(Enum):
     SEOL = "SEOL"
     DEOL = "DEOL"
     TEOL = "TEOL"
-    NO_EOL = "No EOL"
+    NO_EOL = "noEOL"
 
 class NewKeyZoneTriggerTypeCFG(Enum):
     ZONE_STATUS = "zoneStatus"
@@ -664,6 +731,27 @@ class RelatedPIRCAM:
         return result
 
 
+@dataclass
+class AlarmSoundInterlink:
+    support_linkage_zones: Optional[List[Any]] = None
+    linkage_zones: Optional[List[Any]] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'AlarmSoundInterlink':
+        assert isinstance(obj, dict)
+        support_linkage_zones = from_union([lambda x: from_list(lambda x: x, x), from_none], obj.get("supportLinkageZones"))
+        linkage_zones = from_union([lambda x: from_list(lambda x: x, x), from_none], obj.get("linkageZones"))
+        return AlarmSoundInterlink(support_linkage_zones, linkage_zones)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.support_linkage_zones is not None:
+            result["supportLinkageZones"] = from_union([lambda x: from_list(lambda x: x, x), from_none], self.support_linkage_zones)
+        if self.linkage_zones is not None:
+            result["linkageZones"] = from_union([lambda x: from_list(lambda x: x, x), from_none], self.linkage_zones)
+        return result
+
+
 class TimeoutType(Enum):
     RECOVER = "recover"
     TIGGER = "tigger"
@@ -723,6 +811,15 @@ class ZoneConfig:
     timeout_limit: Optional[bool] = None
     check_time: Optional[int] = None
     fault_resistence: Optional[float] = None
+    device_no: Optional[int] = None
+    model: Optional[str] = None
+    report_send_delay_time_enabled: Optional[bool] = None
+    report_send_delay_time: Optional[int] = None
+    alarm_sound_interlink: Optional[AlarmSoundInterlink] = None
+    address: Optional[int] = None
+    module_type: Optional[str] = None
+    support_linkage_keypad_list: Optional[List[Any]] = None
+    related_keypad_no: Optional[int] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'ZoneConfig':
@@ -836,6 +933,20 @@ class ZoneConfig:
         timeout_limit = from_union([from_bool, from_none], obj.get("timeoutLimit"))
         check_time = from_union([from_int, from_none], obj.get("checkTime"))
         fault_resistence = from_union([from_float, from_none], obj.get("faultResistence"))
+        device_no = from_union([from_int, from_none], obj.get("deviceNo"))
+        model = from_union([from_str, from_none], obj.get("model"))
+        report_send_delay_time_enabled = from_union([from_bool, from_none], obj.get("reportSendDelayTimeEnabled"))
+        report_send_delay_time = from_union([from_int, from_none], obj.get("reportSendDelayTime"))
+        try:
+            alarm_sound_interlink = from_union([AlarmSoundInterlink.from_dict, from_none], obj.get("AlarmSoundInterlink"))
+        except:
+            _LOGGER.warning("Invalid AlarmSoundInterlink %s", obj.get("AlarmSoundInterlink"))
+            _LOGGER.warning("Detector info: %s", obj)
+            alarm_sound_interlink = None
+        address = from_union([from_int, from_none], obj.get("address"))
+        module_type = from_union([from_str, from_none], obj.get("moduleType"))
+        support_linkage_keypad_list = from_union([lambda x: from_list(lambda x: x, x), from_none], obj.get("supportLinkageKeypadList"))
+        related_keypad_no = from_union([from_int, from_none], obj.get("relatedKeypadNo"))
         return ZoneConfig(
             id,
             zone_name,
@@ -884,6 +995,15 @@ class ZoneConfig:
             timeout_limit,
             check_time,
             fault_resistence,
+            device_no,
+            model,
+            report_send_delay_time_enabled,
+            report_send_delay_time,
+            alarm_sound_interlink,
+            address,
+            module_type,
+            support_linkage_keypad_list,
+            related_keypad_no,
         )
 
     def to_dict(self) -> dict:
@@ -979,6 +1099,24 @@ class ZoneConfig:
             result["checkTime"] = from_union([from_int, from_none], self.check_time)
         if self.fault_resistence is not None:
             result["faultResistence"] = from_union([to_float, from_none], self.fault_resistence)
+        if self.device_no is not None:
+            result["deviceNo"] = from_union([from_int, from_none], self.device_no)
+        if self.model is not None:
+            result["model"] = from_union([from_str, from_none], self.model)
+        if self.report_send_delay_time_enabled is not None:
+            result["reportSendDelayTimeEnabled"] = from_union([from_bool, from_none], self.report_send_delay_time_enabled)
+        if self.report_send_delay_time is not None:
+            result["reportSendDelayTime"] = from_union([from_int, from_none], self.report_send_delay_time)
+        if self.alarm_sound_interlink is not None:
+            result["AlarmSoundInterlink"] = from_union([lambda x: to_class(AlarmSoundInterlink, x), from_none], self.alarm_sound_interlink)
+        if self.address is not None:
+            result["address"] = from_union([from_int, from_none], self.address)
+        if self.module_type is not None:
+            result["moduleType"] = from_union([from_str, from_none], self.module_type)
+        if self.support_linkage_keypad_list is not None:
+            result["supportLinkageKeypadList"] = from_union([lambda x: from_list(lambda x: x, x), from_none], self.support_linkage_keypad_list)
+        if self.related_keypad_no is not None:
+            result["relatedKeypadNo"] = from_union([from_int, from_none], self.related_keypad_no)
         return result
 
 
@@ -1027,6 +1165,7 @@ class AlarmCFG:
     relay_mode: Optional[str] = None
     pulse_duration: Optional[int] = None
     contact_status: Optional[str] = None
+    zone_temperature: Optional[List[Any]] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'AlarmCFG':
@@ -1042,7 +1181,8 @@ class AlarmCFG:
         relay_mode = from_union([from_str, from_none], obj.get("relayMode"))
         pulse_duration = from_union([from_int, from_none], obj.get("pulseDuration"))
         contact_status = from_union([from_str, from_none], obj.get("contactStatus"))
-        return AlarmCFG(alarm_type, support_associated_zone, associate_zone_cfg, support_disarm_linkage_zone, disarm_linkage_zone, support_linkage_channel_id, linkage_channel_id, alarm_logic, relay_mode, pulse_duration, contact_status)
+        zone_temperature = from_union([lambda x: from_list(lambda x: x, x), from_none], obj.get("zoneTemperature"))
+        return AlarmCFG(alarm_type, support_associated_zone, associate_zone_cfg, support_disarm_linkage_zone, disarm_linkage_zone, support_linkage_channel_id, linkage_channel_id, alarm_logic, relay_mode, pulse_duration, contact_status, zone_temperature)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -1068,6 +1208,8 @@ class AlarmCFG:
             result["pulseDuration"] = from_union([from_int, from_none], self.pulse_duration)
         if self.contact_status is not None:
             result["contactStatus"] = from_union([from_str, from_none], self.contact_status)
+        if self.zone_temperature is not None:
+            result["zoneTemperature"] = from_union([lambda x: from_list(lambda x: x, x), from_none], self.zone_temperature)
         return result
 
 
@@ -1194,6 +1336,9 @@ class RelaySwitchConf:
     original_status: Optional[str] = None
     support_linkage_sub_system_list: Optional[List[int]] = None
     relay_attrib: Optional[str] = None
+    output_module_no: Optional[int] = None
+    channel_no: Optional[int] = None
+    device_no: Optional[int] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'RelaySwitchConf':
@@ -1236,7 +1381,10 @@ class RelaySwitchConf:
         original_status = from_union([from_str, from_none], obj.get("OriginalStatus"))
         support_linkage_sub_system_list = from_union([lambda x: from_list(from_int, x), from_none], obj.get("supportLinkageSubSystemList"))
         relay_attrib = from_union([from_str, from_none], obj.get("relayAttrib"))
-        return RelaySwitchConf(id, name, related, access_module_type, module_channel, sub_system, scenario_type, alarm_cfg, schedule_cfg, arm_cfg, disarm_cfg, clear_alarm_cfg, fault_cfg, manual_cfg, original_status, support_linkage_sub_system_list, relay_attrib)
+        output_module_no = from_union([from_int, from_none], obj.get("outputModuleNo"))
+        channel_no = from_union([from_int, from_none], obj.get("channelNo"))
+        device_no = from_union([from_int, from_none], obj.get("deviceNo"))
+        return RelaySwitchConf(id, name, related, access_module_type, module_channel, sub_system, scenario_type, alarm_cfg, schedule_cfg, arm_cfg, disarm_cfg, clear_alarm_cfg, fault_cfg, manual_cfg, original_status, support_linkage_sub_system_list, relay_attrib, output_module_no, channel_no, device_no)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -1274,6 +1422,12 @@ class RelaySwitchConf:
             result["supportLinkageSubSystemList"] = from_union([lambda x: from_list(from_int, x), from_none], self.support_linkage_sub_system_list)
         if self.relay_attrib is not None:
             result["relayAttrib"] = from_union([from_str, from_none], self.relay_attrib)
+        if self.output_module_no is not None:
+            result["outputModuleNo"] = from_union([from_int, from_none], self.output_module_no)
+        if self.channel_no is not None:
+            result["channelNo"] = from_union([from_int, from_none], self.channel_no)
+        if self.device_no is not None:
+            result["deviceNo"] = from_union([from_int, from_none], self.device_no)
         return result
 
 
@@ -1314,6 +1468,7 @@ class OutputConfList:
 
 class RelayAttrib(Enum):
     WIRED = "wired"
+    WIRELESS = "wireless"
 
 
 class RelayStatusEnum(Enum):
@@ -1579,6 +1734,31 @@ class CardReaderList:
 
 
 @dataclass
+class ExtensionModuleOutputList:
+    output_id: Optional[int] = None
+    status: Optional[str] = None
+    sub_system_list: Optional[List[int]] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'ExtensionModuleOutputList':
+        assert isinstance(obj, dict)
+        output_id = from_union([from_int, from_none], obj.get("outputID"))
+        status = from_union([from_str, from_none], obj.get("status"))
+        sub_system_list = from_union([lambda x: from_list(from_int, x), from_none], obj.get("subSystemList"))
+        return ExtensionModuleOutputList(output_id, status, sub_system_list)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        if self.output_id is not None:
+            result["outputID"] = from_union([from_int, from_none], self.output_id)
+        if self.status is not None:
+            result["status"] = from_union([from_str, from_none], self.status)
+        if self.sub_system_list is not None:
+            result["subSystemList"] = from_union([lambda x: from_list(from_int, x), from_none], self.sub_system_list)
+        return result
+
+
+@dataclass
 class ExtensionModule:
     id: Optional[int] = None
     name: Optional[str] = None
@@ -1589,6 +1769,12 @@ class ExtensionModule:
     tamper_evident: Optional[bool] = None
     module_attrib: Optional[str] = None
     charge: Optional[str] = None
+    model: Optional[str] = None
+    detail_type: Optional[str] = None
+    device_no: Optional[int] = None
+    version: Optional[str] = None
+    sub_system_list: Optional[List[int]] = None
+    output_list: Optional[List[ExtensionModuleOutputList]] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'ExtensionModule':
@@ -1602,7 +1788,13 @@ class ExtensionModule:
         tamper_evident = from_union([from_bool, from_none], obj.get("tamperEvident"))
         module_attrib = from_union([from_str, from_none], obj.get("moduleAttrib"))
         charge = from_union([from_str, from_none], obj.get("charge"))
-        return ExtensionModule(id, name, address, linkage_address, type, status, tamper_evident, module_attrib, charge)
+        model = from_union([from_str, from_none], obj.get("model"))
+        detail_type = from_union([from_str, from_none], obj.get("detailType"))
+        device_no = from_union([from_int, from_none], obj.get("deviceNo"))
+        version = from_union([from_str, from_none], obj.get("version"))
+        sub_system_list = from_union([lambda x: from_list(from_int, x), from_none], obj.get("subSystemList"))
+        output_list = from_union([lambda x: from_list(ExtensionModuleOutputList.from_dict, x), from_none], obj.get("OutputList"))
+        return ExtensionModule(id, name, address, linkage_address, type, status, tamper_evident, module_attrib, charge, model, detail_type, device_no, version, sub_system_list, output_list)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -1624,6 +1816,18 @@ class ExtensionModule:
             result["moduleAttrib"] = from_union([from_str, from_none], self.module_attrib)
         if self.charge is not None:
             result["charge"] = from_union([from_str, from_none], self.charge)
+        if self.model is not None:
+            result["model"] = from_union([from_str, from_none], self.model)
+        if self.detail_type is not None:
+            result["detailType"] = from_union([from_str, from_none], self.detail_type)
+        if self.device_no is not None:
+            result["deviceNo"] = from_union([from_int, from_none], self.device_no)
+        if self.version is not None:
+            result["version"] = from_union([from_str, from_none], self.version)
+        if self.sub_system_list is not None:
+            result["subSystemList"] = from_union([lambda x: from_list(from_int, x), from_none], self.sub_system_list)
+        if self.output_list is not None:
+            result["OutputList"] = from_union([lambda x: from_list(lambda x: to_class(ExtensionModuleOutputList, x), x), from_none], self.output_list)
         return result
 
 
@@ -1667,6 +1871,10 @@ class Keypad:
     main_power_supply: Optional[bool] = None
     type: Optional[str] = None
     device_no: Optional[int] = None
+    charge_value: Optional[int] = None
+    real_signal: Optional[int] = None
+    signal_type: Optional[str] = None
+    abnormal_or_not: Optional[bool] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'Keypad':
@@ -1692,7 +1900,11 @@ class Keypad:
         main_power_supply = from_union([from_bool, from_none], obj.get("mainPowerSupply"))
         type = from_union([from_str, from_none], obj.get("type"))
         device_no = from_union([from_int, from_none], obj.get("deviceNo"))
-        return Keypad(id, seq, name, status, tamper_evident, keypad_attrib, charge, signal, address, model, temperature, sub_system_list, is_via_repeater, repeater_name, version, smoke_detector_alarm, smoke_detector_power_supply, power_supply, main_power_supply, type, device_no)
+        charge_value = from_union([from_int, from_none], obj.get("chargeValue"))
+        real_signal = from_union([from_int, from_none], obj.get("realSignal"))
+        signal_type = from_union([from_str, from_none], obj.get("signalType"))
+        abnormal_or_not = from_union([from_bool, from_none], obj.get("abnormalOrNot"))
+        return Keypad(id, seq, name, status, tamper_evident, keypad_attrib, charge, signal, address, model, temperature, sub_system_list, is_via_repeater, repeater_name, version, smoke_detector_alarm, smoke_detector_power_supply, power_supply, main_power_supply, type, device_no, charge_value, real_signal, signal_type, abnormal_or_not)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -1738,6 +1950,14 @@ class Keypad:
             result["type"] = from_union([from_str, from_none], self.type)
         if self.device_no is not None:
             result["deviceNo"] = from_union([from_int, from_none], self.device_no)
+        if self.charge_value is not None:
+            result["chargeValue"] = from_union([from_int, from_none], self.charge_value)
+        if self.real_signal is not None:
+            result["realSignal"] = from_union([from_int, from_none], self.real_signal)
+        if self.signal_type is not None:
+            result["signalType"] = from_union([from_str, from_none], self.signal_type)
+        if self.abnormal_or_not is not None:
+            result["abnormalOrNot"] = from_union([from_bool, from_none], self.abnormal_or_not)
         return result
 
 
@@ -1776,6 +1996,7 @@ class OutputStatusFull:
     scenario_type: Optional[List[str]] = None
     relay_attrib: Optional[str] = None
     device_no: Optional[int] = None
+    charge_value: Optional[int] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'OutputStatusFull':
@@ -1796,7 +2017,8 @@ class OutputStatusFull:
         scenario_type = from_union([lambda x: from_list(from_str, x), from_none], obj.get("scenarioType"))
         relay_attrib = from_union([from_str, from_none], obj.get("relayAttrib"))
         device_no = from_union([from_int, from_none], obj.get("deviceNo"))
-        return OutputStatusFull(id, name, status, tamper_evident, charge, linkage, signal, temperature, version, access_module_type, related_access_module_id, address, sub_system_list, scenario_type, relay_attrib, device_no)
+        charge_value = from_union([from_int, from_none], obj.get("chargeValue"))
+        return OutputStatusFull(id, name, status, tamper_evident, charge, linkage, signal, temperature, version, access_module_type, related_access_module_id, address, sub_system_list, scenario_type, relay_attrib, device_no, charge_value)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -1832,6 +2054,8 @@ class OutputStatusFull:
             result["relayAttrib"] = from_union([from_str, from_none], self.relay_attrib)
         if self.device_no is not None:
             result["deviceNo"] = from_union([from_int, from_none], self.device_no)
+        if self.charge_value is not None:
+            result["chargeValue"] = from_union([from_int, from_none], self.charge_value)
         return result
 
 
@@ -1903,6 +2127,11 @@ class OutputMod:
     energy_sum_vaule: Optional[int] = None
     relay_list: Optional[List[RelayList]] = None
     volt_value_v20: Optional[float] = None
+    device_no: Optional[int] = None
+    version: Optional[str] = None
+    real_signal: Optional[int] = None
+    signal_type: Optional[str] = None
+    abnormal_or_not: Optional[bool] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'OutputMod':
@@ -1923,7 +2152,12 @@ class OutputMod:
         energy_sum_vaule = from_union([from_int, from_none], obj.get("energySumVaule"))
         relay_list = from_union([lambda x: from_list(RelayList.from_dict, x), from_none], obj.get("relayList"))
         volt_value_v20 = from_union([from_float, from_none], obj.get("voltValueV20"))
-        return OutputMod(id, seq, status, tamper_evident, charge, signal, model, temperature, is_via_repeater, repeater_name, volt_value, current_value, power_load, energy_sum_vaule, relay_list, volt_value_v20)
+        device_no = from_union([from_int, from_none], obj.get("deviceNo"))
+        version = from_union([from_str, from_none], obj.get("version"))
+        real_signal = from_union([from_int, from_none], obj.get("realSignal"))
+        signal_type = from_union([from_str, from_none], obj.get("signalType"))
+        abnormal_or_not = from_union([from_bool, from_none], obj.get("abnormalOrNot"))
+        return OutputMod(id, seq, status, tamper_evident, charge, signal, model, temperature, is_via_repeater, repeater_name, volt_value, current_value, power_load, energy_sum_vaule, relay_list, volt_value_v20, device_no, version, real_signal, signal_type, abnormal_or_not)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -1959,6 +2193,16 @@ class OutputMod:
             result["relayList"] = from_union([lambda x: from_list(lambda x: to_class(RelayList, x), x), from_none], self.relay_list)
         if self.volt_value_v20 is not None:
             result["voltValueV20"] = from_union([from_float, from_none], self.volt_value_v20)
+        if self.device_no is not None:
+            result["deviceNo"] = from_union([from_int, from_none], self.device_no)
+        if self.version is not None:
+            result["version"] = from_union([from_str, from_none], self.version)
+        if self.real_signal is not None:
+            result["realSignal"] = from_union([from_int, from_none], self.real_signal)
+        if self.signal_type is not None:
+            result["signalType"] = from_union([from_str, from_none], self.signal_type)
+        if self.abnormal_or_not is not None:
+            result["abnormalOrNot"] = from_union([from_bool, from_none], self.abnormal_or_not)
         return result
 
 
@@ -2080,6 +2324,8 @@ class Remote:
     user_nick_name: Optional[str] = None
     version: Optional[str] = None
     device_no: Optional[int] = None
+    sub_system_list: Optional[List[int]] = None
+    abnormal_or_not: Optional[bool] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'Remote':
@@ -2099,7 +2345,9 @@ class Remote:
         user_nick_name = from_union([from_str, from_none], obj.get("userNickName"))
         version = from_union([from_str, from_none], obj.get("version"))
         device_no = from_union([from_int, from_none], obj.get("deviceNo"))
-        return Remote(id, seq, name, status, charge, charge_value, model, is_via_repeater, repeater_name, sel_key_list, comb_key_list, related_net_user_name, user_nick_name, version, device_no)
+        sub_system_list = from_union([lambda x: from_list(from_int, x), from_none], obj.get("subSystemList"))
+        abnormal_or_not = from_union([from_bool, from_none], obj.get("abnormalOrNot"))
+        return Remote(id, seq, name, status, charge, charge_value, model, is_via_repeater, repeater_name, sel_key_list, comb_key_list, related_net_user_name, user_nick_name, version, device_no, sub_system_list, abnormal_or_not)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -2133,6 +2381,10 @@ class Remote:
             result["version"] = from_union([from_str, from_none], self.version)
         if self.device_no is not None:
             result["deviceNo"] = from_union([from_int, from_none], self.device_no)
+        if self.sub_system_list is not None:
+            result["subSystemList"] = from_union([lambda x: from_list(from_int, x), from_none], self.sub_system_list)
+        if self.abnormal_or_not is not None:
+            result["abnormalOrNot"] = from_union([from_bool, from_none], self.abnormal_or_not)
         return result
 
 
@@ -2255,6 +2507,18 @@ class Siren:
     signal: Optional[int] = None
     device_no: Optional[int] = None
     main_power_supply: Optional[bool] = None
+    charge_value: Optional[int] = None
+    real_signal: Optional[int] = None
+    signal_type: Optional[str] = None
+    model: Optional[str] = None
+    temperature: Optional[int] = None
+    sub_system_list: Optional[List[int]] = None
+    siren_color: Optional[str] = None
+    is_via_repeater: Optional[bool] = None
+    version: Optional[str] = None
+    abnormal_or_not: Optional[bool] = None
+    access_module_type: Optional[str] = None
+    intercom_service_enabled: Optional[bool] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'Siren':
@@ -2269,7 +2533,19 @@ class Siren:
         signal = from_union([from_int, from_none], obj.get("signal"))
         device_no = from_union([from_int, from_none], obj.get("deviceNo"))
         main_power_supply = from_union([from_bool, from_none], obj.get("mainPowerSupply"))
-        return Siren(id, seq, name, status, tamper_evident, siren_attrib, charge, signal, device_no, main_power_supply)
+        charge_value = from_union([from_int, from_none], obj.get("chargeValue"))
+        real_signal = from_union([from_int, from_none], obj.get("realSignal"))
+        signal_type = from_union([from_str, from_none], obj.get("signalType"))
+        model = from_union([from_str, from_none], obj.get("model"))
+        temperature = from_union([from_int, from_none], obj.get("temperature"))
+        sub_system_list = from_union([lambda x: from_list(from_int, x), from_none], obj.get("subSystemList"))
+        siren_color = from_union([from_str, from_none], obj.get("sirenColor"))
+        is_via_repeater = from_union([from_bool, from_none], obj.get("isViaRepeater"))
+        version = from_union([from_str, from_none], obj.get("version"))
+        abnormal_or_not = from_union([from_bool, from_none], obj.get("abnormalOrNot"))
+        access_module_type = from_union([from_str, from_none], obj.get("accessModuleType"))
+        intercom_service_enabled = from_union([from_bool, from_none], obj.get("intercomServiceEnabled"))
+        return Siren(id, seq, name, status, tamper_evident, siren_attrib, charge, signal, device_no, main_power_supply, charge_value, real_signal, signal_type, model, temperature, sub_system_list, siren_color, is_via_repeater, version, abnormal_or_not, access_module_type, intercom_service_enabled)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -2293,6 +2569,30 @@ class Siren:
             result["deviceNo"] = from_union([from_int, from_none], self.device_no)
         if self.main_power_supply is not None:
             result["mainPowerSupply"] = from_union([from_bool, from_none], self.main_power_supply)
+        if self.charge_value is not None:
+            result["chargeValue"] = from_union([from_int, from_none], self.charge_value)
+        if self.real_signal is not None:
+            result["realSignal"] = from_union([from_int, from_none], self.real_signal)
+        if self.signal_type is not None:
+            result["signalType"] = from_union([from_str, from_none], self.signal_type)
+        if self.model is not None:
+            result["model"] = from_union([from_str, from_none], self.model)
+        if self.temperature is not None:
+            result["temperature"] = from_union([from_int, from_none], self.temperature)
+        if self.sub_system_list is not None:
+            result["subSystemList"] = from_union([lambda x: from_list(from_int, x), from_none], self.sub_system_list)
+        if self.siren_color is not None:
+            result["sirenColor"] = from_union([from_str, from_none], self.siren_color)
+        if self.is_via_repeater is not None:
+            result["isViaRepeater"] = from_union([from_bool, from_none], self.is_via_repeater)
+        if self.version is not None:
+            result["version"] = from_union([from_str, from_none], self.version)
+        if self.abnormal_or_not is not None:
+            result["abnormalOrNot"] = from_union([from_bool, from_none], self.abnormal_or_not)
+        if self.access_module_type is not None:
+            result["accessModuleType"] = from_union([from_str, from_none], self.access_module_type)
+        if self.intercom_service_enabled is not None:
+            result["intercomServiceEnabled"] = from_union([from_bool, from_none], self.intercom_service_enabled)
         return result
 
 
