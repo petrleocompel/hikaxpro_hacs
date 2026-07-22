@@ -15,7 +15,7 @@ from homeassistant.components.switch import SwitchEntity, DOMAIN as SWITCH_DOMAI
 from . import HikAxProDataUpdateCoordinator
 from .const import DATA_COORDINATOR, DOMAIN
 from .entity_id import build_entity_id
-from .model import RelaySwitchConf, RelayStatusEnum, OutputStatusFull
+from .model import RelaySwitchConf, OutputStatusFull, relay_status_is_on
 from homeassistant.const import STATE_ON, STATE_OFF, STATE_UNKNOWN
 
 _LOGGER = logging.getLogger(__name__)
@@ -74,7 +74,7 @@ class HikRelaySwitch(CoordinatorEntity, SwitchEntity):
         status = self.coordinator.relays_status.get(switch.id)
         self._available = status is not None
         if status is not None:
-            self._attr_is_on = status.status == RelayStatusEnum.ON
+            self._attr_is_on = relay_status_is_on(status.status)
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -82,7 +82,7 @@ class HikRelaySwitch(CoordinatorEntity, SwitchEntity):
         status = self.coordinator.relays_status.get(self.switch.id)
         self._available = status is not None
         if status is not None:
-            self._attr_is_on = status.status == RelayStatusEnum.ON
+            self._attr_is_on = relay_status_is_on(status.status)
         else:
             self._attr_is_on = None
         self.async_write_ha_state()

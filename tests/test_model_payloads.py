@@ -416,3 +416,20 @@ def test_relay_status_accepts_wireless_attrib():
         }
     )
     assert status.relay_attrib is model.RelayAttrib.WIRELESS
+
+
+def test_relay_status_is_on_accepts_string_and_enum():
+    """exDevStatus uses string status; comparing to Enum always failed (#195)."""
+    assert model.relay_status_is_on("on") is True
+    assert model.relay_status_is_on("ON") is True
+    assert model.relay_status_is_on("off") is False
+    assert model.relay_status_is_on(model.RelayStatusEnum.ON) is True
+    assert model.relay_status_is_on(model.RelayStatusEnum.OFF) is False
+    assert model.relay_status_is_on(None) is False
+    # Old buggy comparison: str == Enum is always False
+    assert ("on" == model.RelayStatusEnum.ON) is False
+
+    output = model.OutputStatusFull.from_dict(
+        {"id": 0, "name": "rele1", "status": "on", "accessModuleType": "fourWiredOutput"}
+    )
+    assert model.relay_status_is_on(output.status) is True

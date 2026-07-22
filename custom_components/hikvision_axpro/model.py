@@ -1477,6 +1477,21 @@ class RelayStatusEnum(Enum):
     ON = "on"
 
 
+def relay_status_is_on(status: Optional[object]) -> bool:
+    """Return True when an output/relay status means ON.
+
+    exDevStatus returns status as a plain string ("on"/"off"); some parsers
+    may produce RelayStatusEnum. Comparing Enum to str is always False.
+    """
+    if status is None:
+        return False
+    if isinstance(status, RelayStatusEnum):
+        return status is RelayStatusEnum.ON
+    if isinstance(status, str):
+        return status.lower() == RelayStatusEnum.ON.value
+    return False
+
+
 @dataclass
 class RelayStatus:
     id: Optional[int] = None
