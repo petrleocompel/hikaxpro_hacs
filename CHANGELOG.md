@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.1.1
+- **fix**: slugify entity IDs and migrate invalid registry entries for HA 2026.x (#190, #194)
+- **fix**: pass device registry `model` as a string (never `DetectorType`) (#198)
+- **fix**: drop redundant `requests` requirement from manifest (#200)
+
 ## v3.1.0
 - **feat**: HA 2025.12 compliance #162
 

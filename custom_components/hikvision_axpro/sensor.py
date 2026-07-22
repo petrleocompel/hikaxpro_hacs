@@ -29,7 +29,8 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import HikAxProDataUpdateCoordinator
 from .const import DATA_COORDINATOR, DOMAIN
 from .hik_device import HikDevice
-from .model import DetectorType, Status, Zone, detector_model_to_name
+from .entity_id import build_entity_id
+from .model import DetectorType, Status, Zone, zone_device_model
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,9 +66,7 @@ async def async_setup_entry(
                     # suggested_area=zone.zone.,
                     name=zone_config.zone_name,
                     via_device=(DOMAIN, str(coordinator.mac)),
-                    model=detector_model_to_name(zone.zone.model)
-                    if zone.zone.model is not None
-                    else detector_type,
+                    model=zone_device_model(zone.zone.model, detector_type),
                     sw_version=zone.zone.version,
                 )
             else:
@@ -86,9 +85,7 @@ async def async_setup_entry(
                     # suggested_area=zone.zone.,
                     name=zone.zone.name,
                     via_device=(DOMAIN, str(coordinator.mac)),
-                    model=detector_model_to_name(zone.zone.model)
-                    if zone.zone.model is not None
-                    else detector_type,
+                    model=zone_device_model(zone.zone.model, detector_type),
                     sw_version=zone.zone.version,
                 )
 
@@ -132,8 +129,8 @@ class HikTemperature(CoordinatorEntity, HikDevice, SensorEntity):
         self._device_class = SensorDeviceClass.TEMPERATURE
         self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
         self._attr_has_entity_name = True
-        self.entity_id = (
-            f"{SENSOR_DOMAIN}.{coordinator.device_name}-temperature-{zone.id}"
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, coordinator.device_name, "temperature", zone.id
         )
         self._attr_state_class = SensorStateClass.MEASUREMENT
 
@@ -174,7 +171,9 @@ class HikHumidity(CoordinatorEntity, HikDevice, SensorEntity):
         self._attr_native_unit_of_measurement = PERCENTAGE
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_has_entity_name = True
-        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-humidity-{zone.id}"
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, coordinator.device_name, "humidity", zone.id
+        )
 
     @property
     def name(self) -> str | None:
@@ -213,7 +212,9 @@ class HikBatteryInfo(CoordinatorEntity, HikDevice, SensorEntity):
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_device_class = SensorDeviceClass.BATTERY
         self._attr_has_entity_name = True
-        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-battery-{zone.id}"
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, coordinator.device_name, "battery", zone.id
+        )
 
     @property
     def name(self) -> str | None:
@@ -252,7 +253,9 @@ class HikSignalInfo(CoordinatorEntity, HikDevice, SensorEntity):
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_has_entity_name = True
-        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-signal-{zone.id}"
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, coordinator.device_name, "signal", zone.id
+        )
 
     @property
     def name(self) -> str | None:
@@ -286,7 +289,9 @@ class HikStatusInfo(CoordinatorEntity, HikDevice, SensorEntity):
         self._ref_id = entry_id
         self._attr_unique_id = f"{self.coordinator.device_name}-status-{zone.id}"
         self._attr_has_entity_name = True
-        self.entity_id = f"{SENSOR_DOMAIN}.{coordinator.device_name}-status-{zone.id}"
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, coordinator.device_name, "status", zone.id
+        )
         if (
             self.coordinator.zones
             and self.coordinator.zones[self.zone.id]

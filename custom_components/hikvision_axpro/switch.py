@@ -14,6 +14,7 @@ from homeassistant.components.switch import SwitchEntity, DOMAIN as SWITCH_DOMAI
 
 from . import HikAxProDataUpdateCoordinator
 from .const import DATA_COORDINATOR, DOMAIN
+from .entity_id import build_entity_id
 from .model import RelaySwitchConf, RelayStatusEnum, OutputStatusFull
 from homeassistant.const import STATE_ON, STATE_OFF, STATE_UNKNOWN
 
@@ -55,7 +56,9 @@ class HikRelaySwitch(CoordinatorEntity, SwitchEntity):
         self.switch = switch
         self._ref_id = entry_id
         self._attr_unique_id = f"{self.coordinator.device_name}-relay-{switch.id}"
-        self.entity_id = f"{SWITCH_DOMAIN}.{coordinator.device_name}-relay-{switch.id}"
+        self.entity_id = build_entity_id(
+            SWITCH_DOMAIN, coordinator.device_name, "relay", switch.id
+        )
         #self._attr_icon = "mdi:switch"
         #self._attr_has_entity_name = True
         self._attr_device_info = DeviceInfo(
