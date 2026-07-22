@@ -1,2 +1,5 @@
 .idea
 .pytest_cache
+.venv/
+.DS_Store
+test_payloads/
