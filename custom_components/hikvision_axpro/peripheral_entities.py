@@ -426,6 +426,12 @@ class HikPeripheralSensor(CoordinatorEntity, SensorEntity):
         self._device_id = device_id
         self._get = get
         self._value_fn = value_fn
+        # Avoid reading unset _attr_device_class (HA Entity CachedProperties).
+        self._cast_numeric = device_class in (
+            SensorDeviceClass.BATTERY,
+            SensorDeviceClass.TEMPERATURE,
+            SensorDeviceClass.SIGNAL_STRENGTH,
+        )
         self._attr_unique_id = f"{coordinator.device_name}-{kind}-{device_id}-{key}"
         self._attr_name = name
         self._attr_has_entity_name = True
@@ -469,11 +475,7 @@ class HikPeripheralSensor(CoordinatorEntity, SensorEntity):
                 self._attr_native_value = None
                 self._attr_available = False
             else:
-                if self._attr_device_class in (
-                    SensorDeviceClass.BATTERY,
-                    SensorDeviceClass.TEMPERATURE,
-                    SensorDeviceClass.SIGNAL_STRENGTH,
-                ):
+                if self._cast_numeric:
                     self._attr_native_value = cast(float, value)
                 else:
                     self._attr_native_value = value

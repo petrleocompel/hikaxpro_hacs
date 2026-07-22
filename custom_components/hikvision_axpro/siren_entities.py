@@ -323,6 +323,12 @@ class HikSirenSensor(HikSirenEntity, SensorEntity):
         super().__init__(coordinator, siren, entry_id)
         self._key = key
         self._value_fn = value_fn
+        # Avoid reading unset _attr_device_class (HA Entity CachedProperties).
+        self._cast_numeric = device_class in (
+            SensorDeviceClass.BATTERY,
+            SensorDeviceClass.TEMPERATURE,
+            SensorDeviceClass.SIGNAL_STRENGTH,
+        )
         self._attr_unique_id = (
             f"{coordinator.device_name}-siren-{self.siren_id}-{key}"
         )
@@ -352,11 +358,7 @@ class HikSirenSensor(HikSirenEntity, SensorEntity):
                 self._attr_native_value = None
                 self._attr_available = False
             else:
-                if self._attr_device_class in (
-                    SensorDeviceClass.BATTERY,
-                    SensorDeviceClass.TEMPERATURE,
-                    SensorDeviceClass.SIGNAL_STRENGTH,
-                ):
+                if self._cast_numeric:
                     self._attr_native_value = cast(float, value)
                 else:
                     self._attr_native_value = value  # type: ignore[assignment]
