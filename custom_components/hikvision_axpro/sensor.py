@@ -126,7 +126,7 @@ class HikTemperature(CoordinatorEntity, HikDevice, SensorEntity):
         self._attr_unique_id = f"{self.coordinator.device_name}-temp-{zone.id}"
         self._attr_icon = "mdi:thermometer"
         # self._attr_name = f"{self.zone.name} Temperature"
-        self._device_class = SensorDeviceClass.TEMPERATURE
+        self._attr_device_class = SensorDeviceClass.TEMPERATURE
         self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
         self._attr_has_entity_name = True
         self.entity_id = build_entity_id(
@@ -167,7 +167,7 @@ class HikHumidity(CoordinatorEntity, HikDevice, SensorEntity):
         self._attr_unique_id = f"{self.coordinator.device_name}-humid-{zone.id}"
         self._attr_icon = "mdi:cloud-percent"
         # self._attr_name = f"{self.zone.name} Humidity"
-        self._device_class = SensorDeviceClass.HUMIDITY
+        self._attr_device_class = SensorDeviceClass.HUMIDITY
         self._attr_native_unit_of_measurement = PERCENTAGE
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_has_entity_name = True
@@ -248,7 +248,7 @@ class HikSignalInfo(CoordinatorEntity, HikDevice, SensorEntity):
         self._ref_id = entry_id
         self._attr_unique_id = f"{self.coordinator.device_name}-signal-{zone.id}"
         self._attr_icon = "mdi:signal"
-        self._device_class = SensorDeviceClass.SIGNAL_STRENGTH
+        self._attr_device_class = SensorDeviceClass.SIGNAL_STRENGTH
         self._attr_native_unit_of_measurement = SIGNAL_STRENGTH_DECIBELS_MILLIWATT
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_state_class = SensorStateClass.MEASUREMENT

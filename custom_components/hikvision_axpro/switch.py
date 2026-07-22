@@ -69,10 +69,7 @@ class HikRelaySwitch(CoordinatorEntity, SwitchEntity):
             via_device=(DOMAIN, str(coordinator.mac)),
         )
 
-        #entity_description = SwitchEntityDescription(
-        #    device_class=SwitchDeviceClass.SWITCH
-        #)
-        _attr_device_class: SwitchDeviceClass.SWITCH
+        self._attr_device_class = SwitchDeviceClass.SWITCH
 
         status = self.coordinator.relays_status.get(switch.id)
         self._available = status is not None
