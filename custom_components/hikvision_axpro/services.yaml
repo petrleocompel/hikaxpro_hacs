@@ -4,3 +4,73 @@ reload:
 purge:
   name: Purge invalid sensors
   description: Purge old invalid binary sensors registered as sensors
+bypass_zone:
+  name: Bypass zone
+  description: Bypass a zone so the panel can arm with it open
+  fields:
+    zone_id:
+      name: Zone ID
+      description: Zone number from the panel
+      required: true
+      selector:
+        number:
+          min: 0
+          mode: box
+    config_entry_id:
+      name: Config entry ID
+      description: Optional when multiple panels are configured
+      required: false
+      selector:
+        text:
+recover_bypass_zone:
+  name: Recover bypass zone
+  description: Clear bypass on a zone
+  fields:
+    zone_id:
+      name: Zone ID
+      description: Zone number from the panel
+      required: true
+      selector:
+        number:
+          min: 0
+          mode: box
+    config_entry_id:
+      name: Config entry ID
+      description: Optional when multiple panels are configured
+      required: false
+      selector:
+        text:
+arm_away_with_bypass:
+  name: Arm away with bypass
+  description: Bypass open/triggered zones then arm away
+  fields:
+    sub_id:
+      name: Subsystem ID
+      description: Optional area/subsystem id
+      required: false
+      selector:
+        number:
+          min: 1
+          mode: box
+    config_entry_id:
+      name: Config entry ID
+      required: false
+      selector:
+        text:
+arm_home_with_bypass:
+  name: Arm home with bypass
+  description: Bypass open/triggered zones then arm stay/home
+  fields:
+    sub_id:
+      name: Subsystem ID
+      description: Optional area/subsystem id
+      required: false
+      selector:
+        number:
+          min: 1
+          mode: box
+    config_entry_id:
+      name: Config entry ID
+      required: false
+      selector:
+        text:

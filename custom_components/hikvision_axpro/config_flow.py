@@ -21,7 +21,7 @@ from homeassistant.const import (
 )
 from homeassistant.components.alarm_control_panel import SCAN_INTERVAL
 
-from .const import DOMAIN, USE_CODE_ARMING, ALLOW_SUBSYSTEMS, ENABLE_DEBUG_OUTPUT
+from .const import DOMAIN, USE_CODE_ARMING, ALLOW_SUBSYSTEMS, ENABLE_DEBUG_OUTPUT, AUTO_BYPASS_ON_ARM
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,6 +36,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         vol.Optional(USE_CODE_ARMING, default=False): bool,
         vol.Required(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL.total_seconds()): int,
         vol.Optional(ALLOW_SUBSYSTEMS, default=False): bool,
+        vol.Optional(AUTO_BYPASS_ON_ARM, default=False): bool,
     }
 )
 
@@ -51,6 +52,7 @@ CONFIGURE_SCHEMA = vol.Schema(
         vol.Optional(USE_CODE_ARMING, default=False): bool,
         vol.Required(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL.total_seconds()): int,
         vol.Optional(ALLOW_SUBSYSTEMS, default=False): bool,
+        vol.Optional(AUTO_BYPASS_ON_ARM, default=False): bool,
         vol.Optional(ENABLE_DEBUG_OUTPUT, default=False): bool,
     }
 )

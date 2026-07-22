@@ -12,6 +12,8 @@ ALLOW_SUBSYSTEMS: Final[str] = "allow_subsystems"
 
 ENABLE_DEBUG_OUTPUT: Final[str] = "debug"
 
+AUTO_BYPASS_ON_ARM: Final[str] = "auto_bypass_on_arm"
+
 
 # Sensor entity description constants
 ENTITY_DESC_KEY_BATTERY: Final[str] = "battery"

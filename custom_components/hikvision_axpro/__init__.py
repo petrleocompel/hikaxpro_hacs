@@ -36,6 +36,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .const import (
     ALLOW_SUBSYSTEMS,
+    AUTO_BYPASS_ON_ARM,
     DATA_COORDINATOR,
     DOMAIN,
     ENABLE_DEBUG_OUTPUT,
@@ -54,6 +55,7 @@ from .model import (
     RelaySwitchConf,
     Repeater,
     Siren,
+    Status,
     SubSys,
     SubSystemResponse,
     Zone,
@@ -141,7 +143,51 @@ async def async_setup(hass: HomeAssistant, config: ConfigEntry):
         "purge",
         _handle_purge,
     )
+
+    async def _service_bypass_zone(call):
+        zone_id = int(call.data["zone_id"])
+        coordinator = _coordinator_for_service(hass, call)
+        await coordinator.async_bypass_zone(zone_id)
+
+    async def _service_recover_bypass_zone(call):
+        zone_id = int(call.data["zone_id"])
+        coordinator = _coordinator_for_service(hass, call)
+        await coordinator.async_recover_bypass_zone(zone_id)
+
+    async def _service_arm_away_with_bypass(call):
+        coordinator = _coordinator_for_service(hass, call)
+        sub_id = call.data.get("sub_id")
+        await coordinator.async_arm_away(sub_id=sub_id, with_bypass=True)
+
+    async def _service_arm_home_with_bypass(call):
+        coordinator = _coordinator_for_service(hass, call)
+        sub_id = call.data.get("sub_id")
+        await coordinator.async_arm_home(sub_id=sub_id, with_bypass=True)
+
+    hass.services.async_register(DOMAIN, "bypass_zone", _service_bypass_zone)
+    hass.services.async_register(
+        DOMAIN, "recover_bypass_zone", _service_recover_bypass_zone
+    )
+    hass.services.async_register(
+        DOMAIN, "arm_away_with_bypass", _service_arm_away_with_bypass
+    )
+    hass.services.async_register(
+        DOMAIN, "arm_home_with_bypass", _service_arm_home_with_bypass
+    )
     return True
+
+
+def _coordinator_for_service(
+    hass: HomeAssistant, call
+) -> "HikAxProDataUpdateCoordinator":
+    """Resolve coordinator from optional config_entry_id or the first entry."""
+    entry_id = call.data.get("config_entry_id")
+    if entry_id is None:
+        entries = hass.config_entries.async_entries(DOMAIN)
+        if not entries:
+            raise ValueError("No hikvision_axpro config entries")
+        entry_id = entries[0].entry_id
+    return hass.data[DOMAIN][entry_id][DATA_COORDINATOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -154,6 +200,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     code = entry.data[CONF_CODE]
     use_code_arming = entry.data[USE_CODE_ARMING]
     use_sub_systems = entry.data.get(ALLOW_SUBSYSTEMS, False)
+    auto_bypass_on_arm = entry.data.get(AUTO_BYPASS_ON_ARM, False)
     axpro = hikaxpro.HikAxPro(
         host, username, password, user_level=hikaxpro.USER_LEVEL_ADMIN_OPERATOR
     )
@@ -181,6 +228,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         code,
         update_interval,
         use_sub_systems,
+        auto_bypass_on_arm=auto_bypass_on_arm,
     )
     try:
         async with timeout(10):
@@ -232,6 +280,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     ac_power_status: dict | None = None
     hub_batteries: list[dict] = []
     use_sub_systems: bool
+    auto_bypass_on_arm: bool
 
     def __init__(
         self,
@@ -244,6 +293,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         code,
         update_interval: float,
         use_sub_systems=False,
+        auto_bypass_on_arm=False,
     ) -> None:
         """Initialize global data updater and AXPro API."""
         self.axpro = axpro
@@ -256,6 +306,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.use_code_arming = use_code_arming
         self.code = code
         self.use_sub_systems = use_sub_systems
+        self.auto_bypass_on_arm = auto_bypass_on_arm
         self.sirens = {}
         self.keypads = {}
         self.repeaters = {}
@@ -543,16 +594,20 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         except ConnectionError as error:
             raise UpdateFailed(error) from error
 
-    async def async_arm_home(self, sub_id: int | None = None):
+    async def async_arm_home(self, sub_id: int | None = None, with_bypass: bool = False):
         """Arm alarm panel in home state."""
+        if with_bypass or self.auto_bypass_on_arm:
+            await self.async_bypass_blocking_zones()
         is_success = await self.hass.async_add_executor_job(self.axpro.arm_home, sub_id)
 
         if is_success:
             await self._async_update_data()
             await self.async_request_refresh()
 
-    async def async_arm_away(self, sub_id: int | None = None):
+    async def async_arm_away(self, sub_id: int | None = None, with_bypass: bool = False):
         """Arm alarm panel in away state."""
+        if with_bypass or self.auto_bypass_on_arm:
+            await self.async_bypass_blocking_zones()
         is_success = await self.hass.async_add_executor_job(self.axpro.arm_away, sub_id)
 
         if is_success:
@@ -566,6 +621,46 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         if is_success:
             await self._async_update_data()
             await self.async_request_refresh()
+
+    def _zones_blocking_arm(self) -> list[int]:
+        """Return zone IDs that typically prevent arming when left open/triggered."""
+        if not self.zones:
+            return []
+        blocking: list[int] = []
+        for zone_id, zone in self.zones.items():
+            if zone.bypassed:
+                continue
+            open_magnet = zone.magnet_open_status is True
+            triggered = zone.status is Status.TRIGGER
+            alarming = zone.alarm is True
+            if open_magnet or triggered or alarming:
+                blocking.append(zone_id)
+        return blocking
+
+    async def async_bypass_blocking_zones(self) -> None:
+        """Bypass zones that look open/triggered before arming."""
+        for zone_id in self._zones_blocking_arm():
+            await self.async_bypass_zone(zone_id)
+
+    async def async_bypass_zone(self, zone_id: int) -> bool:
+        """Bypass a single zone."""
+        is_success = await self.hass.async_add_executor_job(
+            self.axpro.bypass_zone, zone_id
+        )
+        if is_success:
+            await self._async_update_data()
+            await self.async_request_refresh()
+        return is_success
+
+    async def async_recover_bypass_zone(self, zone_id: int) -> bool:
+        """Clear bypass on a single zone."""
+        is_success = await self.hass.async_add_executor_job(
+            self.axpro.recover_bypass_zone, zone_id
+        )
+        if is_success:
+            await self._async_update_data()
+            await self.async_request_refresh()
+        return is_success
 
     def _relay_call(self, relay_id: int, is_enabled: bool) -> JSONResponseStatus:
         endpoint = self.axpro.build_url(
