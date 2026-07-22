@@ -24,13 +24,14 @@ from .const import DATA_COORDINATOR, DOMAIN
 from .hik_device import HikDevice
 from .entity_id import build_entity_id
 from .model import DetectorType, Zone, zone_device_model
-from .siren_entities import (
-    build_siren_binary_sensors,
-    register_siren_devices,
-)
+from .host_entities import build_host_binary_sensors
 from .peripheral_entities import (
     build_peripheral_binary_sensors,
     register_peripheral_devices,
+)
+from .siren_entities import (
+    build_siren_binary_sensors,
+    register_siren_devices,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -51,6 +52,7 @@ async def async_setup_entry(
     register_peripheral_devices(device_registry, coordinator, entry.entry_id)
     devices.extend(build_siren_binary_sensors(coordinator, entry.entry_id))
     devices.extend(build_peripheral_binary_sensors(coordinator, entry.entry_id))
+    devices.extend(build_host_binary_sensors(coordinator, entry.entry_id))
 
     if coordinator.zone_status is not None:
         for zone in coordinator.zone_status.zone_list:

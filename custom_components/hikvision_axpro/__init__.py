@@ -228,6 +228,9 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     keypads: dict[int, Keypad] = {}
     repeaters: dict[int, Repeater] = {}
     extensions: dict[int, ExtensionModule] = {}
+    host_status: dict | None = None
+    ac_power_status: dict | None = None
+    hub_batteries: list[dict] = []
     use_sub_systems: bool
 
     def __init__(
@@ -257,6 +260,9 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.keypads = {}
         self.repeaters = {}
         self.extensions = {}
+        self.host_status = None
+        self.ac_power_status = None
+        self.hub_batteries = []
         super().__init__(
             hass,
             _LOGGER,
@@ -488,6 +494,46 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
             list(repeaters),
             list(extensions),
         )
+        self._update_host_diagnostics()
+
+    def _update_host_diagnostics(self) -> None:
+        """Best-effort poll of host / AC / hub battery status APIs."""
+        try:
+            self.host_status = self.axpro.host_status()
+        except Exception:  # noqa: BLE001 - panel firmware varies
+            _LOGGER.debug("host status unavailable", exc_info=True)
+            self.host_status = None
+
+        try:
+            endpoint = self.axpro.build_url(
+                f"http://{self.host}/ISAPI/SecurityCP/status/acPowerStatus", True
+            )
+            response = self.axpro.make_request(endpoint, "GET", None, True)
+            if response.status_code == 200:
+                self.ac_power_status = response.json()
+            else:
+                self.ac_power_status = None
+        except Exception:  # noqa: BLE001
+            _LOGGER.debug("AC power status unavailable", exc_info=True)
+            self.ac_power_status = None
+
+        try:
+            endpoint = self.axpro.build_url(
+                f"http://{self.host}" + hikaxpro.consts.Endpoints.BatteriesStatus,
+                True,
+            )
+            response = self.axpro.make_request(endpoint, "GET", None, True)
+            batteries: list[dict] = []
+            if response.status_code == 200:
+                payload = response.json()
+                for item in payload.get("BatteryList") or []:
+                    battery = item.get("Battery") if isinstance(item, dict) else None
+                    if isinstance(battery, dict):
+                        batteries.append(battery)
+            self.hub_batteries = batteries
+        except Exception:  # noqa: BLE001
+            _LOGGER.debug("hub batteries unavailable", exc_info=True)
+            self.hub_batteries = []
 
     async def _async_update_data(self) -> None:
         """Fetch data from Axpro."""
