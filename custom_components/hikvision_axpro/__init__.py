@@ -50,6 +50,7 @@ from .model import (
     OutputStatusFull,
     RelayStatusSearchResponse,
     RelaySwitchConf,
+    Siren,
     SubSys,
     SubSystemResponse,
     Zone,
@@ -220,6 +221,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     devices: dict[int, ZoneConfig] = {}
     relays: dict[int, RelaySwitchConf] = {}
     relays_status: dict[int, OutputStatusFull] = {}
+    sirens: dict[int, Siren] = {}
     use_sub_systems: bool
 
     def __init__(
@@ -245,6 +247,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.use_code_arming = use_code_arming
         self.code = code
         self.use_sub_systems = use_sub_systems
+        self.sirens = {}
         super().__init__(
             hass,
             _LOGGER,
@@ -301,9 +304,16 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         statuses = self._load_ext_devices_status()
         if statuses is not None:
             self.relays_status = {}
+            self.sirens = {}
             if statuses.ex_dev_status is not None:
-                for item in statuses.ex_dev_status.output_list:
-                    self.relays_status[item.output.id] = item.output
+                if statuses.ex_dev_status.output_list is not None:
+                    for item in statuses.ex_dev_status.output_list:
+                        if item.output is not None and item.output.id is not None:
+                            self.relays_status[item.output.id] = item.output
+                if statuses.ex_dev_status.siren_list is not None:
+                    for item in statuses.ex_dev_status.siren_list:
+                        if item.siren is not None and item.siren.id is not None:
+                            self.sirens[item.siren.id] = item.siren
 
     def _load_ext_devices_status(self) -> ExDevStatusResponse:
         endpoint = self.axpro.build_url(
@@ -404,14 +414,23 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
             zones[zone.zone.id] = zone.zone
         self.zones = zones
         _LOGGER.debug("Zones: %s", zone_response)
-        # relays
+        # relays + sirens from exDevStatus
         devices_status = self._load_ext_devices_status()
-        relays_status = {}
+        relays_status: dict[int, OutputStatusFull] = {}
+        sirens: dict[int, Siren] = {}
         if devices_status.ex_dev_status is not None:
-            for item in devices_status.ex_dev_status.output_list:
-                relays_status[item.output.id] = item.output
+            if devices_status.ex_dev_status.output_list is not None:
+                for item in devices_status.ex_dev_status.output_list:
+                    if item.output is not None and item.output.id is not None:
+                        relays_status[item.output.id] = item.output
+            if devices_status.ex_dev_status.siren_list is not None:
+                for item in devices_status.ex_dev_status.siren_list:
+                    if item.siren is not None and item.siren.id is not None:
+                        sirens[item.siren.id] = item.siren
         self.relays_status = relays_status
+        self.sirens = sirens
         _LOGGER.debug("Relay status: %s", relays_status)
+        _LOGGER.debug("Siren status: %s", sirens)
 
     async def _async_update_data(self) -> None:
         """Fetch data from Axpro."""

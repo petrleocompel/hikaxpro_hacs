@@ -31,6 +31,7 @@ from .const import DATA_COORDINATOR, DOMAIN
 from .hik_device import HikDevice
 from .entity_id import build_entity_id
 from .model import DetectorType, Status, Zone, zone_device_model
+from .siren_entities import build_siren_sensors, register_siren_devices
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,6 +47,8 @@ async def async_setup_entry(
     devices = []
     await coordinator.async_request_refresh()
     device_registry = dr.async_get(hass)
+    register_siren_devices(device_registry, coordinator, entry.entry_id)
+    devices.extend(build_siren_sensors(coordinator, entry.entry_id))
     if coordinator.zone_status is not None:
         for zone in coordinator.zone_status.zone_list:
             zone_config = coordinator.devices.get(zone.zone.id)
