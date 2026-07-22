@@ -45,11 +45,14 @@ from .entity_id import migrate_invalid_entity_ids
 from .model import (
     Arming,
     ExDevStatusResponse,
+    ExtensionModule,
     JSONResponseStatus,
+    Keypad,
     OutputConfList,
     OutputStatusFull,
     RelayStatusSearchResponse,
     RelaySwitchConf,
+    Repeater,
     Siren,
     SubSys,
     SubSystemResponse,
@@ -222,6 +225,9 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     relays: dict[int, RelaySwitchConf] = {}
     relays_status: dict[int, OutputStatusFull] = {}
     sirens: dict[int, Siren] = {}
+    keypads: dict[int, Keypad] = {}
+    repeaters: dict[int, Repeater] = {}
+    extensions: dict[int, ExtensionModule] = {}
     use_sub_systems: bool
 
     def __init__(
@@ -248,6 +254,9 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.code = code
         self.use_sub_systems = use_sub_systems
         self.sirens = {}
+        self.keypads = {}
+        self.repeaters = {}
+        self.extensions = {}
         super().__init__(
             hass,
             _LOGGER,
@@ -305,6 +314,9 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         if statuses is not None:
             self.relays_status = {}
             self.sirens = {}
+            self.keypads = {}
+            self.repeaters = {}
+            self.extensions = {}
             if statuses.ex_dev_status is not None:
                 if statuses.ex_dev_status.output_list is not None:
                     for item in statuses.ex_dev_status.output_list:
@@ -314,6 +326,23 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
                     for item in statuses.ex_dev_status.siren_list:
                         if item.siren is not None and item.siren.id is not None:
                             self.sirens[item.siren.id] = item.siren
+                if statuses.ex_dev_status.keypad_list is not None:
+                    for item in statuses.ex_dev_status.keypad_list:
+                        if item.keypad is not None and item.keypad.id is not None:
+                            self.keypads[item.keypad.id] = item.keypad
+                if statuses.ex_dev_status.repeater_list is not None:
+                    for item in statuses.ex_dev_status.repeater_list:
+                        if item.repeater is not None and item.repeater.id is not None:
+                            self.repeaters[item.repeater.id] = item.repeater
+                if statuses.ex_dev_status.extension_list is not None:
+                    for item in statuses.ex_dev_status.extension_list:
+                        if (
+                            item.extension_module is not None
+                            and item.extension_module.id is not None
+                        ):
+                            self.extensions[item.extension_module.id] = (
+                                item.extension_module
+                            )
 
     def _load_ext_devices_status(self) -> ExDevStatusResponse:
         endpoint = self.axpro.build_url(
@@ -414,23 +443,51 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
             zones[zone.zone.id] = zone.zone
         self.zones = zones
         _LOGGER.debug("Zones: %s", zone_response)
-        # relays + sirens from exDevStatus
+        # peripherals from exDevStatus
         devices_status = self._load_ext_devices_status()
         relays_status: dict[int, OutputStatusFull] = {}
         sirens: dict[int, Siren] = {}
+        keypads: dict[int, Keypad] = {}
+        repeaters: dict[int, Repeater] = {}
+        extensions: dict[int, ExtensionModule] = {}
         if devices_status.ex_dev_status is not None:
-            if devices_status.ex_dev_status.output_list is not None:
-                for item in devices_status.ex_dev_status.output_list:
+            ex = devices_status.ex_dev_status
+            if ex.output_list is not None:
+                for item in ex.output_list:
                     if item.output is not None and item.output.id is not None:
                         relays_status[item.output.id] = item.output
-            if devices_status.ex_dev_status.siren_list is not None:
-                for item in devices_status.ex_dev_status.siren_list:
+            if ex.siren_list is not None:
+                for item in ex.siren_list:
                     if item.siren is not None and item.siren.id is not None:
                         sirens[item.siren.id] = item.siren
+            if ex.keypad_list is not None:
+                for item in ex.keypad_list:
+                    if item.keypad is not None and item.keypad.id is not None:
+                        keypads[item.keypad.id] = item.keypad
+            if ex.repeater_list is not None:
+                for item in ex.repeater_list:
+                    if item.repeater is not None and item.repeater.id is not None:
+                        repeaters[item.repeater.id] = item.repeater
+            if ex.extension_list is not None:
+                for item in ex.extension_list:
+                    if (
+                        item.extension_module is not None
+                        and item.extension_module.id is not None
+                    ):
+                        extensions[item.extension_module.id] = item.extension_module
         self.relays_status = relays_status
         self.sirens = sirens
+        self.keypads = keypads
+        self.repeaters = repeaters
+        self.extensions = extensions
         _LOGGER.debug("Relay status: %s", relays_status)
-        _LOGGER.debug("Siren status: %s", sirens)
+        _LOGGER.debug(
+            "Peripherals sirens=%s keypads=%s repeaters=%s extensions=%s",
+            list(sirens),
+            list(keypads),
+            list(repeaters),
+            list(extensions),
+        )
 
     async def _async_update_data(self) -> None:
         """Fetch data from Axpro."""

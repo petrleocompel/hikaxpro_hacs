@@ -28,6 +28,10 @@ from .siren_entities import (
     build_siren_binary_sensors,
     register_siren_devices,
 )
+from .peripheral_entities import (
+    build_peripheral_binary_sensors,
+    register_peripheral_devices,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -44,7 +48,9 @@ async def async_setup_entry(
     await coordinator.async_request_refresh()
     device_registry = dr.async_get(hass)
     register_siren_devices(device_registry, coordinator, entry.entry_id)
+    register_peripheral_devices(device_registry, coordinator, entry.entry_id)
     devices.extend(build_siren_binary_sensors(coordinator, entry.entry_id))
+    devices.extend(build_peripheral_binary_sensors(coordinator, entry.entry_id))
 
     if coordinator.zone_status is not None:
         for zone in coordinator.zone_status.zone_list:
