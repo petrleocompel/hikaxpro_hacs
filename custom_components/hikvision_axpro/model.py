@@ -118,6 +118,17 @@ class DetectorType(Enum):
     OTHER = "other"
 
 
+def zone_device_model(
+    model: Optional[str], detector_type: Optional[DetectorType]
+) -> str:
+    """Return a string device model for the HA device registry."""
+    if model is not None:
+        return detector_model_to_name(model)
+    if detector_type is not None:
+        return detector_type.value
+    return "Unknown"
+
+
 def detector_model_to_name(model_id: Optional[str]) -> str:
     if model_id == "0x00001":
         return "Passive Infrared Detector"

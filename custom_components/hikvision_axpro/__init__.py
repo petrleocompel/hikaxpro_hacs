@@ -41,6 +41,7 @@ from .const import (
     ENABLE_DEBUG_OUTPUT,
     USE_CODE_ARMING,
 )
+from .entity_id import migrate_invalid_entity_ids
 from .model import (
     Arming,
     ExDevStatusResponse,
@@ -184,6 +185,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         raise ConfigEntryNotReady from ex
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {DATA_COORDINATOR: coordinator}
+
+    migrate_invalid_entity_ids(hass, entry)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
