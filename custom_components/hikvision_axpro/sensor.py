@@ -101,8 +101,12 @@ async def async_setup_entry(
             if zone.zone.temperature is not None:
                 devices.append(HikTemperature(coordinator, zone.zone, entry.entry_id))
 
-            if zone.zone.charge_value is not None:
+            # Register battery % whenever charge or chargeValue is present so the
+            # entity exists even if the first poll only had categorical charge (#197).
+            if zone.zone.charge_value is not None or zone.zone.charge is not None:
                 devices.append(HikBatteryInfo(coordinator, zone.zone, entry.entry_id))
+            if zone.zone.charge is not None:
+                devices.append(HikChargeStatus(coordinator, zone.zone, entry.entry_id))
             if zone.zone.signal is not None:
                 devices.append(HikSignalInfo(coordinator, zone.zone, entry.entry_id))
             if zone.zone.status is not None:
@@ -223,10 +227,54 @@ class HikBatteryInfo(CoordinatorEntity, HikDevice, SensorEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        if self.coordinator.zones and self.coordinator.zones[self.zone.id]:
+        if (
+            self.coordinator.zones
+            and self.coordinator.zones[self.zone.id]
+            and self.coordinator.zones[self.zone.id].charge_value is not None
+        ):
             self._attr_native_value = cast(
                 float, self.coordinator.zones[self.zone.id].charge_value
             )
+            self._attr_available = True
+        else:
+            self._attr_native_value = None
+            self._attr_available = False
+        self.async_write_ha_state()
+
+
+class HikChargeStatus(CoordinatorEntity, HikDevice, SensorEntity):
+    """Categorical battery charge status (normal / lowPower / …)."""
+
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(
+        self, coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str
+    ) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._attr_unique_id = f"{self.coordinator.device_name}-charge-{zone.id}"
+        self._attr_icon = "mdi:battery-heart-variant"
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_has_entity_name = True
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, coordinator.device_name, "charge", zone.id
+        )
+
+    @property
+    def name(self) -> str | None:
+        return "Charge status"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        if (
+            self.coordinator.zones
+            and self.coordinator.zones[self.zone.id]
+            and self.coordinator.zones[self.zone.id].charge is not None
+        ):
+            self._attr_native_value = self.coordinator.zones[self.zone.id].charge
             self._attr_available = True
         else:
             self._attr_native_value = None

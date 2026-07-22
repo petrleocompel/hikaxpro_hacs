@@ -145,6 +145,10 @@ async def async_setup_entry(
                 devices.append(
                     HikIsViaRepeaterInfo(coordinator, zone.zone, entry.entry_id)
                 )
+            if zone.zone.charge is not None:
+                devices.append(
+                    HikBinaryBatteryInfo(coordinator, zone.zone, entry.entry_id)
+                )
     _LOGGER.debug("setting up - sensors: %s", ",".join(x.name for x in devices))
     async_add_entities(devices, False)
 
@@ -757,6 +761,7 @@ class HikBinaryBatteryInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
         self._ref_id = entry_id
         self._attr_unique_id = f"{self.coordinator.device_name}-battery-low-{zone.id}"
         self._attr_icon = "mdi:battery"
+        self._attr_device_class = BinarySensorDeviceClass.BATTERY
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_has_entity_name = True
         self.entity_id = build_entity_id(
@@ -770,7 +775,6 @@ class HikBinaryBatteryInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        self.async_write_ha_state()
         if (
             self.coordinator.zones
             and self.coordinator.zones[self.zone.id]
@@ -782,6 +786,7 @@ class HikBinaryBatteryInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
         else:
             self._attr_is_on = None
             self._attr_available = False
+        self.async_write_ha_state()
 
     @property
     def is_on(self) -> bool | None:
