@@ -3,3 +3,4 @@
 .venv/
 .DS_Store
 test_payloads/
+__pycache__/
