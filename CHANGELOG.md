@@ -1,5 +1,8 @@
 # Changelog
 
+## v3.3.1
+- **fix**: accept `relatedKeypadNo` as a list (RS485 R3 wireless zones) and `accessModuleType` `RS485R3WirelessRecv`
+
 ## v3.2.0
 - **fix**: use `_attr_device_class` so temperature unit conversion works (#139)
 - **fix**: relay ON/OFF state from exDevStatus string status (#195)

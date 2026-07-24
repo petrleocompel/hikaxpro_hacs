@@ -37,6 +37,13 @@ def test_access_module_type_four_wired_output():
     )
 
 
+def test_access_module_type_rs485_r3_wireless_recv():
+    assert (
+        model.AccessModuleType("RS485R3WirelessRecv")
+        is model.AccessModuleType.RS485_R3_WIRELESS_RECV
+    )
+
+
 def test_relay_attrib_wireless():
     assert model.RelayAttrib("wireless") is model.RelayAttrib.WIRELESS
 
@@ -199,6 +206,76 @@ def test_zone_config_wired_noeol_from_detector_dump():
     assert cfg.module_type == "localWired"
     assert cfg.support_linkage_keypad_list == []
     assert cfg.related_keypad_no == 0
+
+
+def test_zone_config_rs485_r3_wireless_recv_related_keypad_list():
+    """Zones behind RS485 R3 wireless receivers send relatedKeypadNo as a list."""
+    payload = {
+        "supportLinkageKeypadList": [1],
+        "id": 0,
+        "zoneName": "Living room",
+        "detectorType": "indoorDualTechnologyDetector",
+        "zoneType": "Delay",
+        "subSystemNo": 1,
+        "linkageSubSystem": [1],
+        "armMode": "and",
+        "zoneAttrib": "wireless",
+        "accessModuleType": "RS485R3WirelessRecv",
+        "relatedAccessModuleID": 1,
+        "moduleType": "extendWireless",
+        "relatedKeypadNo": [],
+        "supportLinkageSubSystemList": [1, 2],
+        "enterDelay": 60,
+        "exitDelay": 60,
+        "stayArmDelayTime": 30,
+        "sirenDelayTime": 0,
+        "stayAwayEnabled": True,
+        "chimeEnabled": False,
+        "silentEnabled": False,
+        "chimeWarningType": "single",
+        "timeoutType": "tigger",
+        "timeout": 30,
+        "relateDetector": True,
+        "detectorSeq": "AABBCCDDEEFF",
+        "RelatedChanList": [
+            {
+                "RelatedChan": {
+                    "relator": "host",
+                    "cameraSeq": "",
+                    "relatedChan": 0,
+                    "linkageCameraName": "",
+                }
+            }
+        ],
+        "doubleKnockEnabled": False,
+        "doubleKnockTime": 5,
+        "CrossZoneCfg": {
+            "isAssociated": False,
+            "supportAssociatedZone": [1, 2, 3, 4, 5],
+            "alreadyAssociatedZone": [],
+            "supportLinkageChannelID": [],
+            "alreadyLinkageChannelID": [],
+            "associateTime": 1800,
+        },
+        "newKeyZoneTriggerTypeCfg": "zoneStatus",
+        "zoneStatusCfg": "triggerArm",
+        "armNoBypassEnabled": False,
+        "RelatedPIRCAM": {
+            "supportLinkageZones": [],
+            "linkageZone": [],
+            "linkagePIRCAMName": "",
+        },
+        "deviceNo": 3,
+        "model": "0x000CA",
+    }
+    cfg = model.ZoneConfig.from_dict(payload)
+    assert (
+        cfg.access_module_type is model.AccessModuleType.RS485_R3_WIRELESS_RECV
+    )
+    assert cfg.related_keypad_no == []
+    assert cfg.module_type == "extendWireless"
+    assert cfg.detector_type is model.DetectorType.INDOOR_DUAL_TECHNOLOGY_DETECTOR
+    assert cfg.support_linkage_keypad_list == [1]
 
 
 def test_relay_switch_conf_and_alarm_cfg_extras():

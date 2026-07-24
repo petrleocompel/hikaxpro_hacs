@@ -1,7 +1,7 @@
 import logging
 from enum import Enum
 from dataclasses import dataclass
-from typing import Any, List, Optional, TypeVar, Callable, Type, cast
+from typing import Any, List, Optional, TypeVar, Callable, Type, Union, cast
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -74,6 +74,7 @@ class AccessModuleType(Enum):
     INPUT_MAIN_ZONE = "inputMainZone"
     TRANSMITTER = "transmitter"
     FOUR_WIRED_OUTPUT = "fourWiredOutput"
+    RS485_R3_WIRELESS_RECV = "RS485R3WirelessRecv"
 
 
 class DetectorType(Enum):
@@ -819,7 +820,8 @@ class ZoneConfig:
     address: Optional[int] = None
     module_type: Optional[str] = None
     support_linkage_keypad_list: Optional[List[Any]] = None
-    related_keypad_no: Optional[int] = None
+    # Panels may send a single keypad id (int) or a list of ids
+    related_keypad_no: Optional[Union[int, List[int]]] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'ZoneConfig':
@@ -946,7 +948,10 @@ class ZoneConfig:
         address = from_union([from_int, from_none], obj.get("address"))
         module_type = from_union([from_str, from_none], obj.get("moduleType"))
         support_linkage_keypad_list = from_union([lambda x: from_list(lambda x: x, x), from_none], obj.get("supportLinkageKeypadList"))
-        related_keypad_no = from_union([from_int, from_none], obj.get("relatedKeypadNo"))
+        related_keypad_no = from_union(
+            [from_int, lambda x: from_list(from_int, x), from_none],
+            obj.get("relatedKeypadNo"),
+        )
         return ZoneConfig(
             id,
             zone_name,
@@ -1116,7 +1121,10 @@ class ZoneConfig:
         if self.support_linkage_keypad_list is not None:
             result["supportLinkageKeypadList"] = from_union([lambda x: from_list(lambda x: x, x), from_none], self.support_linkage_keypad_list)
         if self.related_keypad_no is not None:
-            result["relatedKeypadNo"] = from_union([from_int, from_none], self.related_keypad_no)
+            result["relatedKeypadNo"] = from_union(
+                [from_int, lambda x: from_list(from_int, x), from_none],
+                self.related_keypad_no,
+            )
         return result
 
 
