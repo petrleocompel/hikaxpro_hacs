@@ -1,7 +1,7 @@
 # Changelog
 
 ## v3.3.1
-- **fix**: accept `relatedKeypadNo` as a list (RS485 R3 wireless zones) and `accessModuleType` `RS485R3WirelessRecv`
+- **fix**: accept `relatedKeypadNo` as a list (RS485 R3 wireless zones) and `accessModuleType` `RS485R3WirelessRecv` #203
 
 ## v3.2.0
 - **fix**: use `_attr_device_class` so temperature unit conversion works (#139)
