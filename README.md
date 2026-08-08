@@ -56,6 +56,62 @@ Example screens of integration.
 ![Main System Device](https://user-images.githubusercontent.com/9423543/224548626-823a6cfa-5c15-4a6a-97d2-32831797253c.png)
 
 
+## Zone bypass & auto-bypass on arming
+
+Opt-in. The panel refuses to arm while a zone is open, offline or tampered;
+this feature can bypass such zones for you, and put them back afterwards.
+
+### Setting it up
+
+Everything is configured on the integration itself
+(**Settings → Devices & services → Hikvision AX Pro → Configure**):
+
+1. **Arming modes with automatic bypass** — pick the arming modes the feature
+   applies to (home / away / vacation). Leaving this empty disables it.
+2. A second page then shows **one zone picker per enabled mode**. Choose the
+   zones the integration may bypass for that mode; each mode has its own list.
+
+Only *instant* zones can be picked: the panel offers its "forbid bypass on
+arming" setting exclusively for that type, so no other type is ever bypassed
+automatically. A zone for which the panel forbids bypassing is ignored even
+when it is selected — the panel-side setting always wins.
+
+### What it does at arming time
+
+1. Zone states are re-read from the panel (never from the poll cache).
+2. A faulted zone that is selected for the mode is bypassed; a faulted zone
+   that is not is reported and **arming is aborted** with the list of zones.
+3. If a bypass fails, the ones already applied in that flow are rolled back
+   and arming is aborted.
+4. While armed, a bypassed zone that recovers and stays healthy for the
+   configured debounce is un-bypassed automatically.
+5. On disarm, every bypass the integration applied is removed. Bypasses
+   applied from the app or keypad are left alone unless
+   *"On disarm, remove all bypasses"* is enabled.
+
+Bypasses applied by the integration are tracked across restarts, and are
+reconciled with the panel if they are removed elsewhere.
+
+### Entities
+
+| Entity | Meaning |
+| --- | --- |
+| `binary_sensor.<zone>_bypass` | The zone is currently bypassed on the panel. Attributes say whether the integration or someone else applied it. |
+| `binary_sensor.<zone>_bypassable_on_<mode>_arming` | Read-only: the zone is selected for that mode *and* the panel allows bypassing it. One per enabled mode. |
+| `binary_sensor.<panel>_ready_to_arm_<mode>` | Advisory: arming in that mode would currently succeed. Attributes list the blocking zones and the zones that would be bypassed. |
+
+### Services
+
+| Service | Description |
+| --- | --- |
+| `hikvision_axpro.bypass_zone` | Bypass one or more zones (target their bypass sensor, or pass `zone_id`). |
+| `hikvision_axpro.unbypass_zone` | Remove the bypass again. `recover_bypass_zone` is a deprecated alias. |
+| `hikvision_axpro.clear_all_bypasses` | Remove every bypass, whoever applied it. Target an area panel to limit it to that area. |
+| `hikvision_axpro.arm_away_with_bypass` / `arm_home_with_bypass` | Run the bypass flow for this call even when the mode has auto-bypass switched off. The zone selection still applies. |
+
+Events `hikvision_axpro_bypass_applied`, `hikvision_axpro_bypass_removed` and
+`hikvision_axpro_arming_blocked` are fired for automations.
+
 ## Installation
 
 ### Pre-check
@@ -119,7 +175,8 @@ Check your batteries for devices. Check that all zones are closed / not triggere
 If you use Hik-Connect app - you can press the **diagnosis** button on the "system overview page".
 It will tell you why you cannot arm the system. 
 
-This integration is not bypassing any "zones" so you might have to set it up via "Hik-Connect" / Web interface.
+You can also let the integration bypass the offending zones for you: see
+[Zone bypass & auto-bypass on arming](#zone-bypass--auto-bypass-on-arming).
 
 ### Everything seems fine I can arm in "Hik-Connect" app but not in HA.
 

@@ -13,14 +13,19 @@ from homeassistant.components.alarm_control_panel import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.components.alarm_control_panel import DOMAIN as PANEL_DOMAIN
-from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import device_registry as dr, entity_platform
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import Arming, HikAxProDataUpdateCoordinator, SubSys
-from .const import ALLOW_SUBSYSTEMS, DATA_COORDINATOR, DOMAIN
 from .entity_id import build_entity_id
+from .const import (
+    ALLOW_SUBSYSTEMS,
+    DATA_COORDINATOR,
+    DOMAIN,
+    SERVICE_CLEAR_ALL_BYPASSES,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,6 +37,12 @@ async def async_setup_entry(
     coordinator: HikAxProDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id][
         DATA_COORDINATOR
     ]
+    platform = entity_platform.async_get_current_platform()
+    platform.async_register_entity_service(
+        SERVICE_CLEAR_ALL_BYPASSES,
+        None,
+        "async_clear_all_bypasses",
+    )
     device_registry = dr.async_get(hass)
     device_registry.async_get_or_create(
         config_entry_id=entry.entry_id,
@@ -73,6 +84,7 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
     _attr_supported_features = (
         AlarmControlPanelEntityFeature.ARM_HOME
         | AlarmControlPanelEntityFeature.ARM_AWAY
+        | AlarmControlPanelEntityFeature.ARM_VACATION
     )
 
     @property
@@ -143,6 +155,26 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
 
         await self.coordinator.async_arm_away()
 
+    async def async_alarm_arm_vacation(self, code=None):
+        """Send arm vacation command."""
+        if self.coordinator.use_code and self.coordinator.use_code_arming:
+            if not self.__is_code_valid(code):
+                return
+
+        await self.coordinator.async_arm_vacation()
+
+    async def async_clear_all_bypasses(self):
+        """Remove all bypasses on the panel (service handler)."""
+        if self.coordinator.bypass_manager is not None:
+            await self.coordinator.bypass_manager.async_clear_all()
+
+    @property
+    def extra_state_attributes(self):
+        """Return bypass diagnostic attributes."""
+        if self.coordinator.bypass_manager is None:
+            return None
+        return self.coordinator.bypass_manager.diagnostics()
+
     def __is_code_valid(self, code):
         return code == self.coordinator.code
 
@@ -176,6 +208,7 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
     _attr_supported_features = (
         AlarmControlPanelEntityFeature.ARM_HOME
         | AlarmControlPanelEntityFeature.ARM_AWAY
+        | AlarmControlPanelEntityFeature.ARM_VACATION
     )
 
     @property
@@ -255,6 +288,26 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
                 return
 
         await self.coordinator.async_arm_away(self.sys.id)
+
+    async def async_alarm_arm_vacation(self, code=None):
+        """Send arm vacation command."""
+        if self.coordinator.use_code and self.coordinator.use_code_arming:
+            if not self.__is_code_valid(code):
+                return
+
+        await self.coordinator.async_arm_vacation(self.sys.id)
+
+    async def async_clear_all_bypasses(self):
+        """Remove all bypasses in this area (service handler)."""
+        if self.coordinator.bypass_manager is not None:
+            await self.coordinator.bypass_manager.async_clear_all(self.sys.id)
+
+    @property
+    def extra_state_attributes(self):
+        """Return bypass diagnostic attributes for this area."""
+        if self.coordinator.bypass_manager is None:
+            return None
+        return self.coordinator.bypass_manager.diagnostics(self.sys.id)
 
     def __is_code_valid(self, code):
         return code == self.coordinator.code

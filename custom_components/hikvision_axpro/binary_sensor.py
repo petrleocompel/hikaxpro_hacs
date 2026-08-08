@@ -14,13 +14,21 @@ from homeassistant.components.binary_sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import device_registry as dr
-from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers import device_registry as dr, entity_registry as er
+from homeassistant.helpers.entity import DeviceInfo, EntityCategory
+from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import HikAxProDataUpdateCoordinator
-from .const import DATA_COORDINATOR, DOMAIN
+from .bypass_manager import is_auto_bypass_eligible
+from .const import (
+    ARM_MODES,
+    DATA_COORDINATOR,
+    DOMAIN,
+    SERVICE_BYPASS_ZONE,
+    SERVICE_UNBYPASS_ZONE,
+)
 from .entity_id import build_entity_id
 from .hik_device import HikDevice
 from .model import (
@@ -176,8 +184,77 @@ async def async_setup_entry(
                 devices.append(
                     HikBinaryBatteryInfo(coordinator, zone.zone, entry.entry_id)
                 )
+            devices.extend(
+                _zone_bypassable_sensors(coordinator, zone.zone, entry.entry_id)
+            )
+
+    devices.extend(
+        HikReadyToArmSensor(coordinator, entry.entry_id, mode) for mode in ARM_MODES
+    )
+    _remove_stale_bypass_entities(hass, coordinator)
+
     _LOGGER.debug("setting up - sensors: %s", ",".join(x.name for x in devices))
     async_add_entities(devices, False)
+
+    platform = entity_platform.async_get_current_platform()
+    platform.async_register_entity_service(SERVICE_BYPASS_ZONE, None, "async_bypass")
+    platform.async_register_entity_service(
+        SERVICE_UNBYPASS_ZONE, None, "async_unbypass"
+    )
+
+
+def _zone_bypassable_sensors(
+    coordinator: HikAxProDataUpdateCoordinator, zone: Zone, entry_id: str
+) -> list[BinarySensorEntity]:
+    """Per-mode bypassable readback for a zone that may be auto-bypassed.
+
+    Only instant zones get them: the panel offers "forbid bypass on
+    arming" exclusively for that type, so no other type is ever bypassed
+    automatically and a sensor stuck at off would only be noise.
+    """
+    if not is_auto_bypass_eligible(zone):
+        return []
+    manager = coordinator.bypass_manager
+    modes = manager.auto_bypass_modes if manager is not None else set(ARM_MODES)
+    return [
+        HikZoneBypassableSensor(coordinator, zone, entry_id, mode)
+        for mode in ARM_MODES
+        if mode in modes
+    ]
+
+
+def _remove_stale_bypass_entities(
+    hass: HomeAssistant, coordinator: HikAxProDataUpdateCoordinator
+) -> None:
+    """Drop bypass entities that no longer apply.
+
+    Covers a zone whose type changed on the panel, a mode whose
+    auto-bypass was switched off, and the switches earlier builds used
+    before the configuration moved into the integration options.
+    """
+    registry = er.async_get(hass)
+    manager = coordinator.bypass_manager
+    modes = manager.auto_bypass_modes if manager is not None else set(ARM_MODES)
+
+    def remove(domain: str, unique_id: str) -> None:
+        if stale_id := registry.async_get_entity_id(domain, DOMAIN, unique_id):
+            _LOGGER.debug("Removing stale entity %s", stale_id)
+            registry.async_remove(stale_id)
+
+    for zone_id in list((coordinator.zones or {})):
+        zone = coordinator.zones[zone_id]
+        for mode in ARM_MODES:
+            unique_id = f"{coordinator.mac_id}-bypassable-{mode}-{zone_id}"
+            # The configuration now lives in the config entry, so the
+            # per-zone switch is gone whatever the mode.
+            remove("switch", unique_id)
+            if is_auto_bypass_eligible(zone) and mode in modes:
+                continue
+            remove("binary_sensor", unique_id)
+        remove("switch", f"{coordinator.mac_id}-bypassable-{zone_id}")
+
+    # Mode-less ready-to-arm sensor used by earlier builds.
+    remove("binary_sensor", f"{coordinator.mac_id}-ready-to-arm")
 
 
 class HikWirelessExtMagnetDetector(CoordinatorEntity, HikDevice, BinarySensorEntity):
@@ -641,6 +718,172 @@ class HikBypassDetection(CoordinatorEntity, HikDevice, BinarySensorEntity):
             return self.coordinator.zones[self.zone.id].bypassed
         else:
             return False
+
+    @property
+    def extra_state_attributes(self):
+        """Expose owner and reason of the current bypass."""
+        manager = self.coordinator.bypass_manager
+        if manager is None or not self.is_on:
+            return None
+        owned = manager.owns_zone(self.zone.id)
+        return {
+            "bypass_owner": "integration" if owned else "external",
+            "bypass_reason": manager.bypass_reason(self.zone.id),
+        }
+
+    async def async_bypass(self):
+        """Bypass this zone (service handler)."""
+        if self.coordinator.bypass_manager is not None:
+            await self.coordinator.bypass_manager.async_bypass_zone(self.zone.id)
+
+    async def async_unbypass(self):
+        """Restore this zone (service handler)."""
+        if self.coordinator.bypass_manager is not None:
+            await self.coordinator.bypass_manager.async_unbypass_zone(self.zone.id)
+
+
+class HikZoneBypassableSensor(CoordinatorEntity, HikDevice, BinarySensorEntity):
+    """Whether this zone is set as bypassable for one arming mode.
+
+    Read-only: which zones may be auto-bypassed is chosen once in the
+    integration options, not per zone. The sensor is off when the panel
+    itself forbids bypassing the zone on arming
+    (``armNoBypassEnabled``) or when its type is not eligible, because
+    the panel-side setting always wins over the HA-side configuration.
+    """
+
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(
+        self,
+        coordinator: HikAxProDataUpdateCoordinator,
+        zone: Zone,
+        entry_id: str,
+        mode: str,
+    ) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self.zone = zone
+        self._ref_id = entry_id
+        self._mode = mode
+        self._attr_unique_id = f"{coordinator.mac_id}-bypassable-{mode}-{zone.id}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
+        self._attr_icon = "mdi:shield-off-outline"
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_has_entity_name = True
+
+    @property
+    def name(self) -> str | None:
+        return f"Bypassable on {self._mode} arming"
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the zone may be auto-bypassed in this mode."""
+        manager = self.coordinator.bypass_manager
+        if manager is None:
+            return None
+        return manager.is_bypassable(self.zone.id, self._mode)
+
+    @property
+    def available(self) -> bool:
+        manager = self.coordinator.bypass_manager
+        return manager is not None and manager.bypass_supported
+
+    @property
+    def extra_state_attributes(self):
+        """Explain why a configured zone is not effective, if it is not."""
+        manager = self.coordinator.bypass_manager
+        if manager is None:
+            return None
+        attrs = {"arming_mode": self._mode}
+        configured = manager.is_configured_bypassable(self.zone.id, self._mode)
+        attrs["configured"] = configured
+        if configured and manager.zone_forbids_bypass(self.zone.id):
+            attrs["forbidden_by_panel_config"] = True
+        if configured and not manager.zone_bypass_allowed(self.zone.id):
+            attrs["ineffective_reason"] = (
+                "forbidden_by_panel_config"
+                if manager.zone_forbids_bypass(self.zone.id)
+                else "zone_type_not_eligible"
+            )
+        if manager.owns_zone(self.zone.id):
+            attrs["bypass_owner"] = "integration"
+            attrs["bypass_reason"] = manager.bypass_reason(self.zone.id)
+        return attrs
+
+
+class HikReadyToArmSensor(CoordinatorEntity, BinarySensorEntity):
+    """Whether arming in one mode would currently succeed.
+
+    On when no zone is in fault or every faulted zone is set bypassable;
+    off when at least one faulted zone would block arming. One sensor
+    exists per arming mode, independent of the auto-bypass
+    configuration. Advisory: computed from polled data with the same
+    evaluation used at arm time; the authoritative check runs
+    synchronously when arming.
+    """
+
+    coordinator: HikAxProDataUpdateCoordinator
+
+    def __init__(
+        self, coordinator: HikAxProDataUpdateCoordinator, entry_id: str, mode: str
+    ) -> None:
+        """Create the entity with a DataUpdateCoordinator."""
+        super().__init__(coordinator)
+        self._entry_id = entry_id
+        self._mode = mode
+        self._attr_unique_id = f"{coordinator.mac_id}-ready-to-arm-{mode}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, coordinator.device_name
+        )
+        self._attr_icon = "mdi:shield-check"
+        self._attr_has_entity_name = True
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
+    @property
+    def name(self) -> str | None:
+        return f"Ready to arm {self._mode}"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Attach to the panel device."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.coordinator.mac)},
+            manufacturer="Hikvision - Ax Pro",
+            model=self.coordinator.device_model,
+            name=self.coordinator.device_name,
+        )
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true when arming would succeed under the logic."""
+        manager = self.coordinator.bypass_manager
+        if manager is None or self.coordinator.zones is None:
+            return None
+        return manager.current_readiness(self._mode).ready
+
+    @property
+    def extra_state_attributes(self):
+        """Expose the evaluation details."""
+        manager = self.coordinator.bypass_manager
+        if manager is None:
+            return None
+        result = manager.current_readiness(self._mode)
+        return {
+            "blocking_zones": result.blocking_zones,
+            "zones_to_bypass": result.zones_to_bypass,
+            "areas": {
+                str(area): breakdown for area, breakdown in result.per_area.items()
+            },
+            "evaluated_mode": self._mode,
+            "advisory": True,
+        }
 
 
 class HikArmedInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):

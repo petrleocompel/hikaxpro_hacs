@@ -3,8 +3,9 @@
 import asyncio
 from asyncio import timeout
 import contextlib
-from datetime import timedelta
+from datetime import datetime, timedelta
 import logging
+import re
 
 import hikaxpro
 import xmltodict
@@ -29,25 +30,42 @@ from homeassistant.const import (
     Platform,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 import homeassistant.helpers.device_registry as dr
 import homeassistant.helpers.entity_registry as er
+from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.service import async_register_admin_service
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util import dt as dt_util
 
+from .bypass_manager import BypassManager
+from .bypass_store import BypassStore
 from .const import (
     ALLOW_SUBSYSTEMS,
+    ARM_MODE_AWAY,
+    ARM_MODE_HOME,
+    ARM_MODE_VACATION,
+    ARM_MODES,
     AUTO_BYPASS_ON_ARM,
+    CONF_AUTO_BYPASS_MODES,
+    DATA_BYPASS_MANAGER,
     DATA_COORDINATOR,
     DOMAIN,
     ENABLE_DEBUG_OUTPUT,
+    ISSUE_BYPASS_UNSUPPORTED,
+    SERVICE_BYPASS_ZONE,
+    SERVICE_CLEAR_ALL_BYPASSES,
+    SERVICE_UNBYPASS_ZONE,
     USE_CODE_ARMING,
+    conf_bypassable_zones,
+    zone_id_from_bypass_unique_id,
 )
 from .entity_id import (
     has_invalid_object_id_chars,
     normalized_mac,
     normalized_object_id,
 )
+from .isapi_bypass import AxProBypassClient
 from .model import (
     Arming,
     ExDevStatusResponse,
@@ -77,6 +95,10 @@ PLATFORMS: list[Platform] = [
     Platform.SWITCH,
 ]
 _LOGGER = logging.getLogger(__name__)
+
+# The zone configuration (names, types, panel-side bypass restrictions)
+# changes rarely; refresh it hourly instead of on every poll.
+ZONE_CONFIG_REFRESH_INTERVAL = timedelta(hours=1)
 
 
 def _migrated_unique_id(
@@ -306,14 +328,18 @@ async def async_setup(hass: HomeAssistant, config: ConfigEntry):
     )
 
     async def _service_bypass_zone(call):
-        zone_id = int(call.data["zone_id"])
-        coordinator = _coordinator_for_service(hass, call)
-        await coordinator.async_bypass_zone(zone_id)
+        manager = _bypass_manager_for_service(hass, call)
+        for zone_id in _zone_ids_from_call(hass, call):
+            await manager.async_bypass_zone(zone_id)
 
-    async def _service_recover_bypass_zone(call):
-        zone_id = int(call.data["zone_id"])
-        coordinator = _coordinator_for_service(hass, call)
-        await coordinator.async_recover_bypass_zone(zone_id)
+    async def _service_unbypass_zone(call):
+        manager = _bypass_manager_for_service(hass, call)
+        for zone_id in _zone_ids_from_call(hass, call):
+            await manager.async_unbypass_zone(zone_id)
+
+    async def _service_clear_all_bypasses(call):
+        manager = _bypass_manager_for_service(hass, call)
+        await manager.async_clear_all(_subsystem_id_from_call(hass, call))
 
     async def _service_arm_away_with_bypass(call):
         coordinator = _coordinator_for_service(hass, call)
@@ -325,9 +351,14 @@ async def async_setup(hass: HomeAssistant, config: ConfigEntry):
         sub_id = call.data.get("sub_id")
         await coordinator.async_arm_home(sub_id=sub_id, with_bypass=True)
 
-    hass.services.async_register(DOMAIN, "bypass_zone", _service_bypass_zone)
+    hass.services.async_register(DOMAIN, SERVICE_BYPASS_ZONE, _service_bypass_zone)
+    hass.services.async_register(DOMAIN, SERVICE_UNBYPASS_ZONE, _service_unbypass_zone)
+    # Backward-compatible alias used by older automations.
     hass.services.async_register(
-        DOMAIN, "recover_bypass_zone", _service_recover_bypass_zone
+        DOMAIN, "recover_bypass_zone", _service_unbypass_zone
+    )
+    hass.services.async_register(
+        DOMAIN, SERVICE_CLEAR_ALL_BYPASSES, _service_clear_all_bypasses
     )
     hass.services.async_register(
         DOMAIN, "arm_away_with_bypass", _service_arm_away_with_bypass
@@ -372,6 +403,95 @@ def _coordinator_for_service(
     return hass.data[DOMAIN][entry_id][DATA_COORDINATOR]
 
 
+def _bypass_manager_for_service(hass: HomeAssistant, call) -> BypassManager:
+    """Resolve the bypass manager backing a service call."""
+    manager = _coordinator_for_service(hass, call).bypass_manager
+    if manager is None:
+        raise HomeAssistantError("Bypass manager not available")
+    return manager
+
+
+def _zone_ids_from_call(hass: HomeAssistant, call) -> list[int]:
+    """Resolve one or more zone IDs from `zone_id` or bypass entity targets."""
+    if call.data.get("zone_id") is not None:
+        return [int(call.data["zone_id"])]
+
+    target = call.data.get("entity_id")
+    if target is None:
+        raise HomeAssistantError("Missing zone_id or target entity_id")
+
+    entity_ids = [target] if isinstance(target, str) else list(target)
+    registry = er.async_get(hass)
+    zone_ids: list[int] = []
+    for entity_id in entity_ids:
+        reg_entry = registry.async_get(entity_id)
+        if reg_entry is None:
+            raise HomeAssistantError(f"Unknown entity_id: {entity_id}")
+        zone_id = zone_id_from_bypass_unique_id(reg_entry.unique_id)
+        if zone_id is None:
+            raise HomeAssistantError(
+                f"Entity {entity_id} is not a zone bypass binary sensor"
+            )
+        zone_ids.append(zone_id)
+    return zone_ids
+
+
+def _subsystem_id_from_call(hass: HomeAssistant, call) -> int | None:
+    """Resolve optional subsystem id from an alarm_control_panel entity target."""
+    target = call.data.get("entity_id")
+    if target is None:
+        return None
+
+    entity_id = target if isinstance(target, str) else (target[0] if target else None)
+    if not entity_id:
+        return None
+
+    registry = er.async_get(hass)
+    reg_entry = registry.async_get(entity_id)
+    if reg_entry is None or not reg_entry.unique_id:
+        return None
+
+    match = re.fullmatch(r"subsys-.*-(\d+)", reg_entry.unique_id)
+    return int(match.group(1)) if match else None
+
+
+def _migrate_bypass_config(
+    hass: HomeAssistant, entry: ConfigEntry, store: BypassStore
+) -> None:
+    """Move pre-existing bypass configuration into the config entry.
+
+    Two older shapes are folded in, both only when the config entry does
+    not already carry the setting, so a user's own choice always wins:
+
+    - the single ``auto_bypass_on_arm`` boolean, which applied to home
+      and away arming;
+    - the per-zone bypassable flags builds before this one kept in the
+      integration storage next to the ownership tracking.
+    """
+    data = dict(entry.data)
+    changed = False
+
+    if not data.get(CONF_AUTO_BYPASS_MODES) and data.get(AUTO_BYPASS_ON_ARM):
+        data[CONF_AUTO_BYPASS_MODES] = [ARM_MODE_HOME, ARM_MODE_AWAY]
+        changed = True
+    data.pop(AUTO_BYPASS_ON_ARM, None)
+    changed = changed or AUTO_BYPASS_ON_ARM in entry.data
+
+    legacy = store.data.legacy_bypassable_zones_by_mode
+    for mode in ARM_MODES:
+        key = conf_bypassable_zones(mode)
+        zone_ids = legacy.get(mode)
+        if key in data or not zone_ids:
+            continue
+        data[key] = sorted(zone_ids)
+        changed = True
+
+    if changed:
+        _LOGGER.info("Migrating bypass configuration into the config entry")
+        hass.config_entries.async_update_entry(entry, data=data)
+    store.data.legacy_bypassable_zones_by_mode = {}
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up hikvision_axpro from a config entry."""
     host = entry.data[CONF_HOST]
@@ -382,7 +502,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     code = entry.data[CONF_CODE]
     use_code_arming = entry.data[USE_CODE_ARMING]
     use_sub_systems = entry.data.get(ALLOW_SUBSYSTEMS, False)
-    auto_bypass_on_arm = entry.data.get(AUTO_BYPASS_ON_ARM, False)
     axpro = hikaxpro.HikAxPro(
         host, username, password, user_level=hikaxpro.USER_LEVEL_ADMIN_OPERATOR
     )
@@ -410,15 +529,54 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         code,
         update_interval,
         use_sub_systems,
-        auto_bypass_on_arm=auto_bypass_on_arm,
     )
     try:
         async with timeout(10):
             await hass.async_add_executor_job(coordinator.init_device)
     except (TimeoutError, ConnectionError) as ex:
         raise ConfigEntryNotReady from ex
+    bypass_store = BypassStore(hass, entry.entry_id)
+    await bypass_store.async_load()
+    _migrate_bypass_config(hass, entry, bypass_store)
+
+    bypass_manager = BypassManager(
+        hass, entry, coordinator, AxProBypassClient(axpro), bypass_store
+    )
+    # A firmware that reports the per-zone bypass state supports the
+    # bypass control endpoint; detected from already-fetched data.
+    bypass_supported = any(
+        zone.bypassed is not None for zone in (coordinator.zones or {}).values()
+    )
+    bypass_manager.bypass_supported = bypass_supported
+    coordinator.bypass_manager = bypass_manager
+    bypass_manager.async_report_ineffective_config()
+    if not bypass_supported:
+        _LOGGER.warning(
+            "Panel %s does not report zone bypass states; "
+            "bypass features are disabled",
+            coordinator.device_name,
+        )
+        ir.async_create_issue(
+            hass,
+            DOMAIN,
+            f"{ISSUE_BYPASS_UNSUPPORTED}_{entry.entry_id}",
+            is_fixable=False,
+            severity=ir.IssueSeverity.WARNING,
+            translation_key=ISSUE_BYPASS_UNSUPPORTED,
+            translation_placeholders={"device": coordinator.device_name or ""},
+        )
+    else:
+        ir.async_delete_issue(
+            hass, DOMAIN, f"{ISSUE_BYPASS_UNSUPPORTED}_{entry.entry_id}"
+        )
+
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = {DATA_COORDINATOR: coordinator}
+    hass.data[DOMAIN][entry.entry_id] = {
+        DATA_COORDINATOR: coordinator,
+        DATA_BYPASS_MANAGER: bypass_manager,
+    }
+
+    entry.async_on_unload(entry.add_update_listener(update_listener))
 
     await _async_migrate_unique_ids(hass, entry, coordinator.device_name, mac)
     await _async_migrate_invalid_entity_ids(hass, entry)
@@ -436,7 +594,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
-        hass.data[DOMAIN].pop(entry.entry_id)
+        data = hass.data[DOMAIN].pop(entry.entry_id)
+        manager: BypassManager | None = data.get(DATA_BYPASS_MANAGER)
+        if manager is not None:
+            manager.async_unload()
 
     return unload_ok
 
@@ -472,7 +633,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     one_key_alarm_supported: bool | None = None
     siren_ctrl_supported: bool | None = None
     use_sub_systems: bool
-    auto_bypass_on_arm: bool
+    bypass_manager: "BypassManager | None" = None
 
     def __init__(
         self,
@@ -485,7 +646,6 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         code,
         update_interval: float,
         use_sub_systems=False,
-        auto_bypass_on_arm=False,
     ) -> None:
         """Initialize global data updater and AXPro API."""
         self.axpro = axpro
@@ -501,7 +661,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.use_code_arming = use_code_arming
         self.code = code
         self.use_sub_systems = use_sub_systems
-        self.auto_bypass_on_arm = auto_bypass_on_arm
+        self._last_zone_config_fetch: datetime | None = None
         self.sirens = {}
         self.keypads = {}
         self.repeaters = {}
@@ -647,6 +807,7 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     def load_devices(self):
         """Load devices from Zone Config."""
         devices = self._load_devices()
+        self._last_zone_config_fetch = dt_util.utcnow()
         if devices is not None:
             self.devices = {}
             for item in devices.list:
@@ -730,6 +891,23 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
             zones[zone.zone.id] = zone.zone
         self.zones = zones
         _LOGGER.debug("Zones: %s", zone_response)
+        # Refresh the zone configuration hourly, so panel-side setting
+        # changes (e.g. "forbid bypass on arming") are picked up without
+        # a reload while keeping the poll cycle light. A failed refresh
+        # keeps the previous configuration and is retried next poll.
+        if (
+            self._last_zone_config_fetch is None
+            or dt_util.utcnow() - self._last_zone_config_fetch
+            >= ZONE_CONFIG_REFRESH_INTERVAL
+        ):
+            try:
+                self.load_devices()
+            except Exception as err:  # noqa: BLE001 - keep polling alive
+                _LOGGER.warning(
+                    "Zone configuration refresh failed; keeping the previous "
+                    "one: %s",
+                    err,
+                )
         # peripherals from exDevStatus
         devices_status = self._load_ext_devices_status()
         relays_status: dict[int, OutputStatusFull] = {}
@@ -823,74 +1001,86 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
                 await self.hass.async_add_executor_job(self._update_data)
         except ConnectionError as error:
             raise UpdateFailed(error) from error
+        if self.bypass_manager is not None:
+            await self.bypass_manager.async_on_data_refreshed()
+
+    async def _async_arm(
+        self, arm_command, sub_id: int | None, mode: str, with_bypass: bool = False
+    ) -> None:
+        """Run the pre-arm bypass flow, then send the arm command."""
+        manager = self.bypass_manager
+        if manager is None:
+            is_success = await self.hass.async_add_executor_job(arm_command, sub_id)
+        else:
+            if manager.arm_lock.locked():
+                raise HomeAssistantError(
+                    "Another arming or bypass operation is already in progress",
+                    translation_domain=DOMAIN,
+                    translation_key="arming_in_progress",
+                )
+            async with manager.arm_lock:
+                await manager.async_prepare_arming(sub_id, mode, with_bypass)
+                is_success = await self.hass.async_add_executor_job(
+                    arm_command, sub_id
+                )
+
+        if not is_success:
+            raise HomeAssistantError(
+                "The panel refused the arm command",
+                translation_domain=DOMAIN,
+                translation_key="arm_refused",
+            )
+        await self._async_update_data()
+        await self.async_request_refresh()
+
+    def _arm_vacation(self, sub_id: int | None):
+        """Send the vacation arm command (not exposed by hikaxpro)."""
+        sid = "0xffffffff" if sub_id is None else str(sub_id)
+        endpoint = self.axpro.build_url(
+            f"http://{self.host}/ISAPI/SecurityCP/control/arm/{sid}?ways=vacation",
+            True,
+        )
+        response = self.axpro.make_request(endpoint, "PUT", None, True)
+        if response.status_code != 200:
+            raise hikaxpro.errors.UnexpectedResponseCodeError(
+                response.status_code, response.text
+            )
+        return bool(response.json())
 
     async def async_arm_home(self, sub_id: int | None = None, with_bypass: bool = False):
-        """Arm alarm panel in home state."""
-        if with_bypass or self.auto_bypass_on_arm:
-            await self.async_bypass_blocking_zones()
-        is_success = await self.hass.async_add_executor_job(self.axpro.arm_home, sub_id)
+        """Arm alarm panel in home state.
 
-        if is_success:
-            await self._async_update_data()
-            await self.async_request_refresh()
+        ``with_bypass`` runs the pre-arm bypass flow even when home
+        arming is not in the auto-bypass modes.
+        """
+        await self._async_arm(self.axpro.arm_home, sub_id, ARM_MODE_HOME, with_bypass)
 
     async def async_arm_away(self, sub_id: int | None = None, with_bypass: bool = False):
-        """Arm alarm panel in away state."""
-        if with_bypass or self.auto_bypass_on_arm:
-            await self.async_bypass_blocking_zones()
-        is_success = await self.hass.async_add_executor_job(self.axpro.arm_away, sub_id)
+        """Arm alarm panel in away state.
 
-        if is_success:
-            await self._async_update_data()
-            await self.async_request_refresh()
+        ``with_bypass`` runs the pre-arm bypass flow even when away
+        arming is not in the auto-bypass modes.
+        """
+        await self._async_arm(self.axpro.arm_away, sub_id, ARM_MODE_AWAY, with_bypass)
+
+    async def async_arm_vacation(self, sub_id: int | None = None):
+        """Arm alarm panel in vacation state."""
+        await self._async_arm(self._arm_vacation, sub_id, ARM_MODE_VACATION)
 
     async def async_disarm(self, sub_id: int | None = None):
         """Disarm alarm control panel."""
         is_success = await self.hass.async_add_executor_job(self.axpro.disarm, sub_id)
 
-        if is_success:
-            await self._async_update_data()
-            await self.async_request_refresh()
-
-    def _zones_blocking_arm(self) -> list[int]:
-        """Return zone IDs that typically prevent arming when left open/triggered."""
-        if not self.zones:
-            return []
-        blocking: list[int] = []
-        for zone_id, zone in self.zones.items():
-            if zone.bypassed:
-                continue
-            open_magnet = zone.magnet_open_status is True
-            triggered = zone.status is Status.TRIGGER
-            alarming = zone.alarm is True
-            if open_magnet or triggered or alarming:
-                blocking.append(zone_id)
-        return blocking
-
-    async def async_bypass_blocking_zones(self) -> None:
-        """Bypass zones that look open/triggered before arming."""
-        for zone_id in self._zones_blocking_arm():
-            await self.async_bypass_zone(zone_id)
-
-    async def async_bypass_zone(self, zone_id: int) -> bool:
-        """Bypass a single zone."""
-        is_success = await self.hass.async_add_executor_job(
-            self.axpro.bypass_zone, zone_id
-        )
-        if is_success:
-            await self._async_update_data()
-            await self.async_request_refresh()
-        return is_success
-
-    async def async_recover_bypass_zone(self, zone_id: int) -> bool:
-        """Clear bypass on a single zone."""
-        is_success = await self.hass.async_add_executor_job(
-            self.axpro.recover_bypass_zone, zone_id
-        )
-        if is_success:
-            await self._async_update_data()
-            await self.async_request_refresh()
-        return is_success
+        if not is_success:
+            raise HomeAssistantError(
+                "The panel refused the disarm command",
+                translation_domain=DOMAIN,
+                translation_key="disarm_refused",
+            )
+        if self.bypass_manager is not None:
+            await self.bypass_manager.async_on_disarm(sub_id)
+        await self._async_update_data()
+        await self.async_request_refresh()
 
     def _relay_call(self, relay_id: int, is_enabled: bool) -> JSONResponseStatus:
         endpoint = self.axpro.build_url(

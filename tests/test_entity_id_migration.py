@@ -61,8 +61,8 @@ async def test_entity_ids_are_device_zone_name_mac(hass, panel):
     )
     # Panel-level entities carry the panel name and no zone number.
     assert (
-        entity_id_of(hass, "alarm_control_panel", "001122334455")
-        == "alarm_control_panel.axpro_001122334455"
+        entity_id_of(hass, "binary_sensor", "001122334455-ready-to-arm-away")
+        == "binary_sensor.axpro_ready_to_arm_away_001122334455"
     )
 
 

@@ -19,9 +19,13 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.hikvision_axpro.const import (
     ALLOW_SUBSYSTEMS,
+    ARM_MODES,
+    CONF_AUTO_BYPASS_MODES,
+    DATA_BYPASS_MANAGER,
     DATA_COORDINATOR,
     DOMAIN,
     USE_CODE_ARMING,
+    conf_bypassable_zones,
 )
 
 pytest_plugins = "pytest_homeassistant_custom_component"
@@ -97,7 +101,7 @@ class MockAxPro:
     def __init__(self, zones: list[dict] | None = None, subsystems=None):
         self.zones: dict[int, dict] = {z["id"]: z for z in (zones or [])}
         # Optional per-zone configuration payloads (ZonesConfig endpoint),
-        # e.g. {"id": 1, "zoneName": "Front door"}
+        # e.g. {"id": 1, "zoneName": "Front door", "armNoBypassEnabled": True}
         self.zone_configs: list[dict] = []
         self.subsystems = subsystems or [
             {
@@ -109,8 +113,12 @@ class MockAxPro:
                 "delayTime": 0,
             }
         ]
+        self.fail_bypass_zones: set[int] = set()
+        self.fail_unbypass_zones: set[int] = set()
         self.refuse_arm = False
         self.zone_status_fail = False
+        self.bypass_calls: list[int] = []
+        self.unbypass_calls: list[int] = []
         self.arm_calls: list[tuple[str, int | None]] = []
 
     # --- helpers for tests -------------------------------------------------
@@ -178,6 +186,20 @@ class MockAxPro:
             if self.zone_status_fail:
                 raise ConnectionError("zone status unavailable")
             return MockResponse(json_data=self.zone_status())
+        if "control/bypass/" in endpoint:
+            zone_id = int(endpoint.split("control/bypass/")[1].split("?")[0])
+            self.bypass_calls.append(zone_id)
+            if zone_id in self.fail_bypass_zones:
+                return MockResponse(status_code=400, text="bypass refused")
+            self.zones[zone_id]["bypassed"] = True
+            return MockResponse(json_data={"statusCode": 1})
+        if "control/Recoverbypass/" in endpoint:
+            zone_id = int(endpoint.split("control/Recoverbypass/")[1].split("?")[0])
+            self.unbypass_calls.append(zone_id)
+            if zone_id in self.fail_unbypass_zones:
+                return MockResponse(status_code=400, text="unbypass refused")
+            self.zones[zone_id]["bypassed"] = False
+            return MockResponse(json_data={"statusCode": 1})
         if "deviceInfo" in endpoint:
             return MockResponse(text=DEVICE_INFO_XML)
         if "Configuration/zones" in endpoint:
@@ -193,7 +215,7 @@ class MockAxPro:
 
 @pytest.fixture
 def panel():
-    """A default panel: door zone 1 + PIR zone 2."""
+    """A default panel: door zone 1 (bypassable candidate) + PIR zone 2."""
     mock = MockAxPro(
         zones=[
             zone_payload(1, name="Front door", magnet_open=False),
@@ -205,8 +227,11 @@ def panel():
 
 
 def make_entry(
-    hass, entry_id: str = "test-entry", **overrides
-) -> MockConfigEntry:
+    hass,
+    bypassable: dict[str, list[int]] | None = None,
+    entry_id: str = "test-entry",
+    **overrides,
+):
     """Create and register a config entry with sane defaults."""
     data = {
         CONF_HOST: "1.2.3.4",
@@ -218,16 +243,22 @@ def make_entry(
         USE_CODE_ARMING: False,
         CONF_SCAN_INTERVAL: 30,
         ALLOW_SUBSYSTEMS: False,
+        CONF_AUTO_BYPASS_MODES: list(ARM_MODES),
     }
+    for mode, zone_ids in (bypassable or {}).items():
+        data[conf_bypassable_zones(mode)] = list(zone_ids)
     data.update(overrides)
+    # An override of None means "this key was never set", which is how a
+    # config entry from an older release looks.
+    data = {key: value for key, value in data.items() if value is not None}
     entry = MockConfigEntry(domain=DOMAIN, data=data, entry_id=entry_id)
     entry.add_to_hass(hass)
     return entry
 
 
-async def setup_entry(hass, **overrides) -> MockConfigEntry:
+async def setup_entry(hass, bypassable=None, **overrides) -> MockConfigEntry:
     """Set up the integration and wait for it to settle."""
-    entry = make_entry(hass, **overrides)
+    entry = make_entry(hass, bypassable=bypassable, **overrides)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     return entry
@@ -235,3 +266,7 @@ async def setup_entry(hass, **overrides) -> MockConfigEntry:
 
 def get_coordinator(hass, entry):
     return hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
+
+
+def get_manager(hass, entry):
+    return hass.data[DOMAIN][entry.entry_id][DATA_BYPASS_MANAGER]
