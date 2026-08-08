@@ -23,7 +23,10 @@
                     "allow_subsystems": "Zahrnutí zón jako samostatných oblastí pro zapnutí/vypnutí alarmů",
                     "code": "Kód",
                     "scan_interval": "Aktualizační interval",
-                    "debug": "Zapnout debug výstup"
+                    "debug": "Zapnout debug výstup",
+                    "auto_bypass_modes": "Režimy zastřežení s automatickým přemostěním zón v poruše",
+                    "bypass_reenable_debounce": "Počet sekund, po které musí zóna zůstat v pořádku, než bude přemostění odstraněno",
+                    "clear_all_bypasses_on_disarm": "Při deaktivaci odstranit všechna přemostění (nejen ta provedená integrací)"
                 }
             }
         }
@@ -31,7 +34,8 @@
     "options": {
         "step": {
             "init": {
-                "title": "Akutalizace konfigurace",
+                "title": "Připojení a chování",
+                "description": "Pokud má režim zapnuté automatické přemostění, na další stránce vyberete, které zóny smí přemostit.",
                 "data": {
                     "password": "Heslo",
                     "username": "Uživatelské jméno",
@@ -41,8 +45,72 @@
                     "allow_subsystems": "Zahrnutí zón jako samostatných oblastí pro zapnutí/vypnutí alarmů",
                     "code": "Kód",
                     "scan_interval": "Aktualizační interval",
-                    "debug": "Zapnout debug výstup"
+                    "debug": "Zapnout debug výstup",
+                    "auto_bypass_modes": "Režimy zastřežení s automatickým přemostěním zón v poruše",
+                    "bypass_reenable_debounce": "Počet sekund, po které musí zóna zůstat v pořádku, než bude přemostění odstraněno",
+                    "clear_all_bypasses_on_disarm": "Při deaktivaci odstranit všechna přemostění (nejen ta provedená integrací)"
                 }
+            },
+            "bypass_zones": {
+                "title": "Zóny, které lze přemostit",
+                "description": "Vyberte pro každý režim zastřežení zóny, které smí integrace automaticky přemostit, pokud jsou při zastřežení v poruše. Zóna, u které centrála zakazuje přemostění při zastřežení, se ignoruje.",
+                "data": {
+                    "bypassable_zones_home": "Přemostitelné při zastřežení doma",
+                    "bypassable_zones_away": "Přemostitelné při zastřežení mimo domov",
+                    "bypassable_zones_vacation": "Přemostitelné při zastřežení dovolená"
+                }
+            }
+        }
+    },
+    "exceptions": {
+        "arming_blocked": {
+            "message": "Aktivace zablokována: {reason}. Zóny: {zones}"
+        },
+        "arming_in_progress": {
+            "message": "Jiná operace aktivace nebo přemostění již probíhá"
+        },
+        "arm_refused": {
+            "message": "Ústředna odmítla příkaz k aktivaci"
+        },
+        "disarm_refused": {
+            "message": "Ústředna odmítla příkaz k deaktivaci"
+        },
+        "bypass_failed": {
+            "message": "Přemostění zóny {zone} se nezdařilo: {error}"
+        },
+        "unbypass_failed": {
+            "message": "Odstranění přemostění zóny {zone} se nezdařilo: {error}"
+        },
+        "bypass_unsupported": {
+            "message": "Firmware ústředny nepodporuje přemostění zón"
+        }
+    },
+    "issues": {
+        "bypass_unsupported": {
+            "title": "Přemostění zón není podporováno",
+            "description": "Ústředna {device} nehlásí stav přemostění zón, funkce přemostění této integrace jsou proto vypnuty. Vše ostatní funguje dál."
+        }
+    },
+    "services": {
+        "bypass_zone": {
+            "name": "Přemostit zónu",
+            "description": "Přemostí jednu nebo více zón. Integrace přemostění sleduje a automaticky je odstraní, jakmile se zóna při aktivovaném systému zotaví, nebo při deaktivaci."
+        },
+        "unbypass_zone": {
+            "name": "Zrušit přemostění zóny",
+            "description": "Obnoví (zruší přemostění) jedné nebo více zón."
+        },
+        "clear_all_bypasses": {
+            "name": "Odstranit všechna přemostění",
+            "description": "Odstraní všechna přemostění na ústředně bez ohledu na to, jak byla provedena. Při cílení na panel oblasti se obnoví pouze zóny dané oblasti."
+        }
+    },
+    "selector": {
+        "auto_bypass_modes": {
+            "options": {
+                "home": "Doma",
+                "away": "Mimo domov",
+                "vacation": "Dovolená"
             }
         }
     }

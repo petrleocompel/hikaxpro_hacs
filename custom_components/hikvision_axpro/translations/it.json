@@ -23,7 +23,10 @@
                     "allow_subsystems": "Includi aree come zone separate per armare/disarmare",
                     "code": "Codice",
                     "scan_interval": "Intervallo di scansione del sistema",
-                    "debug": "Abilita l'output di debug"
+                    "debug": "Abilita l'output di debug",
+                    "auto_bypass_modes": "Modalità di inserimento con bypass automatico delle zone in anomalia",
+                    "bypass_reenable_debounce": "Secondi per cui una zona deve rimanere sana prima che il bypass venga rimosso",
+                    "clear_all_bypasses_on_disarm": "Al disinserimento, rimuovi tutti i bypass (non solo quelli applicati dall'integrazione)"
                 }
             }
         }
@@ -31,7 +34,8 @@
     "options": {
         "step": {
             "init": {
-                "title": "Aggiorna configurazione",
+                "title": "Connessione e comportamento",
+                "description": "Quando una modalità ha il bypass automatico attivo, nella pagina successiva puoi scegliere quali zone può bypassare.",
                 "data": {
                     "password": "Password",
                     "username": "Nome utente",
@@ -41,8 +45,72 @@
                     "allow_subsystems": "Includi aree come zone separate per armare/disarmare",
                     "code": "Codice",
                     "scan_interval": "Intervallo di scansione del sistema",
-                    "debug": "Abilita l'output di debug"
+                    "debug": "Abilita l'output di debug",
+                    "auto_bypass_modes": "Modalità di inserimento con bypass automatico delle zone in anomalia",
+                    "bypass_reenable_debounce": "Secondi per cui una zona deve rimanere sana prima che il bypass venga rimosso",
+                    "clear_all_bypasses_on_disarm": "Al disinserimento, rimuovi tutti i bypass (non solo quelli applicati dall'integrazione)"
                 }
+            },
+            "bypass_zones": {
+                "title": "Zone che possono essere bypassate",
+                "description": "Scegli, per ogni modalità di inserimento, le zone che l'integrazione può bypassare automaticamente quando sono in anomalia al momento dell'inserimento. Una zona per cui la centrale vieta il bypass all'inserimento viene ignorata.",
+                "data": {
+                    "bypassable_zones_home": "Bypassabile con inserimento in casa",
+                    "bypassable_zones_away": "Bypassabile con inserimento fuori casa",
+                    "bypassable_zones_vacation": "Bypassabile con inserimento vacanza"
+                }
+            }
+        }
+    },
+    "exceptions": {
+        "arming_blocked": {
+            "message": "Inserimento bloccato: {reason}. Zone: {zones}"
+        },
+        "arming_in_progress": {
+            "message": "Un'altra operazione di inserimento o bypass è già in corso"
+        },
+        "arm_refused": {
+            "message": "La centrale ha rifiutato il comando di inserimento"
+        },
+        "disarm_refused": {
+            "message": "La centrale ha rifiutato il comando di disinserimento"
+        },
+        "bypass_failed": {
+            "message": "Bypass della zona {zone} non riuscito: {error}"
+        },
+        "unbypass_failed": {
+            "message": "Rimozione del bypass della zona {zone} non riuscita: {error}"
+        },
+        "bypass_unsupported": {
+            "message": "Il firmware della centrale non supporta il bypass delle zone"
+        }
+    },
+    "issues": {
+        "bypass_unsupported": {
+            "title": "Bypass delle zone non supportato",
+            "description": "La centrale {device} non riporta lo stato di bypass delle zone, quindi le funzionalità di bypass di questa integrazione sono disabilitate. Tutto il resto continua a funzionare."
+        }
+    },
+    "services": {
+        "bypass_zone": {
+            "name": "Bypassa zona",
+            "description": "Bypassa una o più zone. Il bypass è tracciato dall'integrazione e rimosso automaticamente quando la zona torna sana a impianto inserito, o al disinserimento."
+        },
+        "unbypass_zone": {
+            "name": "Rimuovi bypass zona",
+            "description": "Ripristina (rimuove il bypass di) una o più zone."
+        },
+        "clear_all_bypasses": {
+            "name": "Rimuovi tutti i bypass",
+            "description": "Rimuove ogni bypass sulla centrale, indipendentemente da come è stato applicato. Selezionando il pannello di un'area vengono ripristinate solo le zone di quell'area."
+        }
+    },
+    "selector": {
+        "auto_bypass_modes": {
+            "options": {
+                "home": "In casa",
+                "away": "Fuori casa",
+                "vacation": "Vacanza"
             }
         }
     }

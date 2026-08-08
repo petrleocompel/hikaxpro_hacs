@@ -88,14 +88,14 @@ class HikAcPowerBinary(HikPanelEntity, BinarySensorEntity):
         self, coordinator: HikAxProDataUpdateCoordinator, entry_id: str
     ) -> None:
         super().__init__(coordinator, entry_id)
-        self._attr_unique_id = f"{coordinator.device_name}-ac-power"
+        self._attr_unique_id = f"{coordinator.mac_id}-ac-power"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, coordinator.device_name
+        )
         self._attr_name = "AC power"
         self._attr_has_entity_name = True
         self._attr_device_class = BinarySensorDeviceClass.POWER
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        self.entity_id = build_entity_id(
-            BINARY_SENSOR_DOMAIN, coordinator.device_name, "ac_power"
-        )
 
     def _is_on(self) -> bool | None:
         data = self.coordinator.ac_power_status
@@ -127,13 +127,13 @@ class HikHostStatusSensor(HikPanelEntity, SensorEntity):
         self, coordinator: HikAxProDataUpdateCoordinator, entry_id: str
     ) -> None:
         super().__init__(coordinator, entry_id)
-        self._attr_unique_id = f"{coordinator.device_name}-host-status"
+        self._attr_unique_id = f"{coordinator.mac_id}-host-status"
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, coordinator.device_name
+        )
         self._attr_name = "Host status"
         self._attr_has_entity_name = True
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "host_status"
-        )
 
     def _value(self) -> str | None:
         data = self.coordinator.host_status
@@ -182,7 +182,10 @@ class HikHubBatteryPercent(HikPanelEntity, SensorEntity):
     ) -> None:
         super().__init__(coordinator, entry_id)
         self._battery_id = battery_id
-        self._attr_unique_id = f"{coordinator.device_name}-hub-battery-{battery_id}"
+        self._attr_unique_id = f"{coordinator.mac_id}-hub-battery-{battery_id}"
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, coordinator.device_name
+        )
         self._attr_name = (
             "Hub battery" if battery_id in (0, 1) else f"Hub battery {battery_id}"
         )
@@ -191,9 +194,6 @@ class HikHubBatteryPercent(HikPanelEntity, SensorEntity):
         self._attr_native_unit_of_measurement = PERCENTAGE
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "hub_battery", battery_id
-        )
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -221,7 +221,10 @@ class HikHubBatteryStatus(HikPanelEntity, SensorEntity):
         super().__init__(coordinator, entry_id)
         self._battery_id = battery_id
         self._attr_unique_id = (
-            f"{coordinator.device_name}-hub-battery-status-{battery_id}"
+            f"{coordinator.mac_id}-hub-battery-status-{battery_id}"
+        )
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, coordinator.device_name
         )
         self._attr_name = (
             "Hub battery status"
@@ -230,9 +233,6 @@ class HikHubBatteryStatus(HikPanelEntity, SensorEntity):
         )
         self._attr_has_entity_name = True
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "hub_battery_status", battery_id
-        )
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -256,7 +256,10 @@ class HikHubBatteryVoltage(HikPanelEntity, SensorEntity):
         super().__init__(coordinator, entry_id)
         self._battery_id = battery_id
         self._attr_unique_id = (
-            f"{coordinator.device_name}-hub-battery-voltage-{battery_id}"
+            f"{coordinator.mac_id}-hub-battery-voltage-{battery_id}"
+        )
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, coordinator.device_name
         )
         self._attr_name = (
             "Hub battery voltage"
@@ -268,9 +271,6 @@ class HikHubBatteryVoltage(HikPanelEntity, SensorEntity):
         self._attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "hub_battery_voltage", battery_id
-        )
 
     @callback
     def _handle_coordinator_update(self) -> None:

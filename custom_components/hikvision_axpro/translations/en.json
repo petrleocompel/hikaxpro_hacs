@@ -23,7 +23,10 @@
                     "allow_subsystems": "Include areas as separate zones for arm/disarm",
                     "code": "Code",
                     "scan_interval": "Pull interval from system",
-                    "debug": "Enable debug output"
+                    "debug": "Enable debug output",
+                    "auto_bypass_modes": "Arming modes with automatic bypass of faulted zones",
+                    "bypass_reenable_debounce": "Seconds a zone must stay healthy before its bypass is removed",
+                    "clear_all_bypasses_on_disarm": "On disarm, remove all bypasses (not only those applied by the integration)"
                 }
             }
         }
@@ -31,7 +34,8 @@
     "options": {
         "step": {
             "init": {
-                "title": "Update configuration",
+                "title": "Connection and behaviour",
+                "description": "When a mode has automatic bypass enabled, the next page lets you pick which zones it may bypass.",
                 "data": {
                     "password": "Password",
                     "username": "Username",
@@ -41,8 +45,72 @@
                     "allow_subsystems": "Include areas as separate zones for arm/disarm",
                     "code": "Code",
                     "scan_interval": "Pull interval from system",
-                    "debug": "Enable debug output"
+                    "debug": "Enable debug output",
+                    "auto_bypass_modes": "Arming modes with automatic bypass of faulted zones",
+                    "bypass_reenable_debounce": "Seconds a zone must stay healthy before its bypass is removed",
+                    "clear_all_bypasses_on_disarm": "On disarm, remove all bypasses (not only those applied by the integration)"
                 }
+            },
+            "bypass_zones": {
+                "title": "Zones that may be bypassed",
+                "description": "Pick, per arming mode, the zones the integration may bypass automatically when they are faulted at arming time. A zone the panel forbids bypassing on arming is ignored.",
+                "data": {
+                    "bypassable_zones_home": "Bypassable on home arming",
+                    "bypassable_zones_away": "Bypassable on away arming",
+                    "bypassable_zones_vacation": "Bypassable on vacation arming"
+                }
+            }
+        }
+    },
+    "exceptions": {
+        "arming_blocked": {
+            "message": "Arming blocked: {reason}. Zones: {zones}"
+        },
+        "arming_in_progress": {
+            "message": "Another arming or bypass operation is already in progress"
+        },
+        "arm_refused": {
+            "message": "The panel refused the arm command"
+        },
+        "disarm_refused": {
+            "message": "The panel refused the disarm command"
+        },
+        "bypass_failed": {
+            "message": "Bypass of zone {zone} failed: {error}"
+        },
+        "unbypass_failed": {
+            "message": "Removing the bypass of zone {zone} failed: {error}"
+        },
+        "bypass_unsupported": {
+            "message": "The panel firmware does not support zone bypass"
+        }
+    },
+    "issues": {
+        "bypass_unsupported": {
+            "title": "Zone bypass not supported",
+            "description": "The panel {device} does not report zone bypass states, so the bypass features of this integration are disabled. Everything else keeps working."
+        }
+    },
+    "services": {
+        "bypass_zone": {
+            "name": "Bypass zone",
+            "description": "Bypass one or more zones. The bypass is tracked by the integration and removed automatically when the zone recovers while armed, or on disarm."
+        },
+        "unbypass_zone": {
+            "name": "Unbypass zone",
+            "description": "Restore (remove the bypass of) one or more zones."
+        },
+        "clear_all_bypasses": {
+            "name": "Clear all bypasses",
+            "description": "Remove every bypass on the panel, regardless of how it was applied. Targeting an area panel clears only that area's zones."
+        }
+    },
+    "selector": {
+        "auto_bypass_modes": {
+            "options": {
+                "home": "Home",
+                "away": "Away",
+                "vacation": "Vacation"
             }
         }
     }

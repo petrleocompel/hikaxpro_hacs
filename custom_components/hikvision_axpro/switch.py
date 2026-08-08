@@ -10,8 +10,8 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from homeassistant.helpers import device_registry as dr
 from homeassistant.components.switch import (
-    SwitchEntity,
     DOMAIN as SWITCH_DOMAIN,
+    SwitchEntity,
     SwitchDeviceClass,
 )
 
@@ -79,9 +79,9 @@ class HikRelaySwitch(CoordinatorEntity, SwitchEntity):
         super().__init__(coordinator)
         self.switch = switch
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-relay-{switch.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-relay-{switch.id}"
         self.entity_id = build_entity_id(
-            SWITCH_DOMAIN, coordinator.device_name, "relay", switch.id
+            SWITCH_DOMAIN, self._attr_unique_id, coordinator.mac_id, switch.name
         )
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, str(self._ref_id) + "-relay-" + str(switch.id))},
@@ -155,14 +155,14 @@ class HikSirenSwitch(CoordinatorEntity, SwitchEntity):
         self._ref_id = entry_id
         siren = coordinator.sirens.get(siren_id)
         name = (siren.name if siren else None) or f"Siren {siren_id}"
-        self._attr_unique_id = f"{coordinator.device_name}-siren-control-{siren_id}"
+        self._attr_unique_id = f"{coordinator.mac_id}-siren-control-{siren_id}"
+        self.entity_id = build_entity_id(
+            SWITCH_DOMAIN, self._attr_unique_id, coordinator.mac_id, name
+        )
         self._attr_name = "Control"
         self._attr_has_entity_name = True
         self._attr_device_class = SwitchDeviceClass.SWITCH
         self._attr_icon = "mdi:alarm-bell"
-        self.entity_id = build_entity_id(
-            SWITCH_DOMAIN, coordinator.device_name, "siren_control", siren_id
-        )
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, str(entry_id) + "-siren-" + str(siren_id))},
             manufacturer="HikVision",

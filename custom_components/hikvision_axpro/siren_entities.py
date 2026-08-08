@@ -268,7 +268,10 @@ class HikSirenBinary(HikSirenEntity, BinarySensorEntity):
         self._key = key
         self._value_fn = value_fn
         self._attr_unique_id = (
-            f"{coordinator.device_name}-siren-{self.siren_id}-{key}"
+            f"{coordinator.mac_id}-siren-{self.siren_id}-{key}"
+        )
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, siren.name
         )
         self._attr_name = name
         self._attr_has_entity_name = True
@@ -276,13 +279,6 @@ class HikSirenBinary(HikSirenEntity, BinarySensorEntity):
             self._attr_device_class = device_class
         if diagnostic:
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        self.entity_id = build_entity_id(
-            BINARY_SENSOR_DOMAIN,
-            coordinator.device_name,
-            "siren",
-            self.siren_id,
-            key,
-        )
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -330,7 +326,10 @@ class HikSirenSensor(HikSirenEntity, SensorEntity):
             SensorDeviceClass.SIGNAL_STRENGTH,
         )
         self._attr_unique_id = (
-            f"{coordinator.device_name}-siren-{self.siren_id}-{key}"
+            f"{coordinator.mac_id}-siren-{self.siren_id}-{key}"
+        )
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, siren.name
         )
         self._attr_name = name
         self._attr_has_entity_name = True
@@ -342,9 +341,6 @@ class HikSirenSensor(HikSirenEntity, SensorEntity):
             self._attr_state_class = state_class
         if diagnostic:
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "siren", self.siren_id, key
-        )
 
     @callback
     def _handle_coordinator_update(self) -> None:

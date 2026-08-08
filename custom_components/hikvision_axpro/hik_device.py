@@ -6,10 +6,11 @@ Understands zone and custom refID
 from homeassistant.helpers.entity import DeviceInfo
 
 from .const import DOMAIN
+from .entity_id import build_entity_id
 from .model import Zone
 
 
-class HikDevice:
+class HikDevice():
     """Hik device as base for all sensors from HikVision.
 
     Understands zone and custom refID
@@ -29,3 +30,13 @@ class HikDevice:
             # model="Unknown" if self.zone.model is not "0x00001" else self.zone.model,
             sw_version=self.zone.version,
         )
+
+    @property
+    def _object_id_device_name(self) -> str | None:
+        """Device name to strip, falling back to the zone name.
+
+        The registry device entry is only available once the entity has
+        been added; before that the zone name is the device name this
+        integration asks Home Assistant to create.
+        """
+        return super()._object_id_device_name or self.zone.name

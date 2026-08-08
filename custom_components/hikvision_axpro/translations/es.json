@@ -23,7 +23,10 @@
                     "allow_subsystems": "Incluir áreas como zonas separadas para armar/desarmar",
                     "code": "Código",
                     "scan_interval": "Intervalo de escaneo del sistema",
-                    "debug": "Habilitar salida de depuración"
+                    "debug": "Habilitar salida de depuración",
+                    "auto_bypass_modes": "Modos de armado con anulación automática de zonas con fallo",
+                    "bypass_reenable_debounce": "Segundos que una zona debe permanecer sana antes de retirar la anulación",
+                    "clear_all_bypasses_on_disarm": "Al desarmar, retirar todas las anulaciones (no solo las aplicadas por la integración)"
                 }
             }
         }
@@ -31,7 +34,8 @@
     "options": {
         "step": {
             "init": {
-                "title": "Actualizar configuración",
+                "title": "Conexión y comportamiento",
+                "description": "Cuando un modo tiene la anulación automática activada, en la página siguiente eliges qué zonas puede anular.",
                 "data": {
                     "password": "Contraseña",
                     "username": "Usuario",
@@ -41,8 +45,72 @@
                     "allow_subsystems": "Incluir áreas como zonas separadas para armar/desarmar",
                     "code": "Código",
                     "scan_interval": "Intervalo de escaneo del sistema",
-                    "debug": "Habilitar salida de depuración"
+                    "debug": "Habilitar salida de depuración",
+                    "auto_bypass_modes": "Modos de armado con anulación automática de zonas con fallo",
+                    "bypass_reenable_debounce": "Segundos que una zona debe permanecer sana antes de retirar la anulación",
+                    "clear_all_bypasses_on_disarm": "Al desarmar, retirar todas las anulaciones (no solo las aplicadas por la integración)"
                 }
+            },
+            "bypass_zones": {
+                "title": "Zonas que se pueden anular",
+                "description": "Elija, por cada modo de armado, las zonas que la integración puede anular automáticamente cuando están en avería al armar. Una zona para la que el panel prohíbe la anulación al armar se ignora.",
+                "data": {
+                    "bypassable_zones_home": "Anulable al armar en casa",
+                    "bypassable_zones_away": "Anulable al armar fuera",
+                    "bypassable_zones_vacation": "Anulable al armar en vacaciones"
+                }
+            }
+        }
+    },
+    "exceptions": {
+        "arming_blocked": {
+            "message": "Armado bloqueado: {reason}. Zonas: {zones}"
+        },
+        "arming_in_progress": {
+            "message": "Ya hay otra operación de armado o anulación en curso"
+        },
+        "arm_refused": {
+            "message": "El panel rechazó la orden de armado"
+        },
+        "disarm_refused": {
+            "message": "El panel rechazó la orden de desarmado"
+        },
+        "bypass_failed": {
+            "message": "Falló la anulación de la zona {zone}: {error}"
+        },
+        "unbypass_failed": {
+            "message": "Falló la retirada de la anulación de la zona {zone}: {error}"
+        },
+        "bypass_unsupported": {
+            "message": "El firmware del panel no admite la anulación de zonas"
+        }
+    },
+    "issues": {
+        "bypass_unsupported": {
+            "title": "Anulación de zonas no admitida",
+            "description": "El panel {device} no informa del estado de anulación de las zonas, por lo que las funciones de anulación de esta integración están desactivadas. Todo lo demás sigue funcionando."
+        }
+    },
+    "services": {
+        "bypass_zone": {
+            "name": "Anular zona",
+            "description": "Anula una o varias zonas. La integración registra la anulación y la retira automáticamente cuando la zona se recupera estando armado, o al desarmar."
+        },
+        "unbypass_zone": {
+            "name": "Restaurar zona",
+            "description": "Restaura (retira la anulación de) una o varias zonas."
+        },
+        "clear_all_bypasses": {
+            "name": "Retirar todas las anulaciones",
+            "description": "Retira todas las anulaciones del panel, independientemente de cómo se aplicaran. Si se selecciona el panel de un área, solo se restauran las zonas de esa área."
+        }
+    },
+    "selector": {
+        "auto_bypass_modes": {
+            "options": {
+                "home": "En casa",
+                "away": "Ausente",
+                "vacation": "Vacaciones"
             }
         }
     }

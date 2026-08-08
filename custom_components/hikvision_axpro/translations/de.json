@@ -23,7 +23,10 @@
                     "allow_subsystems": "Bereiche als separate Zonen zum Aktivieren/Deaktivieren einbeziehen",
                     "code": "Code",
                     "scan_interval": "Scan-Intervall des Systems",
-                    "debug": "Debug-Ausgabe aktivieren"
+                    "debug": "Debug-Ausgabe aktivieren",
+                    "auto_bypass_modes": "Scharfschaltmodi mit automatischem Bypass gestörter Zonen",
+                    "bypass_reenable_debounce": "Sekunden, die eine Zone gesund bleiben muss, bevor die Überbrückung entfernt wird",
+                    "clear_all_bypasses_on_disarm": "Beim Unscharfschalten alle Überbrückungen entfernen (nicht nur die von der Integration gesetzten)"
                 }
             }
         }
@@ -31,7 +34,8 @@
     "options": {
         "step": {
             "init": {
-                "title": "Konfiguration aktualisieren",
+                "title": "Verbindung und Verhalten",
+                "description": "Ist für einen Modus das automatische Überbrücken aktiv, wählen Sie auf der nächsten Seite die betroffenen Zonen.",
                 "data": {
                     "password": "Passwort",
                     "username": "Benutzername",
@@ -41,8 +45,72 @@
                     "allow_subsystems": "Bereiche als separate Zonen zum Aktivieren/Deaktivieren einbeziehen",
                     "code": "Code",
                     "scan_interval": "Scan-Intervall des Systems",
-                    "debug": "Debug-Ausgabe aktivieren"
+                    "debug": "Debug-Ausgabe aktivieren",
+                    "auto_bypass_modes": "Scharfschaltmodi mit automatischem Bypass gestörter Zonen",
+                    "bypass_reenable_debounce": "Sekunden, die eine Zone gesund bleiben muss, bevor die Überbrückung entfernt wird",
+                    "clear_all_bypasses_on_disarm": "Beim Unscharfschalten alle Überbrückungen entfernen (nicht nur die von der Integration gesetzten)"
                 }
+            },
+            "bypass_zones": {
+                "title": "Zonen, die überbrückt werden dürfen",
+                "description": "Wählen Sie je Scharfschaltmodus die Zonen aus, die die Integration automatisch überbrücken darf, wenn sie beim Scharfschalten gestört sind. Eine Zone, für die die Zentrale das Überbrücken beim Scharfschalten verbietet, wird ignoriert.",
+                "data": {
+                    "bypassable_zones_home": "Überbrückbar beim Scharfschalten (anwesend)",
+                    "bypassable_zones_away": "Überbrückbar beim Scharfschalten (abwesend)",
+                    "bypassable_zones_vacation": "Überbrückbar beim Scharfschalten (Urlaub)"
+                }
+            }
+        }
+    },
+    "exceptions": {
+        "arming_blocked": {
+            "message": "Scharfschalten blockiert: {reason}. Zonen: {zones}"
+        },
+        "arming_in_progress": {
+            "message": "Eine andere Scharfschalt- oder Überbrückungsaktion läuft bereits"
+        },
+        "arm_refused": {
+            "message": "Die Zentrale hat den Scharfschaltbefehl abgelehnt"
+        },
+        "disarm_refused": {
+            "message": "Die Zentrale hat den Unscharfschaltbefehl abgelehnt"
+        },
+        "bypass_failed": {
+            "message": "Überbrückung von Zone {zone} fehlgeschlagen: {error}"
+        },
+        "unbypass_failed": {
+            "message": "Entfernen der Überbrückung von Zone {zone} fehlgeschlagen: {error}"
+        },
+        "bypass_unsupported": {
+            "message": "Die Firmware der Zentrale unterstützt keine Zonenüberbrückung"
+        }
+    },
+    "issues": {
+        "bypass_unsupported": {
+            "title": "Zonenüberbrückung nicht unterstützt",
+            "description": "Die Zentrale {device} meldet keine Überbrückungszustände der Zonen, daher sind die Überbrückungsfunktionen dieser Integration deaktiviert. Alles andere funktioniert weiterhin."
+        }
+    },
+    "services": {
+        "bypass_zone": {
+            "name": "Zone überbrücken",
+            "description": "Überbrückt eine oder mehrere Zonen. Die Überbrückung wird von der Integration verfolgt und automatisch entfernt, wenn sich die Zone im scharfen Zustand erholt oder beim Unscharfschalten."
+        },
+        "unbypass_zone": {
+            "name": "Zonenüberbrückung aufheben",
+            "description": "Stellt eine oder mehrere Zonen wieder her (entfernt die Überbrückung)."
+        },
+        "clear_all_bypasses": {
+            "name": "Alle Überbrückungen entfernen",
+            "description": "Entfernt jede Überbrückung an der Zentrale, unabhängig davon, wie sie gesetzt wurde. Bei Auswahl eines Bereichspanels werden nur die Zonen dieses Bereichs wiederhergestellt."
+        }
+    },
+    "selector": {
+        "auto_bypass_modes": {
+            "options": {
+                "home": "Zu Hause",
+                "away": "Abwesend",
+                "vacation": "Urlaub"
             }
         }
     }

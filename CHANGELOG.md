@@ -1,5 +1,49 @@
 # Changelog
 
+## Unreleased
+- **feat**: managed zone bypass workflow. Which zones may be auto-bypassed is
+  now chosen on the integration itself (**Configure**): one zone picker per
+  arming mode, shown for the modes that have auto-bypass enabled. Each zone
+  exposes a read-only `binary_sensor` per mode reporting whether it is set as
+  bypassable, replacing the former per-zone switch.
+- **feat**: the arming flow re-reads zone states from the panel, bypasses the
+  selected faulted zones, aborts with the offending zone list otherwise, and
+  rolls back on a partial failure. Bypasses applied by the integration are
+  tracked across restarts, removed once a zone recovers while armed, cleaned
+  up on disarm, and reconciled when removed on the panel side.
+- **fix**: the zone picker only offers zones that can really be bypassed — a zone
+  whose type is not eligible, or whose panel-side "forbid bypass on arming" is on,
+  is left out instead of being offered and then silently ignored.
+- **feat**: the first options page now reads "Next" instead of "Submit" when a
+  zone-picker page follows, and says so in its description.
+- **feat**: `unbypass_zone` and `clear_all_bypasses` services, per-mode
+  `ready_to_arm` sensors, vacation arming, and `bypass_applied` /
+  `bypass_removed` / `arming_blocked` events.
+- **feat**: `arm_away_with_bypass` / `arm_home_with_bypass` now really force
+  the bypass flow for that call, instead of silently doing a plain arm.
+- **chore**: the bypass store keeps only what it must — the bypasses this
+  integration applied. An unreadable or unexpected store file is discarded
+  instead of failing the setup, since the reconciliation rebuilds it.
+- **chore**: rework ID generation. Entity IDs are now
+  `<device>_z<zone>_<name>_<compact mac>`
+  (`binary_sensor.ingresso_z1_tamper_a4d5c26bb859`), derived from the entity's own
+  `unique_id`. The MAC stays one compact token instead of being split into six
+  (`a4_d5_c2_...`), so an underscore only ever separates two distinct pieces of
+  information. The id is unique by construction, so two panels carrying zones with
+  the same name no longer collide and Home Assistant never appends a `_2` suffix;
+  a zone number is written `z1` and the MAC always closes the id, so nothing in an
+  ID can be mistaken for such a suffix. Only numbers that really are zones are
+  marked — a hub battery or relay keeps its own plain number.
+- **chore**: key `unique_id` off the compact panel MAC (`a4d5c26bb859-tamper-1`)
+  instead of the panel's `deviceName`, which the user can change on the panel and
+  which is not unique across two panels — with two panels it silently dropped one
+  panel's entities. Subsystem panels gain the missing separator
+  (`subsys-<mac>-<area>`).
+- **chore**: migrate existing installations in place — legacy unique IDs, in both
+  the `deviceName` and the colon-MAC form, are re-keyed on the same registry rows,
+  so custom names, hand-picked entity IDs, history and automations all survive.
+  Entity IDs are only rewritten when they are no longer valid object IDs.
+
 ## v3.4.0
 - **feat**: PIR / motion detector zones expose `binary_sensor` Motion (`device_class: motion`) from zone status `trigger` (#170)
 

@@ -362,14 +362,14 @@ class HikPeripheralBinary(CoordinatorEntity, BinarySensorEntity):
         self._device_id = device_id
         self._get = get
         self._value_fn = value_fn
-        self._attr_unique_id = f"{coordinator.device_name}-{kind}-{device_id}-{key}"
+        self._attr_unique_id = f"{coordinator.mac_id}-{kind}-{device_id}-{key}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id
+        )
         self._attr_name = name
         self._attr_has_entity_name = True
         self._attr_device_class = device_class
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        self.entity_id = build_entity_id(
-            BINARY_SENSOR_DOMAIN, coordinator.device_name, kind, device_id, key
-        )
 
     def _current(self):
         return self._get(self.coordinator)
@@ -432,7 +432,10 @@ class HikPeripheralSensor(CoordinatorEntity, SensorEntity):
             SensorDeviceClass.TEMPERATURE,
             SensorDeviceClass.SIGNAL_STRENGTH,
         )
-        self._attr_unique_id = f"{coordinator.device_name}-{kind}-{device_id}-{key}"
+        self._attr_unique_id = f"{coordinator.mac_id}-{kind}-{device_id}-{key}"
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id
+        )
         self._attr_name = name
         self._attr_has_entity_name = True
         if device_class is not None:
@@ -442,9 +445,6 @@ class HikPeripheralSensor(CoordinatorEntity, SensorEntity):
         if state_class is not None:
             self._attr_state_class = state_class
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, kind, device_id, key
-        )
 
     def _current(self):
         return self._get(self.coordinator)

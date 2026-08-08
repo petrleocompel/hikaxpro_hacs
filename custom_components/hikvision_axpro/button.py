@@ -49,9 +49,9 @@ class HikOneKeyAlarmButton(CoordinatorEntity, ButtonEntity):
         self._attr_has_entity_name = True
         self._attr_name = "One-key alarm"
         self._attr_icon = "mdi:alarm-light"
-        self._attr_unique_id = f"{coordinator.device_name}-one-key-alarm"
+        self._attr_unique_id = f"{coordinator.mac_id}-one-key-alarm"
         self.entity_id = build_entity_id(
-            BUTTON_DOMAIN, coordinator.device_name, "one_key_alarm"
+            BUTTON_DOMAIN, self._attr_unique_id, coordinator.mac_id, coordinator.device_name
         )
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, str(coordinator.mac))},
@@ -83,9 +83,9 @@ class HikOneKeyAlarmClearButton(CoordinatorEntity, ButtonEntity):
         self._attr_has_entity_name = True
         self._attr_name = "Clear one-key alarm"
         self._attr_icon = "mdi:alarm-light-off"
-        self._attr_unique_id = f"{coordinator.device_name}-one-key-alarm-clear"
+        self._attr_unique_id = f"{coordinator.mac_id}-one-key-alarm-clear"
         self.entity_id = build_entity_id(
-            BUTTON_DOMAIN, coordinator.device_name, "one_key_alarm_clear"
+            BUTTON_DOMAIN, self._attr_unique_id, coordinator.mac_id, coordinator.device_name
         )
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, str(coordinator.mac))},

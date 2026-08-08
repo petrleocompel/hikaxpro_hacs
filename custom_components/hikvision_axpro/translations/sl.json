@@ -23,7 +23,10 @@
                     "allow_subsystems": "Vključite območja kot ločena območja za vklop/izklop alarmiranja",
                     "code": "Koda",
                     "scan_interval": "Interval preverjanja sistema",
-                    "debug": "Enable debug output"
+                    "debug": "Enable debug output",
+                    "auto_bypass_modes": "Načini vklopa s samodejnim premoščanjem okvarjenih con",
+                    "bypass_reenable_debounce": "Koliko sekund mora biti cona zdrava, preden se premostitev odstrani",
+                    "clear_all_bypasses_on_disarm": "Ob izklopu odstrani vse premostitve (ne le tistih, ki jih je uporabila integracija)"
                 }
             }
         }
@@ -31,7 +34,8 @@
     "options": {
         "step": {
             "init": {
-                "title": "Posodobi konfiguracijo",
+                "title": "Povezava in obnašanje",
+                "description": "Kadar ima način vklopljeno samodejno premostitev, na naslednji strani izberete, katere cone sme premostiti.",
                 "data": {
                     "password": "Geslo",
                     "username": "Uporabniško ime",
@@ -41,8 +45,72 @@
                     "allow_subsystems": "Vključite območja kot ločena območja za vklop/izklop alarmiranja",
                     "code": "Koda",
                     "scan_interval": "Interval preverjanja sistema",
-                    "debug": "Enable debug output"
+                    "debug": "Enable debug output",
+                    "auto_bypass_modes": "Načini vklopa s samodejnim premoščanjem okvarjenih con",
+                    "bypass_reenable_debounce": "Koliko sekund mora biti cona zdrava, preden se premostitev odstrani",
+                    "clear_all_bypasses_on_disarm": "Ob izklopu odstrani vse premostitve (ne le tistih, ki jih je uporabila integracija)"
                 }
+            },
+            "bypass_zones": {
+                "title": "Cone, ki jih je dovoljeno premostiti",
+                "description": "Za vsak način vklopa izberite cone, ki jih sme integracija samodejno premostiti, kadar so ob vklopu v napaki. Cona, pri kateri centrala premostitev ob vklopu prepoveduje, je prezrta.",
+                "data": {
+                    "bypassable_zones_home": "Premostljiva ob vklopu doma",
+                    "bypassable_zones_away": "Premostljiva ob vklopu odsotnost",
+                    "bypassable_zones_vacation": "Premostljiva ob vklopu počitnice"
+                }
+            }
+        }
+    },
+    "exceptions": {
+        "arming_blocked": {
+            "message": "Vklop blokiran: {reason}. Cone: {zones}"
+        },
+        "arming_in_progress": {
+            "message": "Druga operacija vklopa ali premostitve že poteka"
+        },
+        "arm_refused": {
+            "message": "Centrala je zavrnila ukaz za vklop"
+        },
+        "disarm_refused": {
+            "message": "Centrala je zavrnila ukaz za izklop"
+        },
+        "bypass_failed": {
+            "message": "Premostitev cone {zone} ni uspela: {error}"
+        },
+        "unbypass_failed": {
+            "message": "Odstranitev premostitve cone {zone} ni uspela: {error}"
+        },
+        "bypass_unsupported": {
+            "message": "Strojna programska oprema centrale ne podpira premostitve con"
+        }
+    },
+    "issues": {
+        "bypass_unsupported": {
+            "title": "Premostitev con ni podprta",
+            "description": "Centrala {device} ne poroča o stanju premostitve con, zato so funkcije premostitve te integracije onemogočene. Vse ostalo deluje naprej."
+        }
+    },
+    "services": {
+        "bypass_zone": {
+            "name": "Premosti cono",
+            "description": "Premosti eno ali več con. Integracija premostitev spremlja in jo samodejno odstrani, ko si cona ob vklopljenem sistemu opomore, ali ob izklopu."
+        },
+        "unbypass_zone": {
+            "name": "Odstrani premostitev cone",
+            "description": "Obnovi (odstrani premostitev) eno ali več con."
+        },
+        "clear_all_bypasses": {
+            "name": "Odstrani vse premostitve",
+            "description": "Odstrani vse premostitve na centrali, ne glede na to, kako so bile uporabljene. Pri ciljanju na panel območja se obnovijo samo cone tega območja."
+        }
+    },
+    "selector": {
+        "auto_bypass_modes": {
+            "options": {
+                "home": "Doma",
+                "away": "Odsotnost",
+                "vacation": "Počitnice"
             }
         }
     }

@@ -23,7 +23,10 @@
                     "allow_subsystems": "Inclure des zones comme des zones distinctes pour armer/désarmer",
                     "code": "Code",
                     "scan_interval": "Intervalle de balayage du système",
-                    "debug": "Activer la sortie de débogage"
+                    "debug": "Activer la sortie de débogage",
+                    "auto_bypass_modes": "Modes d'armement avec exclusion automatique des zones en défaut",
+                    "bypass_reenable_debounce": "Secondes pendant lesquelles une zone doit rester saine avant le retrait de l'exclusion",
+                    "clear_all_bypasses_on_disarm": "Au désarmement, retirer toutes les exclusions (pas seulement celles appliquées par l'intégration)"
                 }
             }
         }
@@ -31,7 +34,8 @@
     "options": {
         "step": {
             "init": {
-                "title": "Mettre à jour la configuration",
+                "title": "Connexion et comportement",
+                "description": "Lorsqu'un mode a la mise hors service automatique activée, la page suivante permet de choisir les zones concernées.",
                 "data": {
                     "password": "Mot de passe",
                     "username": "Nom d'utilisateur",
@@ -41,8 +45,72 @@
                     "allow_subsystems": "Inclure des zones comme des zones distinctes pour armer/désarmer",
                     "code": "Code",
                     "scan_interval": "Intervalle de balayage du système",
-                    "debug": "Activer la sortie de débogage"
+                    "debug": "Activer la sortie de débogage",
+                    "auto_bypass_modes": "Modes d'armement avec exclusion automatique des zones en défaut",
+                    "bypass_reenable_debounce": "Secondes pendant lesquelles une zone doit rester saine avant le retrait de l'exclusion",
+                    "clear_all_bypasses_on_disarm": "Au désarmement, retirer toutes les exclusions (pas seulement celles appliquées par l'intégration)"
                 }
+            },
+            "bypass_zones": {
+                "title": "Zones pouvant être mises hors service",
+                "description": "Choisissez, pour chaque mode d'armement, les zones que l'intégration peut mettre hors service automatiquement lorsqu'elles sont en défaut à l'armement. Une zone dont la centrale interdit la mise hors service à l'armement est ignorée.",
+                "data": {
+                    "bypassable_zones_home": "Isolable à l'armement présence",
+                    "bypassable_zones_away": "Isolable à l'armement absence",
+                    "bypassable_zones_vacation": "Isolable à l'armement vacances"
+                }
+            }
+        }
+    },
+    "exceptions": {
+        "arming_blocked": {
+            "message": "Armement bloqué : {reason}. Zones : {zones}"
+        },
+        "arming_in_progress": {
+            "message": "Une autre opération d'armement ou d'exclusion est déjà en cours"
+        },
+        "arm_refused": {
+            "message": "La centrale a refusé la commande d'armement"
+        },
+        "disarm_refused": {
+            "message": "La centrale a refusé la commande de désarmement"
+        },
+        "bypass_failed": {
+            "message": "Échec de l'exclusion de la zone {zone} : {error}"
+        },
+        "unbypass_failed": {
+            "message": "Échec du retrait de l'exclusion de la zone {zone} : {error}"
+        },
+        "bypass_unsupported": {
+            "message": "Le micrologiciel de la centrale ne prend pas en charge l'exclusion de zones"
+        }
+    },
+    "issues": {
+        "bypass_unsupported": {
+            "title": "Exclusion de zones non prise en charge",
+            "description": "La centrale {device} ne signale pas l'état d'exclusion des zones ; les fonctions d'exclusion de cette intégration sont donc désactivées. Tout le reste continue de fonctionner."
+        }
+    },
+    "services": {
+        "bypass_zone": {
+            "name": "Exclure une zone",
+            "description": "Exclut une ou plusieurs zones. L'exclusion est suivie par l'intégration et retirée automatiquement lorsque la zone redevient saine pendant l'armement, ou au désarmement."
+        },
+        "unbypass_zone": {
+            "name": "Réintégrer une zone",
+            "description": "Réintègre (retire l'exclusion d')une ou plusieurs zones."
+        },
+        "clear_all_bypasses": {
+            "name": "Retirer toutes les exclusions",
+            "description": "Retire toutes les exclusions de la centrale, quelle que soit leur origine. Cibler le panneau d'une zone ne réintègre que les zones de cette partition."
+        }
+    },
+    "selector": {
+        "auto_bypass_modes": {
+            "options": {
+                "home": "À domicile",
+                "away": "Absent",
+                "vacation": "Vacances"
             }
         }
     }

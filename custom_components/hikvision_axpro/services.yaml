@@ -6,12 +6,40 @@ purge:
   description: Purge old invalid binary sensors registered as sensors
 bypass_zone:
   name: Bypass zone
-  description: Bypass a zone so the panel can arm with it open
+  description: >
+    Bypass one or more zones. The bypass is tracked by the integration and
+    removed automatically when the zone recovers while armed, or on disarm.
+  target:
+    entity:
+      integration: hikvision_axpro
+      domain: binary_sensor
   fields:
     zone_id:
       name: Zone ID
-      description: Zone number from the panel
-      required: true
+      description: Zone number from the panel; use instead of targeting an entity
+      required: false
+      selector:
+        number:
+          min: 0
+          mode: box
+    config_entry_id:
+      name: Config entry ID
+      description: Optional when multiple panels are configured
+      required: false
+      selector:
+        text:
+unbypass_zone:
+  name: Unbypass zone
+  description: Restore (remove the bypass of) one or more zones
+  target:
+    entity:
+      integration: hikvision_axpro
+      domain: binary_sensor
+  fields:
+    zone_id:
+      name: Zone ID
+      description: Zone number from the panel; use instead of targeting an entity
+      required: false
       selector:
         number:
           min: 0
@@ -23,17 +51,37 @@ bypass_zone:
       selector:
         text:
 recover_bypass_zone:
-  name: Recover bypass zone
-  description: Clear bypass on a zone
+  name: Recover bypass zone (deprecated)
+  description: Deprecated alias of unbypass_zone, kept for existing automations
+  target:
+    entity:
+      integration: hikvision_axpro
+      domain: binary_sensor
   fields:
     zone_id:
       name: Zone ID
-      description: Zone number from the panel
-      required: true
+      description: Zone number from the panel; use instead of targeting an entity
+      required: false
       selector:
         number:
           min: 0
           mode: box
+    config_entry_id:
+      name: Config entry ID
+      description: Optional when multiple panels are configured
+      required: false
+      selector:
+        text:
+clear_all_bypasses:
+  name: Clear all bypasses
+  description: >
+    Remove every bypass on the panel, regardless of how it was applied.
+    Targeting an area panel clears only that area's zones.
+  target:
+    entity:
+      integration: hikvision_axpro
+      domain: alarm_control_panel
+  fields:
     config_entry_id:
       name: Config entry ID
       description: Optional when multiple panels are configured

@@ -20,10 +20,40 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL,
 )
 from homeassistant.components.alarm_control_panel import SCAN_INTERVAL
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.selector import (
+    EntitySelector,
+    EntitySelectorConfig,
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
+)
 
-from .const import DOMAIN, USE_CODE_ARMING, ALLOW_SUBSYSTEMS, ENABLE_DEBUG_OUTPUT, AUTO_BYPASS_ON_ARM
+from .const import (
+    ALLOW_SUBSYSTEMS,
+    ARM_MODES,
+    DATA_BYPASS_MANAGER,
+    CONF_AUTO_BYPASS_MODES,
+    CONF_BYPASS_REENABLE_DEBOUNCE,
+    CONF_CLEAR_ALL_ON_DISARM,
+    DEFAULT_BYPASS_REENABLE_DEBOUNCE,
+    DOMAIN,
+    ENABLE_DEBUG_OUTPUT,
+    USE_CODE_ARMING,
+    conf_bypassable_zones,
+    zone_id_from_bypass_unique_id,
+)
 
 _LOGGER = logging.getLogger(__name__)
+
+AUTO_BYPASS_MODES_SELECTOR = SelectSelector(
+    SelectSelectorConfig(
+        options=ARM_MODES,
+        multiple=True,
+        mode=SelectSelectorMode.LIST,
+        translation_key="auto_bypass_modes",
+    )
+)
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
@@ -36,7 +66,11 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         vol.Optional(USE_CODE_ARMING, default=False): bool,
         vol.Required(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL.total_seconds()): int,
         vol.Optional(ALLOW_SUBSYSTEMS, default=False): bool,
-        vol.Optional(AUTO_BYPASS_ON_ARM, default=False): bool,
+        vol.Optional(CONF_AUTO_BYPASS_MODES, default=[]): AUTO_BYPASS_MODES_SELECTOR,
+        vol.Optional(
+            CONF_BYPASS_REENABLE_DEBOUNCE, default=DEFAULT_BYPASS_REENABLE_DEBOUNCE
+        ): vol.All(int, vol.Range(min=0, max=300)),
+        vol.Optional(CONF_CLEAR_ALL_ON_DISARM, default=False): bool,
     }
 )
 
@@ -52,7 +86,11 @@ CONFIGURE_SCHEMA = vol.Schema(
         vol.Optional(USE_CODE_ARMING, default=False): bool,
         vol.Required(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL.total_seconds()): int,
         vol.Optional(ALLOW_SUBSYSTEMS, default=False): bool,
-        vol.Optional(AUTO_BYPASS_ON_ARM, default=False): bool,
+        vol.Optional(CONF_AUTO_BYPASS_MODES, default=[]): AUTO_BYPASS_MODES_SELECTOR,
+        vol.Optional(
+            CONF_BYPASS_REENABLE_DEBOUNCE, default=DEFAULT_BYPASS_REENABLE_DEBOUNCE
+        ): vol.All(int, vol.Range(min=0, max=300)),
+        vol.Optional(CONF_CLEAR_ALL_ON_DISARM, default=False): bool,
         vol.Optional(ENABLE_DEBUG_OUTPUT, default=False): bool,
     }
 )
@@ -177,6 +215,107 @@ class AxProOptionsFlowHandler(config_entries.OptionsFlow):
 
     def __init__(self):
         """Initialize AxPro options flow."""
+        self._pending: dict[str, Any] = {}
+        self._title: str = ""
+
+    def _zone_bypass_entities(self) -> dict[str, int]:
+        """Map this panel's bypassable zone entities to their zone id.
+
+        Only entities belonging to this config entry are offered, so the
+        picker can never reach another panel's zones, and only zones the
+        panel would actually let us bypass on arming: a zone whose type
+        is not eligible, or whose "forbid bypass on arming" setting is
+        on, is left out rather than offered and then silently ignored.
+        """
+        registry = er.async_get(self.hass)
+        manager = (
+            self.hass.data.get(DOMAIN, {})
+            .get(self.config_entry.entry_id, {})
+            .get(DATA_BYPASS_MANAGER)
+        )
+        entities: dict[str, int] = {}
+        for reg_entry in er.async_entries_for_config_entry(
+            registry, self.config_entry.entry_id
+        ):
+            zone_id = zone_id_from_bypass_unique_id(reg_entry.unique_id)
+            if zone_id is None:
+                continue
+            if manager is not None and not manager.zone_bypass_allowed(zone_id):
+                continue
+            entities[reg_entry.entity_id] = zone_id
+        return entities
+
+    def _bypass_zones_schema(self, modes: list[str]) -> vol.Schema:
+        """One entity multiselect per arming mode with auto-bypass on."""
+        available = self._zone_bypass_entities()
+        by_zone = {zone_id: entity_id for entity_id, zone_id in available.items()}
+        selector = EntitySelector(
+            EntitySelectorConfig(
+                multiple=True,
+                include_entities=sorted(available),
+            )
+        )
+        fields: dict[Any, Any] = {}
+        for mode in ARM_MODES:
+            if mode not in modes:
+                continue
+            key = conf_bypassable_zones(mode)
+            # Stored as zone ids so a renamed entity never loses its
+            # configuration; shown as the entities they belong to.
+            current = [
+                by_zone[zone_id]
+                for zone_id in self.config_entry.data.get(key) or []
+                if zone_id in by_zone
+            ]
+            fields[vol.Optional(key, default=current)] = selector
+        return vol.Schema(fields)
+
+    async def async_step_bypass_zones(self, user_input=None):
+        """Pick which zones the auto-bypass may bypass, per arming mode."""
+        modes = [
+            mode
+            for mode in ARM_MODES
+            if mode in (self._pending.get(CONF_AUTO_BYPASS_MODES) or [])
+        ]
+
+        if user_input is None:
+            return self.async_show_form(
+                step_id="bypass_zones",
+                data_schema=self._bypass_zones_schema(modes),
+                last_step=True,
+            )
+
+        available = self._zone_bypass_entities()
+        data = dict(self._pending)
+        for mode in ARM_MODES:
+            key = conf_bypassable_zones(mode)
+            if mode not in modes:
+                # Auto-bypass is off for this mode: forget its selection
+                # rather than keeping a hidden one that would come back.
+                data.pop(key, None)
+                continue
+            data[key] = sorted(
+                {
+                    available[entity_id]
+                    for entity_id in user_input.get(key) or []
+                    if entity_id in available
+                }
+            )
+        return self._save(data)
+
+    def _save(self, data: dict[str, Any]):
+        """Persist the collected options onto the config entry."""
+        _LOGGER.debug("Saving options %s %s", self._title, data)
+        self.hass.config_entries.async_update_entry(self.config_entry, data=data)
+        return self.async_create_entry(title=self._title, data=data)
+
+    def _zone_step_follows(self, defaults: dict[str, Any]) -> bool:
+        """Whether submitting the first page opens the zone picker.
+
+        Drives the button label: Home Assistant renders "Next" instead
+        of "Submit" when the form says it is not the last step.
+        """
+        return bool(defaults.get(CONF_AUTO_BYPASS_MODES))
 
     async def async_step_init(self, user_input=None):
         """Manage basic options."""
@@ -187,6 +326,7 @@ class AxProOptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_show_form(
                 step_id="init",
                 data_schema=schema_defaults(CONFIGURE_SCHEMA, **defaults),
+                last_step=not self._zone_step_follows(defaults),
             )
         errors = {}
 
@@ -204,17 +344,21 @@ class AxProOptionsFlowHandler(config_entries.OptionsFlow):
             _LOGGER.exception("Unexpected exception")
             errors["base"] = "unknown"
         else:
-            _LOGGER.debug("Saving options %s %s",info["title"], user_input)
-
-            self.hass.config_entries.async_update_entry(
-                self.config_entry,
-                data=user_input,
-            )
-            return self.async_create_entry(title=info["title"], data=user_input)
+            # Carry over settings the form does not expose (the stored
+            # bypassable zone ids), then let the next step revise them.
+            data = {**self.config_entry.data, **user_input}
+            self._pending = data
+            self._title = info["title"]
+            if user_input.get(CONF_AUTO_BYPASS_MODES):
+                return await self.async_step_bypass_zones()
+            for mode in ARM_MODES:
+                data.pop(conf_bypassable_zones(mode), None)
+            return self._save(data)
 
         return self.async_show_form(
             step_id="init",
             data_schema=schema_defaults(CONFIGURE_SCHEMA, None, **defaults),
+            last_step=not self._zone_step_follows(defaults),
             errors=errors
         )
 
