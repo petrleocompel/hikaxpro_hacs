@@ -12,6 +12,7 @@ from homeassistant.components.alarm_control_panel import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.components.alarm_control_panel import DOMAIN as PANEL_DOMAIN
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -19,6 +20,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import Arming, HikAxProDataUpdateCoordinator, SubSys
 from .const import ALLOW_SUBSYSTEMS, DATA_COORDINATOR, DOMAIN
+from .entity_id import build_entity_id
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -55,6 +57,14 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
 
     _attr_code_arm_required = False
 
+    def __init__(self, coordinator: HikAxProDataUpdateCoordinator) -> None:
+        """Initialize the panel and pin its entity id."""
+        super().__init__(coordinator=coordinator)
+        self.entity_id = build_entity_id(
+            PANEL_DOMAIN, coordinator.mac_id, coordinator.mac_id,
+            coordinator.device_name,
+        )
+
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
@@ -69,7 +79,7 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
     def device_info(self) -> DeviceInfo:
         """Return device info for this device."""
         return DeviceInfo(
-            identifiers={(DOMAIN, self.unique_id)},
+            identifiers={(DOMAIN, self.coordinator.mac)},
             manufacturer="Hikvision - Ax Pro",
             model=self.coordinator.device_model,
             name=self.coordinator.device_name,
@@ -78,7 +88,7 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
     @property
     def unique_id(self):
         """Return a unique id."""
-        return self.coordinator.mac
+        return self.coordinator.mac_id
 
     @property
     def name(self):
@@ -149,6 +159,9 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
         """Initialize subpanel."""
         self.sys = sys
         super().__init__(coordinator=coordinator)
+        self.entity_id = build_entity_id(
+            PANEL_DOMAIN, self.unique_id, coordinator.mac_id, sys.name
+        )
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -178,7 +191,7 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
     @property
     def unique_id(self):
         """Return a unique id."""
-        return "subsys-" + self.coordinator.mac + str(self.sys.id)
+        return f"subsys-{self.coordinator.mac_id}-{self.sys.id}"
 
     @property
     def name(self):

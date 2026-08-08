@@ -27,9 +27,9 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import HikAxProDataUpdateCoordinator
+from .entity_id import build_entity_id
 from .const import DATA_COORDINATOR, DOMAIN
 from .hik_device import HikDevice
-from .entity_id import build_entity_id
 from .model import DetectorType, Status, Zone, zone_device_model
 from .host_entities import build_host_sensors
 from .peripheral_entities import (
@@ -137,15 +137,15 @@ class HikTemperature(CoordinatorEntity, HikDevice, SensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-temp-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-temp-{zone.id}"
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_icon = "mdi:thermometer"
         # self._attr_name = f"{self.zone.name} Temperature"
         self._attr_device_class = SensorDeviceClass.TEMPERATURE
         self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "temperature", zone.id
-        )
         self._attr_state_class = SensorStateClass.MEASUREMENT
 
     @property
@@ -178,16 +178,16 @@ class HikHumidity(CoordinatorEntity, HikDevice, SensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-humid-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-humid-{zone.id}"
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_icon = "mdi:cloud-percent"
         # self._attr_name = f"{self.zone.name} Humidity"
         self._attr_device_class = SensorDeviceClass.HUMIDITY
         self._attr_native_unit_of_measurement = PERCENTAGE
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "humidity", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -219,16 +219,16 @@ class HikBatteryInfo(CoordinatorEntity, HikDevice, SensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-battery-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-battery-{zone.id}"
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_icon = "mdi:battery"
         self._attr_native_unit_of_measurement = PERCENTAGE
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_device_class = SensorDeviceClass.BATTERY
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "battery", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -264,13 +264,13 @@ class HikChargeStatus(CoordinatorEntity, HikDevice, SensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-charge-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-charge-{zone.id}"
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_icon = "mdi:battery-heart-variant"
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "charge", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -304,16 +304,16 @@ class HikSignalInfo(CoordinatorEntity, HikDevice, SensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-signal-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-signal-{zone.id}"
+        self.entity_id = build_entity_id(
+            SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_icon = "mdi:signal"
         self._attr_device_class = SensorDeviceClass.SIGNAL_STRENGTH
         self._attr_native_unit_of_measurement = SIGNAL_STRENGTH_DECIBELS_MILLIWATT
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "signal", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -345,11 +345,11 @@ class HikStatusInfo(CoordinatorEntity, HikDevice, SensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-status-{zone.id}"
-        self._attr_has_entity_name = True
+        self._attr_unique_id = f"{self.coordinator.mac_id}-status-{zone.id}"
         self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "status", zone.id
+            SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
         )
+        self._attr_has_entity_name = True
         if (
             self.coordinator.zones
             and self.coordinator.zones[self.zone.id]

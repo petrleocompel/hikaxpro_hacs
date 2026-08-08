@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 
 from homeassistant.components.binary_sensor import (
-    DOMAIN as SENSOR_DOMAIN,
+    DOMAIN as BINARY_SENSOR_DOMAIN,
     BinarySensorDeviceClass,
     BinarySensorEntity,
 )
@@ -21,8 +21,8 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import HikAxProDataUpdateCoordinator
 from .const import DATA_COORDINATOR, DOMAIN
-from .hik_device import HikDevice
 from .entity_id import build_entity_id
+from .hik_device import HikDevice
 from .model import (
     MOTION_DETECTOR_TYPES,
     DetectorType,
@@ -192,13 +192,13 @@ class HikWirelessExtMagnetDetector(CoordinatorEntity, HikDevice, BinarySensorEnt
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-magnet-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-magnet-{zone.id}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_icon = "mdi:magnet"
         self._attr_device_class = BinarySensorDeviceClass.SAFETY
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "magnet", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -251,12 +251,12 @@ class HikMagneticContactDetector(CoordinatorEntity, HikDevice, BinarySensorEntit
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-magnet-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-magnet-{zone.id}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_device_class = BinarySensorDeviceClass.SAFETY
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "magnet", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -309,12 +309,12 @@ class HikMagnetShockDetector(CoordinatorEntity, HikDevice, BinarySensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-magnet-shock-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-magnet-shock-{zone.id}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_device_class = BinarySensorDeviceClass.SAFETY
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "magnet-shock", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -376,12 +376,12 @@ class HikMagnetOpenDetector(CoordinatorEntity, HikDevice, BinarySensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-magnet-open-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-magnet-open-{zone.id}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_device_class = BinarySensorDeviceClass.SAFETY
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "magnet-open", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -443,12 +443,12 @@ class HikMagnetTiltDetector(CoordinatorEntity, HikDevice, BinarySensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-magnet-tilt-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-magnet-tilt-{zone.id}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_device_class = BinarySensorDeviceClass.SAFETY
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "magnet-tilt", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -510,12 +510,12 @@ class HikMotionDetector(CoordinatorEntity, HikDevice, BinarySensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-motion-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-motion-{zone.id}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_device_class = BinarySensorDeviceClass.MOTION
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "motion", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -563,14 +563,14 @@ class HikTamperDetection(CoordinatorEntity, HikDevice, BinarySensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-tamper-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-tamper-{zone.id}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_icon = "mdi:electric-switch"
         self._attr_device_class = BinarySensorDeviceClass.TAMPER
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "tamper", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -609,14 +609,14 @@ class HikBypassDetection(CoordinatorEntity, HikDevice, BinarySensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-bypass-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-bypass-{zone.id}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_icon = "mdi:alarm-light-off"
         self._attr_device_class = BinarySensorDeviceClass.SAFETY
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "bypass", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -655,14 +655,14 @@ class HikArmedInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-armed-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-armed-{zone.id}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_icon = "mdi:lock"
         self._attr_device_class = BinarySensorDeviceClass.LOCK
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "armed", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -701,14 +701,14 @@ class HikAlarmInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-alarm-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-alarm-{zone.id}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_icon = "mdi:alarm-light"
         self._attr_device_class = BinarySensorDeviceClass.LOCK
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "alarm", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -747,14 +747,14 @@ class HikStayAwayInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-stayaway-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-stayaway-{zone.id}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_icon = "mdi:shield-lock-outline"
         self._attr_device_class = BinarySensorDeviceClass.LOCK
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "stayaway", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -793,14 +793,14 @@ class HikIsViaRepeaterInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-isviarepeater-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-isviarepeater-{zone.id}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_icon = "mdi:google-circles-extended"
         self._attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "isviarepeater", zone.id
-        )
 
     @property
     def name(self) -> str | None:
@@ -839,14 +839,14 @@ class HikBinaryBatteryInfo(CoordinatorEntity, HikDevice, BinarySensorEntity):
         super().__init__(coordinator)
         self.zone = zone
         self._ref_id = entry_id
-        self._attr_unique_id = f"{self.coordinator.device_name}-battery-low-{zone.id}"
+        self._attr_unique_id = f"{self.coordinator.mac_id}-battery-low-{zone.id}"
+        self.entity_id = build_entity_id(
+            BINARY_SENSOR_DOMAIN, self._attr_unique_id, coordinator.mac_id, zone.name, "z"
+        )
         self._attr_icon = "mdi:battery"
         self._attr_device_class = BinarySensorDeviceClass.BATTERY
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_has_entity_name = True
-        self.entity_id = build_entity_id(
-            SENSOR_DOMAIN, coordinator.device_name, "battery-low", zone.id
-        )
 
     @property
     def name(self) -> str | None:

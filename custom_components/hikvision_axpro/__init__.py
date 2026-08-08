@@ -9,6 +9,7 @@ import logging
 import hikaxpro
 import xmltodict
 
+from homeassistant.components import persistent_notification
 from homeassistant.components.alarm_control_panel import (
     SCAN_INTERVAL,
     AlarmControlPanelState,
@@ -42,7 +43,11 @@ from .const import (
     ENABLE_DEBUG_OUTPUT,
     USE_CODE_ARMING,
 )
-from .entity_id import migrate_invalid_entity_ids
+from .entity_id import (
+    has_invalid_object_id_chars,
+    normalized_mac,
+    normalized_object_id,
+)
 from .model import (
     Arming,
     ExDevStatusResponse,
@@ -72,6 +77,161 @@ PLATFORMS: list[Platform] = [
     Platform.SWITCH,
 ]
 _LOGGER = logging.getLogger(__name__)
+
+
+def _migrated_unique_id(
+    unique_id: str, device_name: str | None, mac: str, mac_id: str
+) -> str | None:
+    """Map a legacy unique_id onto the compact-MAC scheme, or None.
+
+    Three legacy shapes are folded in:
+
+    - keyed by the panel's ``deviceName``, which the user can change on
+      the panel and which is not unique across two panels;
+    - keyed by the MAC as the panel spells it, ``a4:d5:c2:6b:b8:59``,
+      where the separators split one identifier into six tokens;
+    - subsystem panels, which concatenated the MAC and the area number
+      without a separator and so were ambiguous for any MAC ending in a
+      digit.
+
+    All become ``<compact mac>-<what>`` / ``subsys-<compact mac>-<area>``.
+    """
+    for prefix in (mac, mac_id, device_name):
+        if not prefix:
+            continue
+
+        if unique_id == prefix:
+            return mac_id
+
+        subsys = f"subsys-{prefix}"
+        if unique_id.startswith(subsys):
+            area = unique_id[len(subsys) :].lstrip("-")
+            if area.isdigit():
+                return f"subsys-{mac_id}-{area}"
+            return None
+
+        if unique_id.startswith(f"{prefix}-"):
+            return f"{mac_id}-{unique_id[len(prefix) + 1 :]}"
+
+    return None
+
+
+async def _async_migrate_unique_ids(
+    hass: HomeAssistant, entry: ConfigEntry, device_name: str | None, mac: str
+) -> None:
+    """Re-key existing registry entries onto the MAC-scoped unique ids.
+
+    Without this an upgrade would orphan every entity and create a
+    duplicate set alongside it, losing history and breaking automations.
+    """
+    registry = er.async_get(hass)
+    for reg_entry in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if not reg_entry.unique_id:
+            continue
+        new_unique_id = _migrated_unique_id(
+            reg_entry.unique_id, device_name, mac, normalized_mac(mac)
+        )
+        if new_unique_id is None or new_unique_id == reg_entry.unique_id:
+            continue
+        if (
+            existing := registry.async_get_entity_id(
+                reg_entry.domain, DOMAIN, new_unique_id
+            )
+        ) and existing != reg_entry.entity_id:
+            # A previous partial migration already created the target;
+            # drop the stale duplicate rather than fail the setup.
+            _LOGGER.warning(
+                "Removing stale entity %s: %s is already used by %s",
+                reg_entry.entity_id,
+                new_unique_id,
+                existing,
+            )
+            registry.async_remove(reg_entry.entity_id)
+            continue
+        _LOGGER.info(
+            "Migrating unique_id for %s: %s -> %s",
+            reg_entry.entity_id,
+            reg_entry.unique_id,
+            new_unique_id,
+        )
+        registry.async_update_entity(reg_entry.entity_id, new_unique_id=new_unique_id)
+
+
+def _next_available_entity_id(
+    registry: er.EntityRegistry,
+    domain: str,
+    object_id: str,
+    current_entity_id: str,
+) -> str:
+    """Find a free entity_id using HA-style numeric suffixes."""
+    candidate = f"{domain}.{object_id}"
+    if candidate == current_entity_id:
+        return candidate
+
+    suffix = 2
+    while registry.entities.get(candidate) is not None:
+        candidate = f"{domain}.{object_id}_{suffix}"
+        suffix += 1
+    return candidate
+
+
+async def _async_migrate_invalid_entity_ids(
+    hass: HomeAssistant, entry: ConfigEntry
+) -> list[tuple[str, str]]:
+    """Rename entity IDs that are no longer valid object ids.
+
+    Existing installations keep whatever entity_id the registry already
+    holds: only ids Home Assistant would reject (characters outside
+    ``[a-z0-9_]``, such as the ``-`` separators older releases wrote)
+    are rewritten, and the user is told which ones changed.
+    """
+    registry = er.async_get(hass)
+    renames: list[tuple[str, str]] = []
+
+    for reg_entry in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if not has_invalid_object_id_chars(reg_entry.entity_id):
+            continue
+        if "." not in reg_entry.entity_id:
+            continue
+
+        domain, object_id = reg_entry.entity_id.split(".", 1)
+        target_object_id = normalized_object_id(object_id, fallback=reg_entry.unique_id)
+        target_entity_id = _next_available_entity_id(
+            registry,
+            domain,
+            target_object_id,
+            reg_entry.entity_id,
+        )
+        if target_entity_id == reg_entry.entity_id:
+            continue
+
+        registry.async_update_entity(
+            reg_entry.entity_id,
+            new_entity_id=target_entity_id,
+        )
+        renames.append((reg_entry.entity_id, target_entity_id))
+        _LOGGER.info(
+            "Migrated invalid entity ID for %s: %s -> %s",
+            DOMAIN,
+            reg_entry.entity_id,
+            target_entity_id,
+        )
+
+    if renames:
+        rename_list = "\n".join(f"- {old} -> {new}" for old, new in renames)
+        persistent_notification.async_create(
+            hass,
+            (
+                "The integration renamed invalid entity IDs so they stay valid "
+                "Home Assistant object ids. Update automations, scripts, scenes, "
+                "and dashboards that reference the old IDs.\n\n"
+                f"{rename_list}"
+            ),
+            title="Hikvision AX Pro entity IDs updated",
+            notification_id=f"{DOMAIN}_entity_id_migration_{entry.entry_id}",
+        )
+
+    return renames
 
 
 def _filter_enabled(n: SubSys) -> bool:
@@ -260,9 +420,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {DATA_COORDINATOR: coordinator}
 
-    migrate_invalid_entity_ids(hass, entry)
+    await _async_migrate_unique_ids(hass, entry, coordinator.device_name, mac)
+    await _async_migrate_invalid_entity_ids(hass, entry)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    # Second pass: entities created during platform setup (new unique
+    # ids, or entity ids restored from deleted registry entries) can
+    # still carry ids the first pass never saw.
+    await _async_migrate_invalid_entity_ids(hass, entry)
 
     return True
 
@@ -327,6 +493,9 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
         self.zone_status = None
         self.host = axpro.host
         self.mac = mac
+        # Compact form used to scope unique ids; ``mac`` stays as the
+        # panel reports it and keys the device registry entries.
+        self.mac_id = normalized_mac(mac)
         self.use_code = use_code
         self.code_format = code_format
         self.use_code_arming = use_code_arming

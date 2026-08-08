@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased
+- **chore**: rework ID generation. Entity IDs are now
+  `<device>_z<zone>_<name>_<compact mac>`
+  (`binary_sensor.ingresso_z1_tamper_a4d5c26bb859`), derived from the entity's own
+  `unique_id`. The MAC stays one compact token instead of being split into six
+  (`a4_d5_c2_...`), so an underscore only ever separates two distinct pieces of
+  information. The id is unique by construction, so two panels carrying zones with
+  the same name no longer collide and Home Assistant never appends a `_2` suffix;
+  a zone number is written `z1` and the MAC always closes the id, so nothing in an
+  ID can be mistaken for such a suffix. Only numbers that really are zones are
+  marked — a hub battery or relay keeps its own plain number.
+- **chore**: key `unique_id` off the compact panel MAC (`a4d5c26bb859-tamper-1`)
+  instead of the panel's `deviceName`, which the user can change on the panel and
+  which is not unique across two panels — with two panels it silently dropped one
+  panel's entities. Subsystem panels gain the missing separator
+  (`subsys-<mac>-<area>`).
+- **chore**: migrate existing installations in place — legacy unique IDs, in both
+  the `deviceName` and the colon-MAC form, are re-keyed on the same registry rows,
+  so custom names, hand-picked entity IDs, history and automations all survive.
+  Entity IDs are only rewritten when they are no longer valid object IDs.
+
 ## v3.4.0
 - **feat**: PIR / motion detector zones expose `binary_sensor` Motion (`device_class: motion`) from zone status `trigger` (#170)
 

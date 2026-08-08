@@ -1,19 +1,34 @@
-"""Helpers for valid Home Assistant object/entity IDs."""
+"""Helpers for valid, predictable Home Assistant object/entity IDs.
+
+Every entity id is derived from that entity's ``unique_id``, so the two
+never drift apart and the id is unique by construction: no numeric
+``_2`` suffixes appear when two panels carry zones with the same name.
+An underscore only ever separates two distinct pieces of information —
+the panel MAC stays one compact token, and the trailing number is the
+zone (or area, battery, siren…) the entity belongs to::
+
+    a4d5c26bb859-tamper-1  ->  binary_sensor.a4d5c26bb859_tamper_1
+"""
 
 from __future__ import annotations
 
 from hashlib import sha1
-import logging
 import re
 
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers import entity_registry as er
 from homeassistant.util import slugify
 
-_LOGGER = logging.getLogger(__name__)
-
 INVALID_OBJECT_ID_RE = re.compile(r"[^a-z0-9_]")
+
+
+def normalized_mac(mac: str | None) -> str:
+    """Return the MAC as one compact token: ``a4d5c26bb859``.
+
+    Separators carry no information here, and spelling the MAC out as
+    ``a4:d5:...`` (or, once slugified, ``a4_d5_...``) turns a single
+    identifier into six. Keeping it compact leaves ``_`` free to
+    separate genuinely different parts of an id.
+    """
+    return re.sub(r"[^a-z0-9]", "", (mac or "").lower())
 
 
 def normalized_object_id(value: str | None, fallback: str | None = None) -> str:
@@ -42,41 +57,65 @@ def has_invalid_object_id_chars(entity_id: str) -> bool:
     return bool(INVALID_OBJECT_ID_RE.search(object_id))
 
 
-def build_entity_id(domain: str, device_name: str | None, *parts: object) -> str:
-    """Build a valid entity_id: ``{domain}.{device}_{suffix}_{id}``.
+def build_entity_id(
+    domain: str,
+    unique_id: str | None,
+    mac_id: str,
+    device_name: str | None = None,
+    number_marker: str = "",
+) -> str:
+    """Build ``<domain>.<device>_z<zone>_<name>_<compact mac>``.
 
-    Example: ``sensor.ax_pro_temperature_0``.
+    The parts come from the entity's own ``unique_id``, which is
+    ``<compact mac>-<name>[-<number>]``, so the id is unique by
+    construction and Home Assistant never has to disambiguate with a
+    ``_2`` suffix when two panels carry zones of the same name.
+
+A zone number is written ``z1`` rather than left bare, so it reads
+    as a zone and can never be mistaken for one of those dedup suffixes.
+    ``number_marker`` is what the number counts, so it is only ``"z"``
+    for entities that really belong to a zone — a hub battery or a relay
+    keeps its own plain number. The number sits next to the device it
+    qualifies and the id ends on the MAC that says which panel::
+
+        ingresso + a4d5c26bb859-tamper-1      (zone)
+            -> binary_sensor.ingresso_z1_tamper_a4d5c26bb859
+        alarm    + a4d5c26bb859-hub-battery-1 (not a zone)
+            -> sensor.alarm_hub_battery_1_a4d5c26bb859
+        alarm    + a4d5c26bb859-ac-power      (nothing numbered)
+            -> binary_sensor.alarm_ac_power_a4d5c26bb859
+
+    Only new entities are affected: Home Assistant keeps whatever
+    entity_id the registry already holds for a known unique_id, so an
+    existing installation — including hand-picked ids — is left as is.
     """
-    object_parts = [normalized_object_id(device_name, fallback="axpro")]
-    for part in parts:
-        if part is None:
-            continue
-        object_parts.append(normalized_object_id(str(part)))
-    return f"{domain}.{'_'.join(object_parts)}"
+    tokens = [t for t in normalized_object_id(unique_id).split("_") if t]
+    mac_token = normalized_object_id(mac_id)
 
+    # Drop the MAC wherever it sits; it is re-appended at the end.
+    rest = [t for t in tokens if t != mac_token]
 
-def migrate_invalid_entity_ids(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Rename registry entries whose object_id is not a valid HA slug."""
-    registry = er.async_get(hass)
-    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
-        if not has_invalid_object_id_chars(entity.entity_id):
-            continue
+    # A trailing run of digits identifies the zone / area / device.
+    numbers: list[str] = []
+    while rest and rest[-1].isdigit():
+        numbers.insert(0, rest.pop())
 
-        domain, object_id = entity.entity_id.split(".", 1)
-        new_object_id = normalized_object_id(object_id)
-        new_entity_id = f"{domain}.{new_object_id}"
+    device = [t for t in slugify(device_name or "").split("_") if t]
+    # A device already named after what the entity reports would repeat
+    # itself ("front door alarm" + "alarm"); keep the leading copy only.
+    while device and rest and device[-1] == rest[0]:
+        rest.pop(0)
+    # Likewise when the device name already ends in the number, as area
+    # panels do ("Area 1" + area 1): no need to say it twice.
+    while device and numbers and device[-1] == numbers[0]:
+        numbers.pop(0)
 
-        if new_entity_id == entity.entity_id:
-            continue
-
-        if registry.async_get(new_entity_id) is not None:
-            # Avoid clobbering an existing entity; append a short unique suffix.
-            new_entity_id = f"{domain}.{new_object_id}_{entity.unique_id[-6:]}"
-            new_entity_id = (
-                f"{domain}.{normalized_object_id(new_entity_id.split('.', 1)[1])}"
-            )
-
-        _LOGGER.info(
-            "Migrating invalid entity_id %s -> %s", entity.entity_id, new_entity_id
-        )
-        registry.async_update_entity(entity.entity_id, new_entity_id=new_entity_id)
+    if number_marker:
+        # A marked number leads, right after the device it qualifies.
+        parts = [*device, *(f"{number_marker}{n}" for n in numbers), *rest]
+    else:
+        # An unmarked number stays attached to what it counts.
+        parts = [*device, *rest, *numbers]
+    if mac_token:
+        parts.append(mac_token)
+    return f"{domain}.{'_'.join(parts)}"

@@ -4,3 +4,4 @@
 .DS_Store
 test_payloads/
 __pycache__/
+.env
