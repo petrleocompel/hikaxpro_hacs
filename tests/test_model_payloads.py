@@ -510,3 +510,32 @@ def test_relay_status_is_on_accepts_string_and_enum():
         {"id": 0, "name": "rele1", "status": "on", "accessModuleType": "fourWiredOutput"}
     )
     assert model.relay_status_is_on(output.status) is True
+
+
+def _sub_sys(id, arming="disarm", alarm=False):
+    return model.SubSys(id, model.Arming(arming), alarm, True, f"Area {id}", 0)
+
+
+def test_combined_alarm_state_alarm_not_overwritten_by_later_area():
+    """Alarm in area 5 was overwritten by armed area 8 (#209)."""
+    subs = [_sub_sys(i) for i in range(1, 9)]
+    subs[4] = _sub_sys(5, "away", alarm=True)
+    subs[7] = _sub_sys(8, "away")
+    assert model.combined_alarm_state(subs) == "triggered"
+
+
+def test_combined_alarm_state_armed_not_overwritten_by_later_disarmed_area():
+    subs = [_sub_sys(1, "stay"), _sub_sys(2)]
+    assert model.combined_alarm_state(subs) == "armed_home"
+
+
+def test_combined_alarm_state_strongest_arming_wins():
+    subs = [_sub_sys(1, "stay"), _sub_sys(2, "away"), _sub_sys(3, "vacation")]
+    assert model.combined_alarm_state(subs) == "armed_away"
+
+
+def test_combined_alarm_state_with_sub_system_panels():
+    subs = [_sub_sys(1), _sub_sys(2, "away")]
+    assert model.combined_alarm_state(subs, 1) == "disarmed"
+    subs = [_sub_sys(1), _sub_sys(2, "away", alarm=True)]
+    assert model.combined_alarm_state(subs, 1) == "triggered"

@@ -62,6 +62,7 @@ from .model import (
     ZoneConfig,
     ZonesConf,
     ZonesResponse,
+    combined_alarm_state,
 )
 
 PLATFORMS: list[Platform] = [
@@ -537,16 +538,11 @@ class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
             self.sub_systems = {}
             for subsys in subsys_arr:
                 self.sub_systems[subsys.id] = subsys
-                if self.use_sub_systems and subsys.id != 1:
-                    continue
-                if subsys.alarm:
-                    status = AlarmControlPanelState.TRIGGERED
-                elif subsys.arming == Arming.AWAY:
-                    status = AlarmControlPanelState.ARMED_AWAY
-                elif subsys.arming == Arming.STAY:
-                    status = AlarmControlPanelState.ARMED_HOME
-                elif subsys.arming == Arming.VACATION:
-                    status = AlarmControlPanelState.ARMED_VACATION
+            status = AlarmControlPanelState(
+                combined_alarm_state(
+                    subsys_arr, 1 if self.use_sub_systems else None
+                )
+            )
             _LOGGER.debug("SubSystem status: %s", subsys_resp)
         except:
             _LOGGER.warning("Error getting status: %s", status_json)
