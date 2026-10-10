@@ -577,6 +577,27 @@ class SubSys:
         return result
 
 
+ARMING_PRIORITY = (
+    (Arming.AWAY, "armed_away"),
+    (Arming.VACATION, "armed_vacation"),
+    (Arming.STAY, "armed_home"),
+)
+
+
+def combined_alarm_state(
+    sub_systems: List[SubSys], arming_sub_system_id: Optional[int] = None
+) -> str:
+    """Return alarm panel state for all subsystems: any alarm wins, then the strongest arming."""
+    if any(s.alarm for s in sub_systems):
+        return "triggered"
+    if arming_sub_system_id is not None:
+        sub_systems = [s for s in sub_systems if s.id == arming_sub_system_id]
+    for arming, state in ARMING_PRIORITY:
+        if any(s.arming == arming for s in sub_systems):
+            return state
+    return "disarmed"
+
+
 @dataclass
 class SubSysList:
     sub_sys: SubSys
