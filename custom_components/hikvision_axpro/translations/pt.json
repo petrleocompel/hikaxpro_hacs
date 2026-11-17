@@ -4,10 +4,10 @@
             "already_configured": "O dispositivo já está configurado"
         },
         "error": {
-            "cannot_connect": "Falha ao conectar",
+            "cannot_connect": "Falha na ligação",
             "invalid_auth": "Autenticação inválida",
             "invalid_code": "Código inválido",
-            "invalid_code_format": "Formato do código inválido. Só pode usar TEXTO ou NÚMERO como valor",
+            "invalid_code_format": "Formato do código inválido. Só pode usar TEXT ou NUMBER como valor.",
             "unknown": "Erro inesperado"
         },
         "step": {
@@ -15,15 +15,16 @@
                 "title": "Adicionar sistema AX Pro",
                 "data": {
                     "host": "IP do alarme",
-                    "password": "Palavra passe",
-                    "username": "Usuário",
+                    "password": "Palavra-passe",
+                    "username": "Nome de utilizador",
                     "enabled": "Usar código para desarmar",
-                    "code_format": "Formato do código (TEXTO ou NÚMERO)",
+                    "code_format": "Formato do código (TEXT ou NUMBER)",
                     "use_code_arming": "Usar código para armar",
                     "allow_subsystems": "Incluir áreas como zonas separadas para armar/desarmar",
+                    "auto_bypass_on_arm": "Inibir automaticamente as zonas abertas antes de armar",
                     "code": "Código",
-                    "scan_interval": "Intervalo de extração do sistema",
-                    "debug": "Habilitar saída de depuração"
+                    "scan_interval": "Intervalo de consulta do sistema",
+                    "debug": "Ativar saída de depuração"
                 }
             }
         }
@@ -33,17 +34,34 @@
             "init": {
                 "title": "Atualizar configuração",
                 "data": {
-                    "password": "Palava passe",
-                    "username": "Usuário",
+                    "host": "IP do alarme",
+                    "password": "Palavra-passe",
+                    "username": "Nome de utilizador",
                     "enabled": "Usar código para desarmar",
-                    "code_format": "Formato do código (TEXTO ou NÚMERO)",
+                    "code_format": "Formato do código (TEXT ou NUMBER)",
                     "use_code_arming": "Usar código para armar",
                     "allow_subsystems": "Incluir áreas como zonas separadas para armar/desarmar",
+                    "auto_bypass_on_arm": "Inibir automaticamente as zonas abertas antes de armar",
                     "code": "Código",
-                    "scan_interval": "Intervalo de extração do sistema",
-                    "debug": "Habilitar saída de depuração"
+                    "scan_interval": "Intervalo de consulta do sistema",
+                    "debug": "Ativar saída de depuração"
                 }
             }
+        },
+        "error": {
+            "cannot_connect": "Falha na ligação",
+            "invalid_auth": "Autenticação inválida",
+            "invalid_code": "Código inválido",
+            "invalid_code_format": "Formato do código inválido. Só pode usar TEXT ou NUMBER como valor.",
+            "unknown": "Erro inesperado"
+        },
+        "abort": {
+            "already_configured": "O dispositivo já está configurado"
+        }
+    },
+    "exceptions": {
+        "invalid_code": {
+            "message": "O código introduzido não é válido"
         }
     }
 }

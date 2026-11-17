@@ -7,7 +7,7 @@
             "cannot_connect": "Impossibile connettersi",
             "invalid_auth": "Autenticazione non valida",
             "invalid_code": "Codice non valido",
-            "invalid_code_format": "Formato del codice non valido. Puoi utilizzare solo TESTO o NUMERO come valore",
+            "invalid_code_format": "Formato del codice non valido. Puoi utilizzare solo TEXT o NUMBER come valore.",
             "unknown": "Errore imprevisto"
         },
         "step": {
@@ -17,10 +17,11 @@
                     "host": "Indirizzo IP dell'allarme",
                     "password": "Password",
                     "username": "Nome utente",
-                    "enabled": "Usa il codice per disattivare",
-                    "code_format": "Formato del codice (TESTO o NUMERO)",
+                    "enabled": "Usa il codice per disarmare",
+                    "code_format": "Formato del codice (TEXT o NUMBER)",
                     "use_code_arming": "Usa il codice per armare",
                     "allow_subsystems": "Includi aree come zone separate per armare/disarmare",
+                    "auto_bypass_on_arm": "Escludi automaticamente le zone aperte prima di armare",
                     "code": "Codice",
                     "scan_interval": "Intervallo di scansione del sistema",
                     "debug": "Abilita l'output di debug"
@@ -33,17 +34,34 @@
             "init": {
                 "title": "Aggiorna configurazione",
                 "data": {
+                    "host": "Indirizzo IP dell'allarme",
                     "password": "Password",
                     "username": "Nome utente",
-                    "enabled": "Usa il codice per disattivare",
-                    "code_format": "Formato del codice (TESTO o NUMERO)",
+                    "enabled": "Usa il codice per disarmare",
+                    "code_format": "Formato del codice (TEXT o NUMBER)",
                     "use_code_arming": "Usa il codice per armare",
                     "allow_subsystems": "Includi aree come zone separate per armare/disarmare",
+                    "auto_bypass_on_arm": "Escludi automaticamente le zone aperte prima di armare",
                     "code": "Codice",
                     "scan_interval": "Intervallo di scansione del sistema",
                     "debug": "Abilita l'output di debug"
                 }
             }
+        },
+        "error": {
+            "cannot_connect": "Impossibile connettersi",
+            "invalid_auth": "Autenticazione non valida",
+            "invalid_code": "Codice non valido",
+            "invalid_code_format": "Formato del codice non valido. Puoi utilizzare solo TEXT o NUMBER come valore.",
+            "unknown": "Errore imprevisto"
+        },
+        "abort": {
+            "already_configured": "Il dispositivo è già configurato"
+        }
+    },
+    "exceptions": {
+        "invalid_code": {
+            "message": "Il codice inserito non è valido"
         }
     }
 }

@@ -12,7 +12,7 @@
             "code": "[%key:common::config_flow::data::code%]",
             "scan_interval": "[%key:common::config_flow::data::scan_interval%]",
             "allow_subsystems": "Allow subsystems",
-            "auto_bypass_on_arm": "Auto-bypass open zones before arm",
+            "auto_bypass_on_arm": "Auto-bypass open zones before arming",
             "debug": "Debug logging"
           }
         }
@@ -41,7 +41,7 @@
             "code": "[%key:common::config_flow::data::code%]",
             "scan_interval": "[%key:common::config_flow::data::scan_interval%]",
             "allow_subsystems": "Allow subsystems",
-            "auto_bypass_on_arm": "Auto-bypass open zones before arm",
+            "auto_bypass_on_arm": "Auto-bypass open zones before arming",
             "debug": "Debug logging"
           }
         }
@@ -55,6 +55,11 @@
       },
       "abort": {
         "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      }
+    },
+    "exceptions": {
+      "invalid_code": {
+        "message": "The entered code is not valid"
       }
     }
   }

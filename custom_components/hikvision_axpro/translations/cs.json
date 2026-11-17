@@ -1,29 +1,30 @@
 {
     "config": {
         "abort": {
-            "already_configured": "Zařízení je již nakonfigurováno"
+            "already_configured": "Zařízení je již nastaveno"
         },
         "error": {
-            "cannot_connect": "Nelze se spojit",
-            "invalid_auth": "Neplatná autorizace",
+            "cannot_connect": "Nepodařilo se připojit",
+            "invalid_auth": "Neplatné ověření",
             "invalid_code": "Neplatný kód",
-            "invalid_code_format": "Neplatný formád kódu. Kód může být pouze číslo nebo text.",
+            "invalid_code_format": "Neplatný formát kódu. Formát kódu může mít pouze hodnotu NUMBER nebo TEXT.",
             "unknown": "Neočekávaná chyba"
         },
         "step": {
             "user": {
-                "title": "Přidání AX Pro system",
+                "title": "Přidání systému AX Pro",
                 "data": {
-                    "host": "Host",
+                    "host": "Hostitel",
                     "password": "Heslo",
                     "username": "Uživatelské jméno",
-                    "enabled": "Kód pro odjištění",
+                    "enabled": "Použít kód pro odjištění",
                     "code_format": "Formát kódu (TEXT nebo NUMBER)",
-                    "use_code_arming": "Kód pro zajištění",
-                    "allow_subsystems": "Zahrnutí zón jako samostatných oblastí pro zapnutí/vypnutí alarmů",
+                    "use_code_arming": "Použít kód pro zajištění",
+                    "allow_subsystems": "Zahrnout oblasti jako samostatné zóny pro zajištění/odjištění",
+                    "auto_bypass_on_arm": "Před zajištěním automaticky přemostit otevřené zóny",
                     "code": "Kód",
                     "scan_interval": "Aktualizační interval",
-                    "debug": "Zapnout debug výstup"
+                    "debug": "Zapnout ladicí výstup"
                 }
             }
         }
@@ -31,19 +32,36 @@
     "options": {
         "step": {
             "init": {
-                "title": "Akutalizace konfigurace",
+                "title": "Aktualizace konfigurace",
                 "data": {
+                    "host": "Hostitel",
                     "password": "Heslo",
                     "username": "Uživatelské jméno",
-                    "enabled": "Kód pro odjištění",
+                    "enabled": "Použít kód pro odjištění",
                     "code_format": "Formát kódu (TEXT nebo NUMBER)",
-                    "use_code_arming": "Kód pro zajištění",
-                    "allow_subsystems": "Zahrnutí zón jako samostatných oblastí pro zapnutí/vypnutí alarmů",
+                    "use_code_arming": "Použít kód pro zajištění",
+                    "allow_subsystems": "Zahrnout oblasti jako samostatné zóny pro zajištění/odjištění",
+                    "auto_bypass_on_arm": "Před zajištěním automaticky přemostit otevřené zóny",
                     "code": "Kód",
                     "scan_interval": "Aktualizační interval",
-                    "debug": "Zapnout debug výstup"
+                    "debug": "Zapnout ladicí výstup"
                 }
             }
+        },
+        "error": {
+            "cannot_connect": "Nepodařilo se připojit",
+            "invalid_auth": "Neplatné ověření",
+            "invalid_code": "Neplatný kód",
+            "invalid_code_format": "Neplatný formát kódu. Formát kódu může mít pouze hodnotu NUMBER nebo TEXT.",
+            "unknown": "Neočekávaná chyba"
+        },
+        "abort": {
+            "already_configured": "Zařízení je již nastaveno"
+        }
+    },
+    "exceptions": {
+        "invalid_code": {
+            "message": "Zadaný kód není platný"
         }
     }
 }
