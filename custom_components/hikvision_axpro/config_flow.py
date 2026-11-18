@@ -210,6 +210,8 @@ class AxProOptionsFlowHandler(config_entries.OptionsFlow):
                 self.config_entry,
                 data=user_input,
             )
+            # Settings are read from entry.data at setup: reload to apply them.
+            self.hass.config_entries.async_schedule_reload(self.config_entry.entry_id)
             return self.async_create_entry(title=info["title"], data=user_input)
 
         return self.async_show_form(

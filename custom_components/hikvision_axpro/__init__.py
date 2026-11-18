@@ -276,11 +276,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return unload_ok
 
 
-async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry):
-    """Update listener."""
-    await hass.config_entries.async_reload(config_entry.entry_id)
-
-
 class HikAxProDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching ax pro data."""
 

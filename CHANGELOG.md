@@ -3,6 +3,7 @@
 ## v3.4.2
 - **fix**: ask for the code when arming if "Use code for arming" is enabled (`code_arm_required` was hard-coded to `False`) (#217)
 - **fix**: a wrong code now raises a translated `ServiceValidationError` instead of silently doing nothing
+- **fix**: apply options right after saving them (the entry was never reloaded: `update_listener` was defined but not registered)
 - **fix**: add missing translations (auto-bypass option, options-flow host / errors, invalid code error) for all languages and fix inconsistent wording in existing translations
 
 ## v3.4.1
