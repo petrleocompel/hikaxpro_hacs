@@ -6,24 +6,25 @@
         "error": {
             "cannot_connect": "Povezava ni uspela",
             "invalid_auth": "Neveljavna avtentikacija",
-            "invalid_code": "Napačna koda",
-            "invalid_code_format": "Neveljavna oblika kode. Format kode lahko kot vrednost sprejme samo TEXT ali NUMBER.",
+            "invalid_code": "Neveljavna koda",
+            "invalid_code_format": "Neveljavna oblika kode. Oblika kode lahko kot vrednost sprejme samo NUMBER ali TEXT.",
             "unknown": "Nepričakovana napaka"
         },
         "step": {
             "user": {
                 "title": "Dodaj AX Pro sistem",
                 "data": {
-                    "host": "Naslov",
+                    "host": "Gostitelj",
                     "password": "Geslo",
                     "username": "Uporabniško ime",
                     "enabled": "Uporabi kodo za izklop",
                     "code_format": "Oblika kode (TEXT ali NUMBER)",
                     "use_code_arming": "Uporabi kodo za vklop",
-                    "allow_subsystems": "Vključite območja kot ločena območja za vklop/izklop alarmiranja",
+                    "allow_subsystems": "Vključi območja kot ločene cone za vklop/izklop",
+                    "auto_bypass_on_arm": "Pred vklopom samodejno premosti odprte cone",
                     "code": "Koda",
                     "scan_interval": "Interval preverjanja sistema",
-                    "debug": "Enable debug output"
+                    "debug": "Omogoči izpis za razhroščevanje"
                 }
             }
         }
@@ -33,17 +34,34 @@
             "init": {
                 "title": "Posodobi konfiguracijo",
                 "data": {
+                    "host": "Gostitelj",
                     "password": "Geslo",
                     "username": "Uporabniško ime",
                     "enabled": "Uporabi kodo za izklop",
                     "code_format": "Oblika kode (TEXT ali NUMBER)",
                     "use_code_arming": "Uporabi kodo za vklop",
-                    "allow_subsystems": "Vključite območja kot ločena območja za vklop/izklop alarmiranja",
+                    "allow_subsystems": "Vključi območja kot ločene cone za vklop/izklop",
+                    "auto_bypass_on_arm": "Pred vklopom samodejno premosti odprte cone",
                     "code": "Koda",
                     "scan_interval": "Interval preverjanja sistema",
-                    "debug": "Enable debug output"
+                    "debug": "Omogoči izpis za razhroščevanje"
                 }
             }
+        },
+        "error": {
+            "cannot_connect": "Povezava ni uspela",
+            "invalid_auth": "Neveljavna avtentikacija",
+            "invalid_code": "Neveljavna koda",
+            "invalid_code_format": "Neveljavna oblika kode. Oblika kode lahko kot vrednost sprejme samo NUMBER ali TEXT.",
+            "unknown": "Nepričakovana napaka"
+        },
+        "abort": {
+            "already_configured": "Naprava je že konfigurirana"
+        }
+    },
+    "exceptions": {
+        "invalid_code": {
+            "message": "Vnesena koda ni veljavna"
         }
     }
 }

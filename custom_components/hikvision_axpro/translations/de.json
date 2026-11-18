@@ -7,7 +7,7 @@
             "cannot_connect": "Verbindung fehlgeschlagen",
             "invalid_auth": "Ungültige Authentifizierung",
             "invalid_code": "Ungültiger Code",
-            "invalid_code_format": "Ungültiges Code-Format. Sie können nur TEXT oder NUMMER als Wert verwenden",
+            "invalid_code_format": "Ungültiges Code-Format. Das Code-Format kann als Wert nur NUMBER oder TEXT annehmen.",
             "unknown": "Unerwarteter Fehler"
         },
         "step": {
@@ -18,9 +18,10 @@
                     "password": "Passwort",
                     "username": "Benutzername",
                     "enabled": "Code zum Deaktivieren verwenden",
-                    "code_format": "Code-Format (TEXT oder NUMMER)",
+                    "code_format": "Code-Format (TEXT oder NUMBER)",
                     "use_code_arming": "Code zum Aktivieren verwenden",
                     "allow_subsystems": "Bereiche als separate Zonen zum Aktivieren/Deaktivieren einbeziehen",
+                    "auto_bypass_on_arm": "Offene Zonen vor dem Aktivieren automatisch überbrücken",
                     "code": "Code",
                     "scan_interval": "Scan-Intervall des Systems",
                     "debug": "Debug-Ausgabe aktivieren"
@@ -33,17 +34,34 @@
             "init": {
                 "title": "Konfiguration aktualisieren",
                 "data": {
+                    "host": "IP-Adresse der Alarmzentrale",
                     "password": "Passwort",
                     "username": "Benutzername",
                     "enabled": "Code zum Deaktivieren verwenden",
-                    "code_format": "Code-Format (TEXT oder NUMMER)",
+                    "code_format": "Code-Format (TEXT oder NUMBER)",
                     "use_code_arming": "Code zum Aktivieren verwenden",
                     "allow_subsystems": "Bereiche als separate Zonen zum Aktivieren/Deaktivieren einbeziehen",
+                    "auto_bypass_on_arm": "Offene Zonen vor dem Aktivieren automatisch überbrücken",
                     "code": "Code",
                     "scan_interval": "Scan-Intervall des Systems",
                     "debug": "Debug-Ausgabe aktivieren"
                 }
             }
+        },
+        "error": {
+            "cannot_connect": "Verbindung fehlgeschlagen",
+            "invalid_auth": "Ungültige Authentifizierung",
+            "invalid_code": "Ungültiger Code",
+            "invalid_code_format": "Ungültiges Code-Format. Das Code-Format kann als Wert nur NUMBER oder TEXT annehmen.",
+            "unknown": "Unerwarteter Fehler"
+        },
+        "abort": {
+            "already_configured": "Das Gerät ist bereits konfiguriert"
+        }
+    },
+    "exceptions": {
+        "invalid_code": {
+            "message": "Der eingegebene Code ist ungültig"
         }
     }
 }

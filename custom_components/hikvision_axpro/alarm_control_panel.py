@@ -12,6 +12,7 @@ from homeassistant.components.alarm_control_panel import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -21,6 +22,15 @@ from . import Arming, HikAxProDataUpdateCoordinator, SubSys
 from .const import ALLOW_SUBSYSTEMS, DATA_COORDINATOR, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _check_code(coordinator: HikAxProDataUpdateCoordinator, code: str | None) -> None:
+    """Raise when the given code does not match the configured one."""
+    if code != coordinator.code:
+        raise ServiceValidationError(
+            translation_domain=DOMAIN,
+            translation_key="invalid_code",
+        )
 
 
 async def async_setup_entry(
@@ -53,7 +63,10 @@ async def async_setup_entry(
 class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
     """Representation of Hikvision Ax Pro alarm panel."""
 
-    _attr_code_arm_required = False
+    @property
+    def code_arm_required(self) -> bool:
+        """Require a code for arming only when configured."""
+        return bool(self.coordinator.use_code and self.coordinator.use_code_arming)
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -112,35 +125,32 @@ class HikAxProPanel(CoordinatorEntity, AlarmControlPanelEntity):
     async def async_alarm_disarm(self, code=None):
         """Send disarm command."""
         if self.coordinator.use_code:
-            if not self.__is_code_valid(code):
-                return
+            _check_code(self.coordinator, code)
 
         await self.coordinator.async_disarm()
 
     async def async_alarm_arm_home(self, code=None):
         """Send arm home command."""
         if self.coordinator.use_code and self.coordinator.use_code_arming:
-            if not self.__is_code_valid(code):
-                return
+            _check_code(self.coordinator, code)
 
         await self.coordinator.async_arm_home()
 
     async def async_alarm_arm_away(self, code=None):
         """Send arm away command."""
         if self.coordinator.use_code and self.coordinator.use_code_arming:
-            if not self.__is_code_valid(code):
-                return
+            _check_code(self.coordinator, code)
 
         await self.coordinator.async_arm_away()
-
-    def __is_code_valid(self, code):
-        return code == self.coordinator.code
 
 
 class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
     """Representation of Hikvision Ax Pro alarm panel."""
 
-    _attr_code_arm_required = False
+    @property
+    def code_arm_required(self) -> bool:
+        """Require a code for arming only when configured."""
+        return bool(self.coordinator.use_code and self.coordinator.use_code_arming)
 
     sys: SubSys
     coordinator: HikAxProDataUpdateCoordinator
@@ -222,26 +232,20 @@ class HikAxProSubPanel(CoordinatorEntity, AlarmControlPanelEntity):
     async def async_alarm_disarm(self, code=None):
         """Send disarm command."""
         if self.coordinator.use_code:
-            if not self.__is_code_valid(code):
-                return
+            _check_code(self.coordinator, code)
 
         await self.coordinator.async_disarm(self.sys.id)
 
     async def async_alarm_arm_home(self, code=None):
         """Send arm home command."""
         if self.coordinator.use_code and self.coordinator.use_code_arming:
-            if not self.__is_code_valid(code):
-                return
+            _check_code(self.coordinator, code)
 
         await self.coordinator.async_arm_home(self.sys.id)
 
     async def async_alarm_arm_away(self, code=None):
         """Send arm away command."""
         if self.coordinator.use_code and self.coordinator.use_code_arming:
-            if not self.__is_code_valid(code):
-                return
+            _check_code(self.coordinator, code)
 
         await self.coordinator.async_arm_away(self.sys.id)
-
-    def __is_code_valid(self, code):
-        return code == self.coordinator.code

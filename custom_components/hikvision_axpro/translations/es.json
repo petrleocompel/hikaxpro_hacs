@@ -4,23 +4,24 @@
             "already_configured": "El dispositivo ya está configurado"
         },
         "error": {
-            "cannot_connect": "Fallo al conectar",
+            "cannot_connect": "No se pudo conectar",
             "invalid_auth": "Autenticación inválida",
             "invalid_code": "Código inválido",
-            "invalid_code_format": "Formato de código inválido. Solo se puede usar TEXTO o NÚMERO como valor",
+            "invalid_code_format": "Formato de código inválido. Solo se puede usar TEXT o NUMBER como valor.",
             "unknown": "Error inesperado"
         },
         "step": {
             "user": {
-                "title": "Agregar sistema AX Pro",
+                "title": "Añadir sistema AX Pro",
                 "data": {
                     "host": "IP de la alarma",
                     "password": "Contraseña",
                     "username": "Usuario",
                     "enabled": "Usar código para desarmar",
-                    "code_format": "Formato de código (TEXTO o NÚMERO)",
+                    "code_format": "Formato de código (TEXT o NUMBER)",
                     "use_code_arming": "Usar código para armar",
                     "allow_subsystems": "Incluir áreas como zonas separadas para armar/desarmar",
+                    "auto_bypass_on_arm": "Anular automáticamente las zonas abiertas antes de armar",
                     "code": "Código",
                     "scan_interval": "Intervalo de escaneo del sistema",
                     "debug": "Habilitar salida de depuración"
@@ -33,17 +34,34 @@
             "init": {
                 "title": "Actualizar configuración",
                 "data": {
+                    "host": "IP de la alarma",
                     "password": "Contraseña",
                     "username": "Usuario",
                     "enabled": "Usar código para desarmar",
-                    "code_format": "Formato de código (TEXTO o NÚMERO)",
+                    "code_format": "Formato de código (TEXT o NUMBER)",
                     "use_code_arming": "Usar código para armar",
                     "allow_subsystems": "Incluir áreas como zonas separadas para armar/desarmar",
+                    "auto_bypass_on_arm": "Anular automáticamente las zonas abiertas antes de armar",
                     "code": "Código",
                     "scan_interval": "Intervalo de escaneo del sistema",
                     "debug": "Habilitar salida de depuración"
                 }
             }
+        },
+        "error": {
+            "cannot_connect": "No se pudo conectar",
+            "invalid_auth": "Autenticación inválida",
+            "invalid_code": "Código inválido",
+            "invalid_code_format": "Formato de código inválido. Solo se puede usar TEXT o NUMBER como valor.",
+            "unknown": "Error inesperado"
+        },
+        "abort": {
+            "already_configured": "El dispositivo ya está configurado"
+        }
+    },
+    "exceptions": {
+        "invalid_code": {
+            "message": "El código introducido no es válido"
         }
     }
 }

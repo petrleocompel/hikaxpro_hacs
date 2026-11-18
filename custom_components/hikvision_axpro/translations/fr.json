@@ -1,13 +1,13 @@
 {
     "config": {
         "abort": {
-            "already_configured": "Le dispositif est déjà configuré"
+            "already_configured": "L'appareil est déjà configuré"
         },
         "error": {
             "cannot_connect": "Échec de la connexion",
             "invalid_auth": "Authentification invalide",
             "invalid_code": "Code invalide",
-            "invalid_code_format": "Format de code invalide. Vous ne pouvez utiliser que TEXTE ou NUMÉRO comme valeur",
+            "invalid_code_format": "Format de code invalide. Vous ne pouvez utiliser que TEXT ou NUMBER comme valeur.",
             "unknown": "Erreur inattendue"
         },
         "step": {
@@ -18,11 +18,12 @@
                     "password": "Mot de passe",
                     "username": "Nom d'utilisateur",
                     "enabled": "Utiliser un code pour désarmer",
-                    "code_format": "Format du code (TEXTE ou NUMÉRO)",
+                    "code_format": "Format du code (TEXT ou NUMBER)",
                     "use_code_arming": "Utiliser un code pour armer",
-                    "allow_subsystems": "Inclure des zones comme des zones distinctes pour armer/désarmer",
+                    "allow_subsystems": "Inclure les secteurs comme zones distinctes pour armer/désarmer",
+                    "auto_bypass_on_arm": "Exclure automatiquement les zones ouvertes avant d'armer",
                     "code": "Code",
-                    "scan_interval": "Intervalle de balayage du système",
+                    "scan_interval": "Intervalle d'interrogation du système",
                     "debug": "Activer la sortie de débogage"
                 }
             }
@@ -33,17 +34,34 @@
             "init": {
                 "title": "Mettre à jour la configuration",
                 "data": {
+                    "host": "Adresse IP de l'alarme",
                     "password": "Mot de passe",
                     "username": "Nom d'utilisateur",
                     "enabled": "Utiliser un code pour désarmer",
-                    "code_format": "Format du code (TEXTE ou NUMÉRO)",
+                    "code_format": "Format du code (TEXT ou NUMBER)",
                     "use_code_arming": "Utiliser un code pour armer",
-                    "allow_subsystems": "Inclure des zones comme des zones distinctes pour armer/désarmer",
+                    "allow_subsystems": "Inclure les secteurs comme zones distinctes pour armer/désarmer",
+                    "auto_bypass_on_arm": "Exclure automatiquement les zones ouvertes avant d'armer",
                     "code": "Code",
-                    "scan_interval": "Intervalle de balayage du système",
+                    "scan_interval": "Intervalle d'interrogation du système",
                     "debug": "Activer la sortie de débogage"
                 }
             }
+        },
+        "error": {
+            "cannot_connect": "Échec de la connexion",
+            "invalid_auth": "Authentification invalide",
+            "invalid_code": "Code invalide",
+            "invalid_code_format": "Format de code invalide. Vous ne pouvez utiliser que TEXT ou NUMBER comme valeur.",
+            "unknown": "Erreur inattendue"
+        },
+        "abort": {
+            "already_configured": "L'appareil est déjà configuré"
+        }
+    },
+    "exceptions": {
+        "invalid_code": {
+            "message": "Le code saisi n'est pas valide"
         }
     }
 }

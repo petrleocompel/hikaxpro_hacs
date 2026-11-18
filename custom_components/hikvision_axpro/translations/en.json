@@ -21,6 +21,7 @@
                     "code_format": "Code format (TEXT or NUMBER)",
                     "use_code_arming": "Use code for arming",
                     "allow_subsystems": "Include areas as separate zones for arm/disarm",
+                    "auto_bypass_on_arm": "Auto-bypass open zones before arming",
                     "code": "Code",
                     "scan_interval": "Pull interval from system",
                     "debug": "Enable debug output"
@@ -33,17 +34,34 @@
             "init": {
                 "title": "Update configuration",
                 "data": {
+                    "host": "Host",
                     "password": "Password",
                     "username": "Username",
                     "enabled": "Use code to disarm",
                     "code_format": "Code format (TEXT or NUMBER)",
                     "use_code_arming": "Use code for arming",
                     "allow_subsystems": "Include areas as separate zones for arm/disarm",
+                    "auto_bypass_on_arm": "Auto-bypass open zones before arming",
                     "code": "Code",
                     "scan_interval": "Pull interval from system",
                     "debug": "Enable debug output"
                 }
             }
+        },
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "invalid_auth": "Invalid authentication",
+            "invalid_code": "Invalid code",
+            "invalid_code_format": "Invalid code format. Code format can take only NUMBER or TEXT as value.",
+            "unknown": "Unexpected error"
+        },
+        "abort": {
+            "already_configured": "Device is already configured"
+        }
+    },
+    "exceptions": {
+        "invalid_code": {
+            "message": "The entered code is not valid"
         }
     }
 }
